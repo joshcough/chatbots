@@ -1,6 +1,9 @@
 
 module Settings where
 
+import Protolude
+import Prelude (error)
+
 import           Data.Text                   (Text, pack, unpack)
 import qualified Data.Text                   as T
 import           Safe                        (readMay)

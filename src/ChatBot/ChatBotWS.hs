@@ -3,6 +3,9 @@ module ChatBot.ChatBotWS
   , main
   ) where
 
+import Protolude
+import Prelude (fail, String) -- TODO: kill me
+
 import           Control.Concurrent      (forkIO)
 import           Control.Concurrent.Chan (newChan, readChan, writeChan)
 import           Control.Monad           (forever, void, forM_)
@@ -22,7 +25,7 @@ import           Text.Trifecta
 
 import           ChatBot.Config          (ChannelName(..), ChatBotConfig(..), ChatBotExecutionConfig(..), ChatBotFrontendMessage(..), configFromFile)
 import           ChatBot.Models          (ChatMessage(..))
-import           ChatBot.Parsers         (anything, slurp, url, (~~))
+import           ChatBot.Parsers         (anything, slurp, url)
 
 -- import qualified Data.Text.IO              as T
 -- import           Data.Aeson.Encode.Pretty       (encodePretty)
@@ -50,8 +53,6 @@ commands = [ Command "hi"    anything $ const $ pure $ RespondWith "hello!"
            , Command "echo"  slurp    $ pure . RespondWith
            , Command "echo!" slurp    $ pure . RespondWith . \t -> t <> "!"
            , Command "url" url $ fmap (RespondWith . cs . take 100) . fetchUrl
-           , Command "mult" (integer ~~ integer) $ \(i, j) ->
-                pure $ RespondWith . cs . show $ i * j
            ]
 
 data Response = RespondWith Text | Nada

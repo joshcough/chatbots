@@ -17,16 +17,18 @@ module Error(
     orFailM
 ) where
 
+import Protolude
+
 import Util.Utils (tShow)
 
-import Control.Exception (Exception, throwIO)
+import Control.Exception (Exception)
 import Control.Lens (prism, makeClassyPrisms)
 import Control.Monad.Except (MonadError, catchError, throwError)
 import Control.Monad.Trans (MonadIO, liftIO)
 import qualified Data.ByteString.Lazy.Char8 as BL
 import Data.Maybe (Maybe(..))
 import Data.Monoid ((<>))
-import Data.Text (Text)
+import Data.Text (Text, unpack)
 import Network.HTTP.Nano (AsHttpError(..), HttpError)
 import Servant ((:<|>) (..), ServantErr(..), err400, err401, err403, err404, err409, err500)
 import Web.Rollbar (Event(..), EventLevel(..), ToRollbarEvent(..))
@@ -67,11 +69,11 @@ class ClassifiedError e where
 
 data AppError e
     = AppHttpError HttpError
-    | AppBadRequestError String
+    | AppBadRequestError Text
     | AppAuthError AuthError
-    | AppNotFoundError String
-    | AppConflictError String
-    | AppUnexpectedError String
+    | AppNotFoundError Text
+    | AppConflictError Text
+    | AppUnexpectedError Text
     | AppAppError e
     deriving (Show, Functor, Foldable, Traversable)
 
@@ -80,7 +82,7 @@ makeClassyPrisms ''AppError
 type ProverlaysError = AppError ProverlaysError'
 
 newtype ProverlaysError'
-    = ProverlaysMiscError String
+    = ProverlaysMiscError Text
     deriving (Show, Eq)
 
 instance ClassifiedError ProverlaysError' where
@@ -127,11 +129,11 @@ instance TitledError e => TitledError (AppError e) where
 
 instance ToServant e => ToServant (AppError e) where
     toServantErr (AppHttpError _) = err500
-    toServantErr (AppBadRequestError e) = err400 { errBody = BL.pack e }
+    toServantErr (AppBadRequestError e) = err400 { errBody = BL.pack $ unpack e }
     toServantErr (AppAuthError NoAuthError) = err401
     toServantErr (AppAuthError BadAuthError) = err403
-    toServantErr (AppNotFoundError e) = err404 { errBody = BL.pack e }
-    toServantErr (AppConflictError e) = err409 { errBody = BL.pack e }
+    toServantErr (AppNotFoundError e) = err404 { errBody = BL.pack $ unpack e }
+    toServantErr (AppConflictError e) = err409 { errBody = BL.pack $ unpack e }
     toServantErr (AppUnexpectedError _) = err500 -- TODO: use string or?
     toServantErr (AppAppError e) = toServantErr e
 

@@ -1,0 +1,150 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.1.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: aca33a6aee377b9c05ea32413a2803cf6b863fbb456ba186a6fa2c7c0d5d3064
+
+name:           chatbots
+version:        0.1.0.0
+category:       Web
+homepage:       https://github.com/joshcough/chatbots
+bug-reports:    https://github.com/https://github.com/joshcough/chatbots/issues
+author:         Josh Cough
+maintainer:     joshcough@gmail.com
+copyright:      © 2019 Josh Cough
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/https://github.com/joshcough/chatbots
+
+library
+  exposed-modules:
+      ChatBot.ChatBotWS
+      ChatBot.Config
+      ChatBot.DatabaseModels
+      ChatBot.Models
+      ChatBot.Parsers
+      ChatBot.Storage
+      Config
+      Error
+      Init
+      Logging
+      Settings
+      Types
+      Util.Utils
+  other-modules:
+      Paths_chatbots
+  hs-source-dirs:
+      src
+  default-extensions: ApplicativeDo BangPatterns ConstraintKinds DataKinds DefaultSignatures DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DerivingStrategies DeriveTraversable EmptyCase ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedLabels OverloadedStrings PatternSynonyms RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TemplateHaskell TupleSections TypeApplications TypeFamilies TypeFamilyDependencies TypeOperators
+  ghc-options: -Wall -Werror -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Wimplicit-prelude
+  build-depends:
+      HTTP
+    , MissingH
+    , aeson
+    , aeson-pretty
+    , amazonka
+    , amazonka-s3
+    , async
+    , base
+    , bcrypt
+    , binary
+    , blaze-html
+    , blaze-markup
+    , bytestring
+    , conduit
+    , containers
+    , directory
+    , esqueleto
+    , exceptions
+    , fast-logger
+    , filepath
+    , foreign-store
+    , http-api-data
+    , irc-core
+    , jose
+    , lens
+    , lens-aeson
+    , monad-control
+    , monad-logger
+    , mtl
+    , nano-http >=0.1.1
+    , network
+    , persistent
+    , persistent-postgresql
+    , persistent-template
+    , postgresql-simple
+    , postgresql-simple-url
+    , protolude
+    , purescript-bridge >=0.13
+    , resource-pool
+    , resourcet
+    , rollbar
+    , safe
+    , servant >=0.13 && <=0.14.1
+    , servant-auth >=0.3.1.0
+    , servant-auth-server
+    , servant-blaze
+    , servant-multipart
+    , servant-server >=0.13 && <=0.14.1
+    , servant-websockets
+    , stm
+    , string-conversions
+    , template-haskell
+    , text
+    , time
+    , transformers
+    , transformers-base
+    , trifecta
+    , unliftio-core
+    , unordered-containers
+    , uuid
+    , vector
+    , wai
+    , warp
+    , websockets
+    , zip
+  default-language: Haskell2010
+
+executable chatbots-server
+  main-is: Main.hs
+  other-modules:
+      Paths_chatbots
+  hs-source-dirs:
+      app
+  default-extensions: ApplicativeDo BangPatterns ConstraintKinds DataKinds DefaultSignatures DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DerivingStrategies DeriveTraversable EmptyCase ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedLabels OverloadedStrings PatternSynonyms RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TemplateHaskell TupleSections TypeApplications TypeFamilies TypeFamilyDependencies TypeOperators
+  ghc-options: -Wall -Werror -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Wimplicit-prelude
+  build-depends:
+      base
+    , chatbots
+    , protolude
+  default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_chatbots
+  hs-source-dirs:
+      test
+  default-extensions: ApplicativeDo BangPatterns ConstraintKinds DataKinds DefaultSignatures DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DerivingStrategies DeriveTraversable EmptyCase ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedLabels OverloadedStrings PatternSynonyms RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TemplateHaskell TupleSections TypeApplications TypeFamilies TypeFamilyDependencies TypeOperators
+  ghc-options: -Wall -Werror -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Wimplicit-prelude -Wall -Werror -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Wimplicit-prelude -threaded
+  build-depends:
+      QuickCheck
+    , base
+    , chatbots
+    , hedgehog
+    , protolude
+    , quickcheck-instances
+    , tasty
+    , tasty-hedgehog
+    , tasty-hunit
+    , tasty-quickcheck
+  default-language: Haskell2010

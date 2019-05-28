@@ -11,6 +11,9 @@ module ChatBot.Config
   , configFromFile
   ) where
 
+import Protolude
+import Prelude (userError)
+
 import           Control.Concurrent.Chan (Chan)
 import           Control.Lens.TH         (makeClassy)
 import           Data.Aeson              (ToJSON, FromJSON, eitherDecode)
@@ -21,7 +24,8 @@ import           GHC.Generics            (Generic)
 import           Web.HttpApiData         (FromHttpApiData(..))
 
 newtype ChannelName = ChannelName { _unChannelName :: Text }
-    deriving (Eq, Generic, Ord, Show, ToJSON, FromJSON)
+    deriving stock (Eq, Ord, Show, Generic)
+    deriving anyclass (FromJSON, ToJSON)
 
 makeClassy ''ChannelName
 
@@ -32,12 +36,14 @@ data ChatBotConfig = ChatBotConfig
   { _cbConfigNick :: Text
   , _cbConfigPass :: Text
   , _cbConfigChannels :: [Text]
-  } deriving (Eq, Generic, Show, ToJSON, FromJSON)
+  } deriving stock (Eq, Ord, Show, Generic)
+    deriving anyclass (FromJSON, ToJSON)
 
 makeClassy ''ChatBotConfig
 
 data ChatBotFrontendMessage = ConnectTo ChannelName | DisconnectFrom ChannelName
-    deriving (Eq, Generic, Ord, Show, ToJSON, FromJSON)
+    deriving stock (Eq, Ord, Show, Generic)
+    deriving anyclass (FromJSON, ToJSON)
 
 data ChatBotExecutionConfig = ChatBotExecutionConfig {
     _cbecOutputChan :: Chan RawIrcMsg

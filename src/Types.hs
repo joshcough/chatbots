@@ -1,7 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-{-# OPTIONS_GHC -fno-warn-orphans #-}
-
 module Types (
     module Config
   , AppT
@@ -12,6 +10,8 @@ module Types (
   , runAppTInTest
   , runDb
   ) where
+
+import Protolude
 
 import           Control.Lens                         (view, (^.))
 import           Control.Monad                        (when)
@@ -46,11 +46,11 @@ runAppT = runAppT' $ \err -> do
     when (isUnexpected err) (rollbar $ toRollbarEvent err)
 
 -- | Runs without rollbar
-runAppTInTest :: forall err a. (ClassifiedError err, ToRollbarEvent err, Show err) => AppT' err IO a -> Config -> IO (Either err a)
+runAppTInTest :: Show err => AppT' err IO a -> Config -> IO (Either err a)
 runAppTInTest = runAppT' $ \err -> $(logError) "Uncaught app error" ["error" .= tShow err]
 
 -- |
-runAppT' :: forall err a. (ClassifiedError err, ToRollbarEvent err, Show err) =>
+runAppT' ::
        (err -> AppT' HttpError IO ())
     -> AppT' err IO a
     -> Config

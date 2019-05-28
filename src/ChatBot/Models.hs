@@ -9,6 +9,8 @@ module ChatBot.Models
     ChatMessage(..)
   ) where
 
+import Protolude
+
 import           Control.Monad        (mzero)
 import           Data.Aeson           (Value(..), ToJSON(..), FromJSON(..))
 import           Data.Text            (Text)

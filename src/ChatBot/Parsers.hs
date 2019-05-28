@@ -1,5 +1,7 @@
 module ChatBot.Parsers where
 
+import Protolude
+
 import           Data.String.Conversions (cs)
 import           Data.Text               (Text)
 import           Text.Trifecta

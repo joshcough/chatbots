@@ -24,6 +24,8 @@ module Util.Utils (
   , addElementToList'
 ) where
 
+import Protolude
+
 import           Control.Lens                   (Traversal', alaf, (^?), set)
 import           Control.Monad                  (forM)
 import           Control.Monad.Except           (MonadIO, liftIO)
@@ -36,7 +38,6 @@ import           Data.List                      (genericLength, foldl')
 import           Data.Map                       (Map)
 import qualified Data.Map                       as Map
 import           Data.Maybe                     (fromMaybe)
-import           Data.Monoid
 import           Data.Text                      (Text, pack, split)
 import           Data.Text.Encoding             (decodeUtf8)
 import qualified Data.Vector                    as V

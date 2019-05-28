@@ -74,11 +74,7 @@
     <orderEntry type="library" name="warp-3.2.25" level="project" />
     <orderEntry type="library" name="websockets-0.12.5.2" level="project" />
     <orderEntry type="library" name="zip-1.1.0" level="project" />
-    <orderEntry type="library" name="hspec-2.5.5" level="project" />
-    <orderEntry type="library" name="hspec-wai-0.9.2" level="project" />
-    <orderEntry type="library" name="hspec-wai-json-0.9.2" level="project" />
     <orderEntry type="library" name="http-types-0.12.2" level="project" />
-    <orderEntry type="library" name="monad-metrics-0.2.1.2" level="project" />
     <orderEntry type="library" name="QuickCheck-2.11.3" level="project" />
     <orderEntry type="library" name="wai-extra-3.0.24.3" level="project" />
     <orderEntry type="library" name="ghc-prim-0.5.2.0" level="project" />
@@ -191,13 +187,7 @@
     <orderEntry type="library" name="bzlib-conduit-0.3.0.1" level="project" />
     <orderEntry type="library" name="cereal-0.5.7.0" level="project" />
     <orderEntry type="library" name="digest-0.0.1.2" level="project" />
-    <orderEntry type="library" name="hspec-core-2.5.5" level="project" />
-    <orderEntry type="library" name="hspec-discover-2.5.5" level="project" />
-    <orderEntry type="library" name="hspec-expectations-0.8.2" level="project" />
-    <orderEntry type="library" name="aeson-qq-0.8.2" level="project" />
     <orderEntry type="library" name="clock-0.7.2" level="project" />
-    <orderEntry type="library" name="ekg-core-0.1.1.6" level="project" />
-    <orderEntry type="library" name="microlens-0.4.9.1" level="project" />
     <orderEntry type="library" name="tf-random-0.5" level="project" />
     <orderEntry type="library" name="wai-logger-2.3.2" level="project" />
     <orderEntry type="library" name="zlib-0.6.2" level="project" />
@@ -236,8 +226,6 @@
     <orderEntry type="library" name="network-byte-order-0.0.0.0" level="project" />
     <orderEntry type="library" name="psqueues-0.2.7.0" level="project" />
     <orderEntry type="library" name="bindings-DSL-1.0.25" level="project" />
-    <orderEntry type="library" name="quickcheck-io-0.2.0" level="project" />
-    <orderEntry type="library" name="setenv-0.1.1.3" level="project" />
     <orderEntry type="library" name="connection-0.2.8" level="project" />
     <orderEntry type="library" name="tls-1.4.1" level="project" />
     <orderEntry type="library" name="th-lift-0.7.11" level="project" />
@@ -248,5 +236,21 @@
     <orderEntry type="library" name="x509-system-1.6.6" level="project" />
     <orderEntry type="library" name="x509-validation-1.6.11" level="project" />
     <orderEntry type="library" name="th-expand-syns-0.4.4.0" level="project" />
+    <orderEntry type="library" name="protolude-0.2.2" level="project" />
+    <orderEntry type="library" name="hedgehog-0.6.1" level="project" />
+    <orderEntry type="library" name="tasty-1.1.0.4" level="project" />
+    <orderEntry type="library" name="tasty-hedgehog-0.2.0.0" level="project" />
+    <orderEntry type="library" name="tasty-hunit-0.10.0.1" level="project" />
+    <orderEntry type="library" name="tasty-quickcheck-0.10" level="project" />
+    <orderEntry type="library" name="mtl-compat-0.2.1.3" level="project" />
+    <orderEntry type="library" name="concurrent-output-1.10.9" level="project" />
+    <orderEntry type="library" name="lifted-async-0.10.0.3" level="project" />
+    <orderEntry type="library" name="pretty-show-1.7" level="project" />
+    <orderEntry type="library" name="wl-pprint-annotated-0.1.0.1" level="project" />
+    <orderEntry type="library" name="unbounded-delays-0.1.1.0" level="project" />
+    <orderEntry type="library" name="wcwidth-0.0.2" level="project" />
+    <orderEntry type="library" name="terminal-size-0.3.2.1" level="project" />
+    <orderEntry type="library" name="constraints-0.10.1" level="project" />
+    <orderEntry type="library" name="haskell-lexer-1.0.2" level="project" />
   </component>
 </module>

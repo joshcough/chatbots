@@ -11,16 +11,17 @@ module Config (
   , configPool, configEnv, configPort, configHttp, configRollbar, configAwsEnv, configChatBotExecution
   ) where
 
+import Protolude
+import Prelude (userError)
+
 import           Control.Concurrent.Chan              (newChan)
-import           Control.Exception                    (throwIO)
 import           Control.Lens                         ((<&>), set)
 import           Control.Lens.TH                      (makeClassy)
 import           Control.Monad.Logger                 (runNoLoggingT)
 import           Control.Monad.Trans.AWS              (Credentials( Discover ), LogLevel( Debug ), envLogger, newEnv, newLogger)
 import qualified Control.Monad.Trans.AWS              as AWS
 import           Data.Monoid                          ((<>))
-import           Data.Text                            (unpack)
-import           Data.Text                            (Text)
+import           Data.Text                            (Text, unpack)
 import           Database.Persist.Postgresql          (ConnectionPool, createPostgresqlPool)
 import           Database.PostgreSQL.Simple.Internal  (postgreSQLConnectionString)
 import           Database.PostgreSQL.Simple.URL       (parseDatabaseUrl)
@@ -96,7 +97,7 @@ acquireConfig = do
 
 -- |
 acquirePool :: Environment -> IO ConnectionPool
-acquirePool env = flip makePool env . unpack =<< S.lookupRequiredSetting "DATABASE_URL"
+acquirePool env = flip makePool env =<< S.lookupRequiredSetting "DATABASE_URL"
 
 -- | Allocates resources for AwsConfig
 acquireAwsConfig :: IO AwsConfig
@@ -129,7 +130,7 @@ mkRollbar = RollbarCfg  <$> (RB.AccessToken <$> S.lookupRequiredSetting "ROLLBAR
                         <*> (RB.Environment <$> S.lookupRequiredSetting "ROLLBAR_ENVIRONMENT")
                         <*> (fmap . fmap) RB.Host (S.lookupOptionalSetting "ROLLBAR_HOST")
                         <*> (fmap . fmap) RB.CodeVersion (S.lookupOptionalSetting "SOURCE_VERSION")
-                        <*> (S.lookupReadableSetting "ROLLBAR_MUTE" False)
+                        <*> S.lookupReadableSetting "ROLLBAR_MUTE" False
 
 -- |
 mkHttp :: IO HttpCfg
@@ -140,8 +141,8 @@ mkLoggingCfg :: IO LoggingCfg
 mkLoggingCfg = Logging.fromEnv
 
 -- | This function creates a 'ConnectionPool' for the given environment.
-makePool :: String -> Environment -> IO ConnectionPool
-makePool dbUrl env = case postgreSQLConnectionString <$> parseDatabaseUrl dbUrl of
+makePool :: Text -> Environment -> IO ConnectionPool
+makePool dbUrl env = case postgreSQLConnectionString <$> parseDatabaseUrl (unpack dbUrl) of
     Nothing  -> throwIO (userError "DATABASE_URL malformed.")
     Just url -> runNoLoggingT $ createPostgresqlPool url (envPool env)
 

@@ -1,6 +1,8 @@
 
 module Init where
 
+import Protolude
+
 import           Control.Exception           (bracket)
 import qualified Data.Pool                   as Pool
 

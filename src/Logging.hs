@@ -31,6 +31,8 @@ module Logging
     , logSourceVersion
     ) where
 
+import Protolude hiding (catch, lift)
+
 import Control.Lens (makeClassy)
 import Control.Monad (when)
 import Control.Monad.Base (MonadBase(liftBase))
@@ -179,8 +181,7 @@ instance (MonadLoggerJSON m, Monoid w) => MonadLoggerJSON (Strict.RWST r w s m) 
 
 
 runStdoutLoggingJSONT ::
-       MonadIO m
-    => LogLevel -- ^ Minimum level at which messages are logged
+       LogLevel -- ^ Minimum level at which messages are logged
     -> Maybe SourceVersion -- ^ Source version, e.g. Git commit SHA
     -> LoggingJSONT m a -- ^ Logging action
     -> m a
@@ -188,8 +189,7 @@ runStdoutLoggingJSONT minLevel sourceVersion =
     (`runLoggingJSONT` defaultOutput sourceVersion stdout) . filterLogger (\level _ -> level >= minLevel)
 
 runStdoutLoggingJSONTVerbose ::
-       MonadIO m
-    => LoggingJSONT m a -- ^ Logging action
+       LoggingJSONT m a -- ^ Logging action
     -> m a
 runStdoutLoggingJSONTVerbose = runStdoutLoggingJSONT LevelDebug Nothing
 
@@ -201,9 +201,9 @@ filterLogger p (LoggingJSONT f) = LoggingJSONT $ \logger ->
         when (p level meta) $ logger loc level msg meta
 
 defaultOutput :: Maybe SourceVersion -> Handle -> Loc -> LogLevel -> LogStr -> [Pair] -> IO ()
-defaultOutput sourceVersion handle loc level msg meta = do
+defaultOutput sourceVersion handle' loc level msg meta = do
     time <- getCurrentTime
-    TIO.hPutStrLn handle (defaultFormat sourceVersion time loc level msg meta)
+    TIO.hPutStrLn handle' (defaultFormat sourceVersion time loc level msg meta)
 
 defaultFormat :: Maybe SourceVersion -> UTCTime -> Loc -> LogLevel -> LogStr -> [Pair] -> Text
 defaultFormat sourceVersion time loc level msg meta =
