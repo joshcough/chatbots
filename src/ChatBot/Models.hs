@@ -1,16 +1,19 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric  #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module ChatBot.Models
   (
     ChatMessage(..)
+  , ChannelName(..)
   ) where
 
 import Protolude
 
+import           Control.Lens.TH      (makeClassy)
 import           Control.Monad        (mzero)
 import           Data.Aeson           (Value(..), ToJSON(..), FromJSON(..))
 import           Data.Text            (Text)
@@ -18,10 +21,20 @@ import           GHC.Generics         (Generic)
 import           Irc.Identifier       (Identifier, idText, mkId)
 import           Irc.RawIrcMsg        (RawIrcMsg(..), TagEntry(..))
 import           Irc.UserInfo         (UserInfo(..))
+import           Web.HttpApiData         (FromHttpApiData(..))
+
+newtype ChannelName = ChannelName { _unChannelName :: Text }
+    deriving stock (Eq, Ord, Show, Generic)
+    deriving anyclass (FromJSON, ToJSON)
+
+makeClassy ''ChannelName
+
+instance FromHttpApiData ChannelName where
+    parseUrlPiece = pure . ChannelName
 
 data ChatMessage = ChatMessage {
     cmUser :: Text
-  , cmChannel :: Text
+  , cmChannel :: ChannelName
   , cmBody :: Text
   , cmRawMessage :: RawIrcMsg
 } deriving (Eq, Generic, Show, ToJSON, FromJSON)

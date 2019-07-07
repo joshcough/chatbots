@@ -14,6 +14,7 @@ import           Types                       (AppT', runDb)
 
 import           ChatBot.Config              (ChannelName(..))
 import           ChatBot.DatabaseModels      (DbQuote(..), EntityField( DbQuoteChannel, DbQuoteQid ))
+import           Config                      (HasConfig)
 
 class Monad m => QuotesDb m where
     insertQuote :: ChannelName -> Text -> m (Entity DbQuote)
@@ -21,40 +22,33 @@ class Monad m => QuotesDb m where
     getQuoteByPK :: Int64 -> m (Maybe DbQuote)
     deleteQuote :: ChannelName -> Int -> m ()
 
-instance MonadIO m => QuotesDb (AppT' e m) where
-    insertQuote channel quoteText = do
+instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
+    insertQuote (ChannelName channel) quoteText = do
         $(logDebug) "insertQuote" ["channel" .= channel, "quoteText" .= quoteText]
-        runDb $ insertQuote channel quoteText
-    getQuote channel qid = do
+        -- insert into quotes values (
+        --   channel, quote, select count(*) + 1 from quotes where channel = channel
+        -- )
+        runDb $ do
+            qid <- fmap length $ select $ from $ \quote -> do
+                     where_ $ (quote ^. DbQuoteChannel) ==. val channel
+                     return quote
+            let q = DbQuote channel quoteText qid
+            k <- insert q
+            pure $ Entity k q
+    getQuote (ChannelName channel) qid = do
         $(logDebug) "getQuote" ["channel" .= channel, "qid" .= qid]
-        runDb $ getQuote channel qid
+        -- select * from quote where channel = channel and qid = qid
+        runDb $ selectFirst [DbQuoteChannel P.==. channel, DbQuoteQid P.==. qid] []
     getQuoteByPK qid = do
         $(logDebug) "getQuote" ["id" .= qid]
-        runDb $ getQuoteByPK qid
-    deleteQuote channel qid = do
+        -- select * from quote where id = qid
+        runDb $ P.get (toSqlKey qid)
+    deleteQuote (ChannelName channel) qid = do
         $(logDebug) "deleteQuote" ["channel" .= channel, "qid" .= qid]
-        runDb $ deleteQuote channel qid
-
-instance MonadIO m => QuotesDb (SqlPersistT m) where
-    -- insert into quotes values (
-    --   channel, quote, select count(*) + 1 from quotes where channel = channel
-    -- )
-    insertQuote (ChannelName channel) quoteText = do
-        qid <- fmap length $ select $ from $ \quote -> do
-                 where_ $ (quote ^. DbQuoteChannel) ==. val channel
-                 return quote
-        let q = DbQuote channel quoteText qid
-        k <- insert q
-        pure $ Entity k q
-    -- select * from quote where channel = channel and qid = qid
-    getQuote (ChannelName channel) qid =
-        selectFirst [DbQuoteChannel P.==. channel, DbQuoteQid P.==. qid] []
-    -- select * from quote where id = qid
-    getQuoteByPK qid = P.get (toSqlKey qid)
-    -- delete from quote where channel = channel and qid = qid
-    deleteQuote (ChannelName channel) qid = delete $ from $ \quote ->
-        where_ (
-            (quote ^. DbQuoteChannel) ==. val channel
-            &&.
-            (quote ^. DbQuoteQid) ==. val qid
-         )
+        -- delete from quote where channel = channel and qid = qid
+        runDb $ delete $ from $ \quote ->
+            where_ (
+                (quote ^. DbQuoteChannel) ==. val channel
+                &&.
+                (quote ^. DbQuoteQid) ==. val qid
+             )

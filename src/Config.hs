@@ -7,8 +7,7 @@ module Config (
   , Config(..)
   , Environment(..)
   , acquireConfig
-  -- lenses for config
-  , configPool, configEnv, configPort, configHttp, configRollbar, configAwsEnv, configChatBotExecution
+  , HasConfig(..)
   ) where
 
 import Protolude

@@ -8,8 +8,8 @@ module Error(
     ClassifiedError(..),
     AppError(..),
     ThrowAll(..),
-    ProverlaysError,
-    ProverlaysError'(..),
+    ChatBotError,
+    ChatBotError'(..),
     catchAuth,
     throwToIO,
     defaultToRollbarEvent,
@@ -79,19 +79,19 @@ data AppError e
 
 makeClassyPrisms ''AppError
 
-type ProverlaysError = AppError ProverlaysError'
+type ChatBotError = AppError ChatBotError'
 
-newtype ProverlaysError'
+newtype ChatBotError'
     = ProverlaysMiscError Text
     deriving (Show, Eq)
 
-instance ClassifiedError ProverlaysError' where
+instance ClassifiedError ChatBotError' where
     isUnexpected (ProverlaysMiscError _) = True
 
-instance TitledError ProverlaysError' where
+instance TitledError ChatBotError' where
     getErrorTitle (ProverlaysMiscError _) = "Unknown Error"
 
-instance ToServant ProverlaysError' where
+instance ToServant ChatBotError' where
     toServantErr (ProverlaysMiscError _) = err500
 
 instance Exception e => Exception (AppError e)
@@ -183,7 +183,7 @@ class ThrowAll a where
   --
   -- > throwAll err400 :: Handler a :<|> Handler b :<|> Handler c
   -- >    == throwError err400 :<|> throwError err400 :<|> err400
-  throwAll :: ProverlaysError -> a
+  throwAll :: ChatBotError -> a
 
 instance (ThrowAll a, ThrowAll b) => ThrowAll (a :<|> b) where
   throwAll e = throwAll e :<|> throwAll e
@@ -193,5 +193,5 @@ instance (ThrowAll a, ThrowAll b) => ThrowAll (a :<|> b) where
 instance {-# OVERLAPPING #-} ThrowAll b => ThrowAll (a -> b) where
   throwAll e = const $ throwAll e
 
-instance {-# OVERLAPPABLE #-} (MonadError ProverlaysError m) => ThrowAll (m a) where
+instance {-# OVERLAPPABLE #-} (MonadError ChatBotError m) => ThrowAll (m a) where
   throwAll = throwError

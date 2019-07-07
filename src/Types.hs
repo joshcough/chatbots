@@ -4,6 +4,8 @@ module Types (
     module Config
   , AppT
   , AppT'
+  , AppTEnv
+  , AppTEnv'
   , App
   , ProverlaysM
   , runAppT
@@ -23,56 +25,67 @@ import           Database.Persist.Sql                 (SqlPersistT, runSqlPool)
 import           Network.HTTP.Nano                    (HttpError)
 import           Web.Rollbar                          (ToRollbarEvent(..), rollbar)
 
-import           Config                               (Config(..), configPool)
+import           Config                               (Config(..), configPool, HasConfig)
 import           Error
 import           Logging
 import           Util.Utils                           (tShow)
 
+import Network.HTTP.Nano.Types (HasHttpCfg)
+import Web.Rollbar.Types (HasRollbarCfg)
+
 ---
 ---
 ---
 
-type ProverlaysM m = (MonadError ProverlaysError m, MonadLoggerJSON m)
+type ProverlaysM m = (MonadError ChatBotError m, MonadLoggerJSON m)
 
-type AppT m = AppT' ProverlaysError m
-type AppT' e m = ReaderT Config (ExceptT e (LoggingJSONT m))
+type AppT m = AppT' ChatBotError m Config
+type AppTEnv' e m r = ReaderT r (ExceptT e (LoggingJSONT m))
+type AppTEnv m r = AppTEnv' ChatBotError m r
+type AppT' e m r = AppTEnv' e m r
 
 type App = AppT IO
 
 -- | Executes the given computation in AppT, logging to stdout with log level configured in the
 --   context (via `HasLoggingCfg`), and sending errors to Rollbar (using `HasRollbarCfg`).
-runAppT :: forall err a. (ClassifiedError err, ToRollbarEvent err, Show err) => AppT' err IO a -> Config -> IO (Either err a)
+runAppT :: forall err r a. (ClassifiedError err, ToRollbarEvent err, Show err, HasHttpCfg r, HasRollbarCfg r, HasLoggingCfg r) => AppT' err IO r a -> r -> IO (Either err a)
 runAppT = runAppT' $ \err -> do
     $(logError) "Uncaught app error" ["error" .= tShow err]
     when (isUnexpected err) (rollbar $ toRollbarEvent err)
 
-runAppToIO :: Config -> App a -> IO a
+runAppToIO :: HasLoggingCfg r => r -> AppTEnv IO r a -> IO a
 runAppToIO config app' = do
     result <- runAppTInTest app' config
     either (throwIO . fmap (const (ErrorCall "error"))) return result
 
 -- | Runs without rollbar
-runAppTInTest :: Show err => AppT' err IO a -> Config -> IO (Either err a)
+runAppTInTest :: (HasLoggingCfg r, Show err) => AppT' err IO r a -> r -> IO (Either err a)
 runAppTInTest = runAppT' $ \err -> $(logError) "Uncaught app error" ["error" .= tShow err]
 
 -- |
-runAppT' ::
-       (err -> AppT' HttpError IO ())
-    -> AppT' err IO a
-    -> Config
+runAppT' :: HasLoggingCfg r =>
+       (err -> AppT' HttpError IO r ())
+    -> AppT' err IO r a
+    -> r
     -> IO (Either err a)
 runAppT' onError action context = do
-    let run :: forall e r. AppT' e IO r -> IO (Either e r)
-        run f = (runStdoutLoggingJSONT level sourceVersion . runExceptT) (runReaderT f context)
-        handleErrorCallingRollbar :: Either HttpError () -> IO ()
+    let handleErrorCallingRollbar :: Either HttpError () -> IO ()
         handleErrorCallingRollbar = either print (const $ return ())
-    res <- run action
-    either (\e -> run (onError e) >>= handleErrorCallingRollbar) (const $ pure ()) res
+    res <- run level sourceVersion context action
+    either (\e -> run level sourceVersion context (onError e) >>= handleErrorCallingRollbar) (const $ pure ()) res
     pure res
     where
         level = context ^. (loggingCfg . logLevel)
         sourceVersion = context ^. (loggingCfg . logSourceVersion)
 
+run :: LogLevel
+     -> Maybe SourceVersion
+     -> r
+     -> ReaderT r (ExceptT e (LoggingJSONT m)) a
+     -> m (Either e a)
+run level sourceVersion context f =
+    (runStdoutLoggingJSONT level sourceVersion . runExceptT) (runReaderT f context)
+
 -- |
-runDb :: (MonadReader Config m, MonadIO m) => SqlPersistT IO b -> m b
+runDb :: (HasConfig c, MonadReader c m, MonadIO m) => SqlPersistT IO b -> m b
 runDb query = view configPool >>= liftIO . runSqlPool query

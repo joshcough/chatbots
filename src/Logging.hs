@@ -29,6 +29,7 @@ module Logging
     , fromEnv
     , logLevel
     , logSourceVersion
+    , SourceVersion(..)
     ) where
 
 import Protolude hiding (catch, lift)

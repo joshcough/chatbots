@@ -20,16 +20,8 @@ import qualified Data.ByteString.Lazy    as B
 import           Data.Text               (Text)
 import           Irc.RawIrcMsg           (RawIrcMsg)
 import           GHC.Generics            (Generic)
-import           Web.HttpApiData         (FromHttpApiData(..))
 
-newtype ChannelName = ChannelName { _unChannelName :: Text }
-    deriving stock (Eq, Ord, Show, Generic)
-    deriving anyclass (FromJSON, ToJSON)
-
-makeClassy ''ChannelName
-
-instance FromHttpApiData ChannelName where
-    parseUrlPiece = pure . ChannelName
+import ChatBot.Models (ChannelName(..))
 
 data ChatBotConfig = ChatBotConfig
   { _cbConfigNick :: Text

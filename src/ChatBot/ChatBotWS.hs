@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module ChatBot.ChatBotWS
   ( runBot
   ) where
@@ -6,8 +8,10 @@ import Protolude
 import Prelude (fail, String) -- TODO: kill me
 
 import           Control.Concurrent.Chan (writeChan)
+import           Control.Lens.TH         (makeClassy)
 import           Control.Monad           (forever, forM_)
-import           Data.String.Conversions (ConvertibleStrings, cs)
+import qualified Data.Map                as Map
+import           Data.String.Conversions (cs)
 import           Network.Socket          (withSocketsDo)
 import           Data.Text               (Text)
 import qualified Data.Text               as T
@@ -16,123 +20,111 @@ import qualified Irc.Identifier          as Irc
 import           Irc.Message             (IrcMsg(..), cookIrcMsg)
 import           Irc.RawIrcMsg           (RawIrcMsg(..), parseRawIrcMsg, renderRawIrcMsg)
 import qualified Irc.UserInfo            as Irc
-import           Network.HTTP            (getRequest, getResponseBody, simpleHTTP)
 import qualified Network.WebSockets      as WS
-import           Text.Trifecta
+import           Text.Trifecta           (Result(..), parseString, string, whiteSpace)
 
+import           ChatBot.Commands        (Command(..), Response(..), defaultCommands)
 import           ChatBot.Config          (ChatBotConfig(..), ChatBotExecutionConfig(..))
-import           ChatBot.Models          (ChatMessage(..))
-import           ChatBot.Parsers         (anything, slurp, url)
-import           Config                  (Config(..))
-import           Types                   (App, runAppToIO)
+import           ChatBot.Models          (ChatMessage(..), ChannelName(..))
+import           Config                  (Config(..), HasConfig(..))
+import           Error                   (ChatBotError)
+import           Types                   (AppTEnv', runAppToIO)
+import Logging (HasLoggingCfg(..))
 
--- import qualified Data.Text.IO              as T
--- import           Data.Aeson.Encode.Pretty       (encodePretty)
+import qualified Data.Text.IO              as T
+import           Data.Aeson.Encode.Pretty       (encodePretty)
+
+
+data ConfigAndConnection = ConfigAndConnection {
+   _configAndConnectionConfig :: Config
+ , _configAndConnectionConn :: WS.Connection
+ }
+
+makeClassy ''ConfigAndConnection
 
 twitchIrcUrl :: String
 twitchIrcUrl = "irc-ws.chat.twitch.tv"
 
 runBot :: Config -> IO ()
 runBot conf = withSocketsDo $
-    WS.runClient twitchIrcUrl 80 "/" (runAppToIO conf . app)
+    WS.runClient twitchIrcUrl 80 "/" $ \conn ->
+        runAppToIO (ConfigAndConnection conf conn) app
 
----
----
----
+instance HasLoggingCfg ConfigAndConnection
+    where loggingCfg = configAndConnectionConfig . loggingCfg
 
-commands :: MonadIO m => [Command m]
-commands = [ Command "hi"    anything $ const $ pure $ RespondWith "hello!"
-           , Command "bye"   anything $ const $ pure $ RespondWith "bye!"
-           , Command "echo"  slurp    $ pure . RespondWith
-           , Command "echo!" slurp    $ pure . RespondWith . \t -> t <> "!"
-           , Command "url" url $ fmap (RespondWith . cs . take 100) . fetchUrl
-           ]
+instance HasConfig ConfigAndConnection
+    where config = configAndConnectionConfig
 
-data Response = RespondWith Text | Nada
-data Command m = forall a . Command Text (Parser a) (a -> m Response)
+type App = AppTEnv' ChatBotError IO ConfigAndConnection
 
-fetchUrl :: MonadIO m => ConvertibleStrings a String => a -> m String
-fetchUrl u = liftIO $ simpleHTTP (getRequest $ cs u) >>= getResponseBody
+app :: App ()
+app = authorize >> twitchListener
 
-app :: WS.Connection -> App ()
-app conn = do
-    authorize conn
-    twitchListener conn
-
-twitchListener :: WS.Connection -> App ()
-twitchListener conn = forever $ do
+twitchListener :: App ()
+twitchListener = forever $ do
+    ConfigAndConnection _ conn <- ask
     msg <- liftIO $ T.strip <$> WS.receiveData conn
     liftIO $ print msg
     -- todo: throw actual error here.
     maybe (fail "Server sent invalid message!")
-          (processMessage conn)
+          processMessage
           (parseRawIrcMsg msg)
 
-processMessage :: WS.Connection -> RawIrcMsg -> App ()
-processMessage conn rawIrcMsg = processMessage' (cookIrcMsg rawIrcMsg)
+processMessage :: RawIrcMsg -> App ()
+processMessage rawIrcMsg = processMessage' (cookIrcMsg rawIrcMsg)
     where
-    processMessage' (Ping xs) = sendMsg conn (ircPong xs)
+    processMessage' (Ping xs) = sendMsg (ircPong xs)
     processMessage' (Privmsg userInfo channelName msgBody) = do
-        conf <- ask
+        ConfigAndConnection conf _ <- ask
         let outputChan = _cbecOutputChan $ _configChatBotExecution conf
         case _msgParams rawIrcMsg of
             [_, _] -> do
                 let m = ChatMessage (Irc.userName userInfo)
-                                    (Irc.idText channelName)
+                                    (ChannelName $ Irc.idText channelName)
                                     msgBody
                                     rawIrcMsg
-                dispatch conn m
+                dispatch m
                 -- T.putStrLn . cs $ encodePretty rawIrcMsg
                 liftIO $ writeChan outputChan rawIrcMsg
             params -> putStr $ "<Unhandled params>: " ++ show params
-    processMessage' _ = return ()
-        -- T.putStrLn . cs $ encodePretty rawIrcMsg
-        -- writeChan outputChan rawIrcMsg
+    processMessage' _ = do
+        liftIO $ T.putStr "couldn't process message: "
+        liftIO $ T.putStrLn . cs $ encodePretty rawIrcMsg
 
-dispatch :: WS.Connection -> ChatMessage -> App ()
-dispatch conn msg = forM_ commands (runCommand conn msg)
+dispatch :: ChatMessage -> App ()
+dispatch msg = forM_ (Map.toList defaultCommands) (runCommand msg)
 
-runCommand :: WS.Connection -> ChatMessage -> Command App -> App ()
-runCommand conn (ChatMessage _ channel input _) (Command name args body) =
+runCommand :: ChatMessage -> (Text, Command App) -> App ()
+runCommand (ChatMessage _ channel input _) (name, Command args body) =
     case parseString p mempty (cs input) of
-        Success a -> body a >>= \case
-            RespondWith t -> say channel t conn
+        Success a -> body channel a >>= \case
+            RespondWith t -> say channel t
             Nada  -> return ()
         Failure _ -> return ()
     where p = string (cs $ "!" <> name) >> optional whiteSpace >> args
 
-say :: Text -> Text -> WS.Connection -> App ()
-say twitchChannel msg conn = do
-    conf <- ask
-    sendMsg conn $ ircPrivmsg twitchChannel msg
+say :: ChannelName -> Text -> App ()
+say (ChannelName twitchChannel) msg = do
+    ConfigAndConnection conf _ <- ask
+    sendMsg $ ircPrivmsg twitchChannel msg
     let outputChan = _cbecOutputChan $ _configChatBotExecution conf
     liftIO $ writeChan outputChan $ ircPrivmsg twitchChannel msg
 
-authorize :: WS.Connection -> App ()
-authorize conn = do
-    chatBotConf <- _configChatBot <$> ask
-    sendMsg conn (ircPass $ _cbConfigPass chatBotConf)
-    sendMsg conn (ircNick $ _cbConfigNick chatBotConf)
-    sendMsg conn (ircCapReq ["twitch.tv/membership"])
-    sendMsg conn (ircCapReq ["twitch.tv/commands"])
-    sendMsg conn (ircCapReq ["twitch.tv/tags"])
-    forM_ (_cbConfigChannels chatBotConf) $ \c -> sendMsg conn (ircJoin c Nothing)
-    sendMsg conn (ircPing ["ping"])
+authorize :: App ()
+authorize = do
+    ConfigAndConnection conf _ <- ask
+    let chatBotConf = _configChatBot conf
+    sendMsg (ircPass $ _cbConfigPass chatBotConf)
+    sendMsg (ircNick $ _cbConfigNick chatBotConf)
+    sendMsg (ircCapReq ["twitch.tv/membership"])
+    sendMsg (ircCapReq ["twitch.tv/commands"])
+    sendMsg (ircCapReq ["twitch.tv/tags"])
+    forM_ (_cbConfigChannels chatBotConf) $ \c -> sendMsg (ircJoin c Nothing)
+    sendMsg (ircPing ["ping"])
 
-sendMsg :: MonadIO m => WS.Connection -> RawIrcMsg -> m ()
-sendMsg conn msg =
+sendMsg :: RawIrcMsg -> App ()
+sendMsg msg = do
+    ConfigAndConnection _ conn <- ask
     -- T.putStrLn . cs $ encodePretty msg
     liftIO $ WS.sendTextData conn (renderRawIrcMsg msg)
-
-
-{-
-!addQuote something stupid i said
-=> "add quote 22: something stupid i said"
-!quote22
-=> "something stupid i said"
-!quote5
-=> "im lazy"
-!randomQuote
-=> ...
-!uptime
--}
