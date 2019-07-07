@@ -12,11 +12,7 @@ import           Config                      (Config (..), acquireConfig)
 -- | An action that creates a WAI 'Application' together with its resources,
 --   runs it, and tears it down on exit
 runApp :: IO ()
-runApp = bracket acquireConfig shutdownApp runChatBot
-  where
-    runChatBot :: Config -> IO ()
-    runChatBot config = runBot (_configChatBotExecution config)
-                               (_configChatBot config)
+runApp = bracket acquireConfig shutdownApp runBot
 
 -- | Takes care of cleaning up 'Config' resources
 shutdownApp :: Config -> IO ()

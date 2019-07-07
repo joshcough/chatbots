@@ -7,7 +7,6 @@ module ChatBot.Config
     ChannelName(..)
   , ChatBotConfig(..)
   , ChatBotExecutionConfig(..)
-  , ChatBotFrontendMessage(..)
   , configFromFile
   ) where
 
@@ -41,13 +40,8 @@ data ChatBotConfig = ChatBotConfig
 
 makeClassy ''ChatBotConfig
 
-data ChatBotFrontendMessage = ConnectTo ChannelName | DisconnectFrom ChannelName
-    deriving stock (Eq, Ord, Show, Generic)
-    deriving anyclass (FromJSON, ToJSON)
-
-data ChatBotExecutionConfig = ChatBotExecutionConfig {
+newtype ChatBotExecutionConfig = ChatBotExecutionConfig {
     _cbecOutputChan :: Chan RawIrcMsg
-  , _cbecInputChan :: Chan ChatBotFrontendMessage
 }
 
 makeClassy ''ChatBotExecutionConfig

@@ -7,6 +7,7 @@ module Types (
   , App
   , ProverlaysM
   , runAppT
+  , runAppToIO
   , runAppTInTest
   , runDb
   ) where
@@ -44,6 +45,11 @@ runAppT :: forall err a. (ClassifiedError err, ToRollbarEvent err, Show err) => 
 runAppT = runAppT' $ \err -> do
     $(logError) "Uncaught app error" ["error" .= tShow err]
     when (isUnexpected err) (rollbar $ toRollbarEvent err)
+
+runAppToIO :: Config -> App a -> IO a
+runAppToIO config app' = do
+    result <- runAppTInTest app' config
+    either (throwIO . fmap (const (ErrorCall "error"))) return result
 
 -- | Runs without rollbar
 runAppTInTest :: Show err => AppT' err IO a -> Config -> IO (Either err a)

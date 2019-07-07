@@ -8,6 +8,7 @@ import           ChatBot.DatabaseModels (DbQuote(..))
 import           ChatBot.Storage (QuotesDb(..), insertQuote)
 import           Database.Persist (Entity(..))
 import           Helpers
+import           Types (runAppToIO)
 
 art :: ChannelName
 art = ChannelName "artoftroll"

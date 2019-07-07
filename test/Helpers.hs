@@ -6,16 +6,11 @@ import Prelude (IO)
 import           Data.Text                   (pack)
 import           Database.Persist.Sql        (rawExecute)
 import           Config                      (Config (..), acquireConfig)
-import           Types                       (App, runAppTInTest, runDb)
+import           Types                       (runAppToIO, runDb)
 
 ---
 --- Setup and teardown helpers
 ---
-
-runAppToIO :: Config -> App a -> IO a
-runAppToIO config app' = do
-    result <- runAppTInTest app' config
-    either (throwIO . fmap (const (ErrorCall "error"))) return result
 
 setupTeardown :: (Config -> IO ()) -> IO ()
 setupTeardown runTestsWith = do
