@@ -47,7 +47,7 @@ runBot eConf conf = withSocketsDo $
 ---
 ---
 
-commands :: [Command]
+commands :: MonadIO m => [Command m]
 commands = [ Command "hi"    anything $ const $ pure $ RespondWith "hello!"
            , Command "bye"   anything $ const $ pure $ RespondWith "bye!"
            , Command "echo"  slurp    $ pure . RespondWith
@@ -56,10 +56,10 @@ commands = [ Command "hi"    anything $ const $ pure $ RespondWith "hello!"
            ]
 
 data Response = RespondWith Text | Nada
-data Command = forall a. Command Text (Parser a) (a -> IO Response)
+data Command m = forall a . Command Text (Parser a) (a -> m Response)
 
-fetchUrl :: ConvertibleStrings a String => a -> IO String
-fetchUrl u = simpleHTTP (getRequest $ cs u) >>= getResponseBody
+fetchUrl :: MonadIO m => ConvertibleStrings a String => a -> m String
+fetchUrl u = liftIO $ simpleHTTP (getRequest $ cs u) >>= getResponseBody
 
 app :: ChatBotExecutionConfig -> ChatBotConfig -> WS.ClientApp ()
 app (ChatBotExecutionConfig outputChan inputChan) conf conn = do
@@ -112,7 +112,7 @@ app (ChatBotExecutionConfig outputChan inputChan) conf conn = do
         dispatch :: ChatMessage -> IO ()
         dispatch msg = forM_ commands (runCommand msg)
 
-        runCommand :: ChatMessage -> Command -> IO ()
+        runCommand :: ChatMessage -> Command IO -> IO ()
         runCommand (ChatMessage _ channel input _) (Command name args body) =
             case parseString p mempty (cs input) of
                 Success a -> body a >>= \case

@@ -12,6 +12,6 @@ share [mkPersist sqlSettings, mkDeleteCascade sqlSettings] [persistLowerCase|
 DbQuote json sql=quotes
     channel             Text
     text                Text
-    number              Int
+    qid                 Int
     deriving Show Eq
 |]

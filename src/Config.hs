@@ -151,4 +151,3 @@ envPool :: Environment -> Int
 envPool Test        = 1
 envPool Development = 1
 envPool Production  = 8
-

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: aca33a6aee377b9c05ea32413a2803cf6b863fbb456ba186a6fa2c7c0d5d3064
+-- hash: 3d62653ce49583c178f57f2123f3098a57b0fa0301299283dd305edd49d2c5b3
 
 name:           chatbots
 version:        0.1.0.0
@@ -131,6 +131,8 @@ test-suite spec
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      ChatBotDbSpec
+      Helpers
       Paths_chatbots
   hs-source-dirs:
       test
@@ -141,10 +143,15 @@ test-suite spec
     , base
     , chatbots
     , hedgehog
+    , hspec
+    , mtl
+    , persistent
+    , persistent-postgresql
     , protolude
     , quickcheck-instances
     , tasty
     , tasty-hedgehog
     , tasty-hunit
     , tasty-quickcheck
+    , text
   default-language: Haskell2010
