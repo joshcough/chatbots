@@ -20,3 +20,6 @@ anything = () <$ restOfLine
 
 url :: DeltaParsing m => m Text
 url = slurp
+
+number :: DeltaParsing m => m Int
+number = fromIntegral <$> integer

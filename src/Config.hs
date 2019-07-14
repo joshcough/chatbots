@@ -30,7 +30,7 @@ import           System.IO                            (stdout)
 import           Web.Rollbar                          (RollbarCfg(..), HasRollbarCfg(..))
 import qualified Web.Rollbar                          as RB
 
-import           ChatBot.Config                       (ChatBotConfig(..), ChatBotExecutionConfig(..))
+import           ChatBot.Config                       (ChatBotConfig(..), ChatBotExecutionConfig(..), configFromFile)
 import           Logging                              (HasLoggingCfg, LoggingCfg)
 import qualified Logging
 import qualified Settings                             as S
@@ -90,7 +90,7 @@ acquireConfig = do
     _configAwsEnv           <- acquireAwsConfig
     _configRollbar          <- mkRollbar
     _configLogging          <- mkLoggingCfg
-    _configChatBot          <- acquireChatBotConfig
+    _configChatBot          <- configFromFile "chatbot.json"
     _configChatBotExecution <- acquireChatBotExecutionConfig
     pure Config {..}
 
@@ -109,11 +109,11 @@ acquireAwsConfig = do
     return AwsConfig {..}
 
 -- |
-acquireChatBotConfig :: IO ChatBotConfig
-acquireChatBotConfig = do
+acquireChatBotConfigFromEnv :: IO ChatBotConfig
+acquireChatBotConfigFromEnv = do
     _cbConfigNick <- S.lookupTextSetting "CHATBOT_NICK" "ProverlaysBot"
     _cbConfigPass <- S.lookupRequiredSetting "CHATBOT_PASS"
-    let _cbConfigChannels = []
+    let _cbConfigChannels = ["#artofthetroll"]
     return ChatBotConfig{..}
 
 -- |
