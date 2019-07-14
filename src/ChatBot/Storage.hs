@@ -1,5 +1,7 @@
 module ChatBot.Storage (
-    QuotesDb(..)
+    ChatBotDB
+  , CommandsDb(..)
+  , QuotesDb(..)
   ) where
 
 import Protolude hiding (from)
@@ -13,14 +15,39 @@ import           Logging                     (logDebug)
 import           Types                       (AppT', runDb)
 
 import           ChatBot.Config              (ChannelName(..))
-import           ChatBot.DatabaseModels      (DbQuote(..), EntityField( DbQuoteChannel, DbQuoteQid ))
+import           ChatBot.DatabaseModels      (DbCommand(..), DbQuote(..), EntityField(..))
 import           Config                      (HasConfig)
+
+type ChatBotDB m = (CommandsDb m, QuotesDb m)
+
+class Monad m => CommandsDb m where
+    insertCommand :: ChannelName -> Text -> Text -> m (Entity DbCommand)
+    getCommand :: ChannelName -> Text -> m (Maybe (Entity DbCommand))
+    deleteCommand :: ChannelName -> Text -> m ()
 
 class Monad m => QuotesDb m where
     insertQuote :: ChannelName -> Text -> m (Entity DbQuote)
     getQuote :: ChannelName -> Int -> m (Maybe (Entity DbQuote))
     getQuoteByPK :: Int64 -> m (Maybe DbQuote)
     deleteQuote :: ChannelName -> Int -> m ()
+
+instance (HasConfig c, MonadIO m) => CommandsDb (AppT' e m c) where
+    insertCommand (ChannelName channel) commandName commandText = do
+        $(logDebug) "insertCommand" ["channel" .= channel, "name" .= commandName, "text" .= commandText]
+        let q = DbCommand channel commandName commandText
+        k <- runDb $ insert q
+        pure $ Entity k q
+    getCommand (ChannelName channel) commandName = do
+        $(logDebug) "getCommand" ["channel" .= channel, "name" .= commandName]
+        runDb $ selectFirst [DbCommandChannel P.==. channel, DbCommandName P.==. commandName] []
+    deleteCommand (ChannelName channel) commandName = do
+        $(logDebug) "deleteCommand" ["channel" .= channel, "name" .= commandName]
+        runDb $ delete $ from $ \command ->
+            where_ (
+                (command ^. DbCommandChannel) ==. val channel
+                &&.
+                (command ^. DbCommandName) ==. val commandName
+             )
 
 instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
     insertQuote (ChannelName channel) quoteText = do

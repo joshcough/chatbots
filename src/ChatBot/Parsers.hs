@@ -3,7 +3,7 @@ module ChatBot.Parsers where
 import Protolude
 
 import           Data.String.Conversions (cs)
-import           Data.Text               (Text)
+import           Data.Text               (Text, pack)
 import           Text.Trifecta
 
 (~~) :: Parser a -> Parser b -> Parser (a, b)
@@ -23,3 +23,9 @@ url = slurp
 
 number :: DeltaParsing m => m Int
 number = fromIntegral <$> integer
+
+commandName :: DeltaParsing m => m Text
+commandName = do
+  _ <- string "!"
+  name <- pack <$> many alphaNum
+  return $ "!" <> name

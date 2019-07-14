@@ -14,7 +14,8 @@ module Error(
     throwToIO,
     defaultToRollbarEvent,
     orFail,
-    orFailM
+    orFailM,
+    miscError
 ) where
 
 import Protolude
@@ -82,17 +83,20 @@ makeClassyPrisms ''AppError
 type ChatBotError = AppError ChatBotError'
 
 newtype ChatBotError'
-    = ProverlaysMiscError Text
+    = ChatBotMiscError Text
     deriving (Show, Eq)
 
+miscError :: Text -> ChatBotError
+miscError = AppAppError . ChatBotMiscError
+
 instance ClassifiedError ChatBotError' where
-    isUnexpected (ProverlaysMiscError _) = True
+    isUnexpected (ChatBotMiscError _) = True
 
 instance TitledError ChatBotError' where
-    getErrorTitle (ProverlaysMiscError _) = "Unknown Error"
+    getErrorTitle (ChatBotMiscError _) = "Unknown Error"
 
 instance ToServant ChatBotError' where
-    toServantErr (ProverlaysMiscError _) = err500
+    toServantErr (ChatBotMiscError _) = err500
 
 instance Exception e => Exception (AppError e)
 

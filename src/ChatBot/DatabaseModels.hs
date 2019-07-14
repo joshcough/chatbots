@@ -9,6 +9,12 @@ import           Database.Persist.TH              (mkDeleteCascade, mkPersist, p
 import           Data.Text                        (Text)
 
 share [mkPersist sqlSettings, mkDeleteCascade sqlSettings] [persistLowerCase|
+DbCommand json sql=commands
+    channel Text
+    name    Text
+    body    Text
+    deriving Show Eq
+
 DbQuote json sql=quotes
     channel             Text
     text                Text

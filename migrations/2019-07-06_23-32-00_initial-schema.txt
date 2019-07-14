@@ -2,6 +2,15 @@ Description: Initial schema
 Created: 2019-07-06 23:32:00.000000 UTC
 Depends:
 Apply: |
+
+    CREATE TABLE commands (
+        id SERIAL PRIMARY KEY,
+        channel character varying NOT NULL,
+        name character varying NOT NULL,
+        body character varying NOT NULL,
+        Unique (channel, name)
+    );
+
     CREATE TABLE quotes (
         id SERIAL PRIMARY KEY,
         channel character varying NOT NULL,
@@ -11,4 +20,5 @@ Apply: |
     );
 
 Revert: |
+    DROP TABLE IF EXISTS commands;
     DROP TABLE IF EXISTS quotes;

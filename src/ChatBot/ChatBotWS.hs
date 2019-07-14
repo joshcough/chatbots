@@ -5,7 +5,6 @@ module ChatBot.ChatBotWS
   ) where
 
 import Protolude
-import Prelude (fail, String) -- TODO: kill me
 
 import           Control.Concurrent.Chan (writeChan)
 import           Control.Lens.TH         (makeClassy)
@@ -23,11 +22,11 @@ import qualified Irc.UserInfo            as Irc
 import qualified Network.WebSockets      as WS
 import           Text.Trifecta           (Result(..), parseString, whiteSpace)
 
-import           ChatBot.Commands        (Command(..), Response(..), defaultCommands)
+import           ChatBot.Commands        (Command(..), Response(..), builtinCommands, getCommandFromDb)
 import           ChatBot.Config          (ChatBotConfig(..), ChatBotExecutionConfig(..))
 import           ChatBot.Models          (ChatMessage(..), ChannelName(..))
 import           Config                  (Config(..), HasConfig(..))
-import           Error                   (ChatBotError)
+import           Error                   (ChatBotError, miscError)
 import           Types                   (AppTEnv', runAppToIO)
 import Logging (HasLoggingCfg(..))
 
@@ -42,12 +41,12 @@ data ConfigAndConnection = ConfigAndConnection {
 
 makeClassy ''ConfigAndConnection
 
-twitchIrcUrl :: String
+twitchIrcUrl :: Text
 twitchIrcUrl = "irc-ws.chat.twitch.tv"
 
 runBot :: Config -> IO ()
 runBot conf = withSocketsDo $
-    WS.runClient twitchIrcUrl 80 "/" $ \conn ->
+    WS.runClient (cs twitchIrcUrl) 80 "/" $ \conn ->
         runAppToIO (ConfigAndConnection conf conn) app
 
 instance HasLoggingCfg ConfigAndConnection
@@ -66,8 +65,7 @@ twitchListener = forever $ do
     ConfigAndConnection _ conn <- ask
     msg <- liftIO $ T.strip <$> WS.receiveData conn
     liftIO $ print msg
-    -- todo: throw actual error here.
-    maybe (fail "Server sent invalid message!")
+    maybe (throwError $ miscError "Server sent invalid message!")
           processMessage
           (parseRawIrcMsg msg)
 
@@ -85,13 +83,13 @@ processMessage rawIrcMsg = processMessage' (cookIrcMsg rawIrcMsg)
 
 processUserMessage :: RawIrcMsg -> Irc.UserInfo -> Irc.Identifier -> Text -> App ()
 processUserMessage rawIrcMsg userInfo channelName msgBody = do
-  ConfigAndConnection conf _ <- ask
-  let outputChan = _cbecOutputChan $ _configChatBotExecution conf
-  case _msgParams rawIrcMsg of
+    ConfigAndConnection conf _ <- ask
+    let outputChan = _cbecOutputChan $ _configChatBotExecution conf
+    case _msgParams rawIrcMsg of
       [_, _] -> do
           let cn = ChannelName $ Irc.idText channelName
           let m = ChatMessage (Irc.userName userInfo) cn msgBody rawIrcMsg
-          response <- dispatch m
+          response <- findAndRunCommand m
           case response of
              RespondWith t -> say cn t
              Nada  -> return ()
@@ -99,16 +97,20 @@ processUserMessage rawIrcMsg userInfo channelName msgBody = do
           liftIO $ writeChan outputChan rawIrcMsg
       params -> putStr $ "<Unhandled params>: " ++ show params
 
-dispatch :: ChatMessage -> App Response
-dispatch (ChatMessage _ channel input _) =
-    case Map.lookup name defaultCommands of
+findAndRunCommand :: ChatMessage -> App Response
+findAndRunCommand (ChatMessage _ channel input _) =
+    let (name, rest) = T.breakOn " " input
+    in case Map.lookup name builtinCommands of
+        -- default command
         Just (Command args body) ->
             case parseString (optional whiteSpace >> args) mempty (cs rest) of
                 Success a -> body channel a
-                Failure _ -> return Nada
-        Nothing -> return Nada
-    where
-    (name, rest) = T.breakOn " " input
+                Failure _ -> return $ RespondWith "Sorry, I don't understand that."
+        -- not a default command, look in the db for it.
+        Nothing -> f <$> getCommandFromDb channel name
+            where
+            f (Just body) = RespondWith body
+            f Nothing = RespondWith "I couldn't find that command."
 
 say :: ChannelName -> Text -> App ()
 say (ChannelName twitchChannel) msg = do
@@ -126,7 +128,9 @@ authorize = do
     send conn (ircCapReq ["twitch.tv/membership"])
     send conn (ircCapReq ["twitch.tv/commands"])
     send conn (ircCapReq ["twitch.tv/tags"])
-    forM_ (_cbConfigChannels chatBotConf) $ \c -> send conn (ircJoin c Nothing)
+    forM_ (_cbConfigChannels chatBotConf) $ \c -> do
+        send conn (ircJoin c Nothing)
+        say (ChannelName c) "Hello!"
     send conn (ircPing ["ping"])
 
 class Sender c m where
