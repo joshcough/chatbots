@@ -26,6 +26,7 @@ import           Database.PostgreSQL.Simple.Internal  (postgreSQLConnectionStrin
 import           Database.PostgreSQL.Simple.URL       (parseDatabaseUrl)
 import           Network.HTTP.Nano                    (HasHttpCfg(..), HttpCfg(..), tlsManager)
 import           Network.Wai.Handler.Warp             (Port)
+import           Servant.Auth.Server                  (CookieSettings, JWTSettings, defaultCookieSettings, defaultJWTSettings) --, generateKey)
 import           System.IO                            (stdout)
 import           Web.Rollbar                          (RollbarCfg(..), HasRollbarCfg(..))
 import qualified Web.Rollbar                          as RB
@@ -33,6 +34,7 @@ import qualified Web.Rollbar                          as RB
 import           ChatBot.Config                       (ChatBotConfig(..), ChatBotExecutionConfig(..), configFromFile)
 import           Logging                              (HasLoggingCfg, LoggingCfg)
 import qualified Logging
+import qualified KeyGen                               as KG
 import qualified Settings                             as S
 
 -- | Right now, we're distinguishing between three environments. We could
@@ -58,6 +60,8 @@ data Config = Config
     , _configEnv :: Environment
     , _configPort :: Port
     , _configHttp :: HttpCfg
+    , _configCookies :: CookieSettings
+    , _configJWT :: JWTSettings
     , _configAwsEnv :: AwsConfig
     , _configRollbar :: RollbarCfg
     , _configLogging :: LoggingCfg
@@ -87,6 +91,8 @@ acquireConfig = do
     _configEnv              <- S.lookupReadableSetting "ENV" Development
     _configPool             <- acquirePool _configEnv
     _configHttp             <- mkHttp
+    let _configCookies      = defaultCookieSettings
+    _configJWT              <- acquireJWT _configEnv
     _configAwsEnv           <- acquireAwsConfig
     _configRollbar          <- mkRollbar
     _configLogging          <- mkLoggingCfg
@@ -97,6 +103,16 @@ acquireConfig = do
 -- |
 acquirePool :: Environment -> IO ConnectionPool
 acquirePool env = flip makePool env =<< S.lookupRequiredSetting "DATABASE_URL"
+
+
+-- |
+acquireJWT :: Environment -> IO JWTSettings
+acquireJWT env = defaultJWTSettings <$> mkJWT' env
+    where
+    mkJWT' Production = KG.readProdKey
+    mkJWT' Development = KG.readDevKey
+    mkJWT' Test = KG.readTestKey
+
 
 -- | Allocates resources for AwsConfig
 acquireAwsConfig :: IO AwsConfig

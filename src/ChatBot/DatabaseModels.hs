@@ -13,11 +13,11 @@ DbCommand json sql=commands
     channel Text
     name    Text
     body    Text
-    deriving Show Eq
+    deriving Show Eq Ord Generic
 
 DbQuote json sql=quotes
     channel             Text
     text                Text
     qid                 Int
-    deriving Show Eq
+    deriving Show Eq Ord Generic
 |]
