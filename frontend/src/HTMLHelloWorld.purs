@@ -1,36 +1,50 @@
 module HTMLHelloWorld
-    ( helloWorld
+    ( main'
     ) where
 
-import Elmish (ReactElement)
+import Prelude
+import Effect (Effect)
+import Elmish (ReactElement, boot)
 import Elmish.HTML as R
+import Elmish (ComponentDef, DispatchMsgFn, JsCallback0, ReactComponent, Transition(..), createElement', handle, pureUpdate)
 
-helloWorld :: ReactElement
-helloWorld =
-    R.article { className: "container" }
+-- import JSX.Web.Core.Atoms.Layout.Grid (col, row)
+-- import JSX.Web.Core.Atoms.Layout.Grid as Col
+
+main' :: Effect Unit
+main' = boot { domElementId: "app" , def: def }
+
+data Message = Inc | Dec
+
+type State = { count :: Int }
+
+def :: forall m. ComponentDef m Message State
+def =
+  { init: Transition { count: 0 } []
+  , update
+  , view
+  }
+  where
+    update s Inc = pureUpdate s { count = s.count+1 }
+    update s Dec = pureUpdate s { count = s.count-1 }
+    view s dispatch = helloWorld s dispatch
+
+foreign import view_ :: ReactComponent
+  { count :: Int
+  , onInc :: JsCallback0
+  , onDec :: JsCallback0
+  }
+
+helloWorld :: State -> DispatchMsgFn Message -> ReactElement
+helloWorld s dispatch = R.article { className: "container" }
         [ R.h1 {} "PureScript Elmish: HTML Hello World"
-        , R.p {}
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit.\
-            \ Curabitur massa sapien, convallis sed commodo eget, dictum a nunc.\
-            \ Nunc cursus porta quam ut porttitor. Sed et faucibus magna.\
-            \ Praesent id nibh quis elit placerat venenatis vehicula at quam.\
-            \ Duis tristique velit sit amet orci fringilla varius.\
-            \ Integer mollis fermentum magna. Etiam id rutrum mi. Cras mollis\
-            \ ex eget velit interdum, ut porttitor erat pulvinar.\
-            \ Nulla eleifend cursus lacus vitae molestie."
-        , R.img
-            { src: "http://placekitten.com/780/540"
-            , width: "780"
-            , height: "540"
-            }
-        , R.p {}
-            "Pellentesque libero mi, feugiat at ligula et, blandit\
-            \ sollicitudin sem. Maecenas ex risus, volutpat at dui eget,\
-            \ tristique posuere justo. Fusce fermentum metus euismod,\
-            \ scelerisque mi at, blandit nibh. Phasellus eu bibendum velit.\
-            \ Pellentesque turpis neque, aliquet quis ultricies in, feugiat ut\
-            \ urna. Vestibulum dui sem, semper vitae placerat sed, pretium et\
-            \ mauris. Curabitur id diam aliquet purus accumsan sodales eu\
-            \ quis odio. Phasellus ornare lacus mi, quis feugiat quam\
-            \ dignissim non."
+        , R.p {className:"text-right"} "Lorem ipsum dolor sit amet, consectetur adipiscing elit molestie."
+        , R.img { src: "http://placekitten.com/780/540", width: "780", height: "540" }
+        , R.p {} "Pellentesque libero mi, feugiat at ligula et, blandit dignissim non."
+        -- , row {} [ col { col: Col.span5 } "test??" ]
+        , createElement' view_
+                { count: s.count
+                , onInc: handle dispatch Inc
+                , onDec: handle dispatch Dec
+                }
         ]

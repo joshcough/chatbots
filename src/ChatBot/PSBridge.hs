@@ -12,8 +12,8 @@ main = writePSTypes "frontend/src" (buildBridge defaultBridge) myTypes
 -- TODO: there are more types in Models that maybe should be added here
 myTypes :: [SumType 'Haskell]
 myTypes = [
-    let p = (Proxy :: Proxy DbCommand)         in o p
-  , let p = (Proxy :: Proxy DbQuote)           in o p
+    go (Proxy :: Proxy DbCommand)
+  , go (Proxy :: Proxy DbQuote)
   ]
   where
-  o p = order p (mkSumType p)
+  go p = order p (mkSumType p)

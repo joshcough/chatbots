@@ -10,6 +10,7 @@
     , "argonaut-codecs"
     , "http-methods"
     , "affjax"
+    , "react-basic"
     ]
 , packages =
     ./packages.dhall

@@ -57,6 +57,7 @@
     <mapping directory="$PROJECT_DIR$/frontend/.spago/profunctor/v4.0.0" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/frontend/.spago/proxy/v3.0.0" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/frontend/.spago/psci-support/v4.0.0" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/frontend/.spago/react-basic/v9.0.1" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/frontend/.spago/record/v2.0.1" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/frontend/.spago/refs/v4.1.0" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/frontend/.spago/st/v4.0.0" vcs="Git" />

@@ -15,7 +15,10 @@
         "spago": "^0.8.0"
     },
     "dependencies": {
+        "JSX": "^1.1.0",
         "react": "^16.8.6",
-        "react-dom": "^16.8.6"
+        "react-dom": "^16.8.6",
+        "styled-bootstrap-grid": "^3.0.4",
+        "styled-components": "^4.3.2"
     }
 }
