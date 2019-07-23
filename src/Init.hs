@@ -8,6 +8,7 @@ import           Control.Exception           (bracket)
 import qualified Data.Pool                   as Pool
 import           Network.Wai                 (Application)
 import           Network.Wai.Handler.Warp    (run)
+import           Network.Wai.Middleware.Cors (simpleCors)
 
 import           Api                         (app)
 import           ChatBot.ChatBotWS           (runBot)
@@ -36,4 +37,4 @@ shutdownApp Config {..} = do
 -- | The 'initialize' function accepts the required environment information,
 -- initializes the WAI 'Application' and returns it
 initialize :: Config -> IO Application
-initialize = pure . app
+initialize = pure . simpleCors . app

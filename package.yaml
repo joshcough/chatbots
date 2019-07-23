@@ -104,6 +104,7 @@ library:
     - postgresql-simple-url
     - postgresql-simple
     - purescript-bridge >= 0.13
+    - random
     - resourcet
     - resource-pool
     - rollbar
@@ -128,6 +129,7 @@ library:
     - uuid
     - vector
     - wai
+    - wai-cors
     - warp
     - websockets
     - zip

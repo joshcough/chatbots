@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 046f0195b812274d3b85c3011cd9c21d9101603508c2cfee19bca6bed4a3db4c
+-- hash: 00d95d1e7d6a49f8d5747cfdf3e466393b500906489ecc6803f6c55a007bb10e
 
 name:           chatbots
 version:        0.1.0.0
@@ -92,6 +92,7 @@ library
     , postgresql-simple-url
     , protolude
     , purescript-bridge >=0.13
+    , random
     , resource-pool
     , resourcet
     , rollbar
@@ -116,6 +117,7 @@ library
     , uuid
     , vector
     , wai
+    , wai-cors
     , warp
     , websockets
     , zip

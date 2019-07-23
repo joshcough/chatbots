@@ -5,13 +5,25 @@ import Protolude
 import           Control.Monad.Except     ( MonadIO, liftIO, throwError )
 import           ServantHelpers
 import           Servant.Auth.Server      hiding (throwAll)
+import           System.Random            (randomIO)
 
 import           Auth.Models              ( MiniUser )
 import           Error                    ( AppError(..), AuthError(..), toServantErr, throwAll )
 import           Types                    ( App, AppT, Config (..), runAppT )
 
 type ChatBotAPI' auths = (Auth auths MiniUser :> Protected) :<|> Unprotected
-type ChatBotAPI        = ChatBotAPI' '[Cookie, JWT]
+type ChatBotAPI        = Unprotected -- ChatBotAPI' '[Cookie, JWT]
+
+type IntAPI' = Compose IntServer'
+
+newtype IntServer' r = IntServer' {
+    intServerHello :: r :- Get '[JSON] Int
+ } deriving Generic
+
+intServer' :: MonadIO m => ServerT IntAPI' (AppT m)
+intServer' = toServant $ IntServer' {
+    intServerHello = liftIO $ (\b -> if b then 1 else 2) <$> randomIO
+}
 
 type EmptyAPI' = Compose EmptyServer'
 
@@ -36,12 +48,12 @@ type Unprotected = Compose UnprotectedServer
 
 -- | Not protected by any authorization. Anyone can visit these pages.
 newtype UnprotectedServer route = UnprotectedServer {
-    unprotectedServerEmptyApi :: route :- EmptyAPI'
+    unprotectedServerEmptyApi :: route :- "random_int" :> IntAPI'
   } deriving Generic
 
 -- |
 unprotectedServer :: MonadIO m => ServerT Unprotected (AppT m)
-unprotectedServer = emptyServer'
+unprotectedServer = intServer'
 
 -- |
 protectedServer :: MonadIO m => AuthResult MiniUser -> ServerT Protected (AppT m)
@@ -64,5 +76,5 @@ app cfg = serveWithContext
         (Proxy :: Proxy ChatBotAPI)
         (Proxy :: Proxy '[CookieSettings, JWTSettings])
         (convertApp cfg)
-        (protectedServer :<|> unprotectedServer)
+        ({-protectedServer :<|> -}unprotectedServer)
 
