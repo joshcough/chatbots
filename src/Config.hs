@@ -7,6 +7,8 @@ module Config (
   , Config(..)
   , Environment(..)
   , acquireConfig
+  -- TODO: just to shut up the compiler. Please fix.
+  , acquireChatBotConfigFromEnv
   , HasConfig(..)
   ) where
 

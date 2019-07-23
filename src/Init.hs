@@ -25,8 +25,13 @@ runAppAndBot = bracket acquireConfig shutdownApp runApp'
         -- run the servant app
         run (_configPort config) =<< initialize config
 
-runBotOnly :: IO ()
-runBotOnly = bracket acquireConfig shutdownApp runBot
+botOnly :: IO ()
+botOnly = bracket acquireConfig shutdownApp runBot
+
+appOnly :: IO ()
+appOnly = bracket acquireConfig shutdownApp runApp'
+  where
+    runApp' config = run (_configPort config) =<< initialize config
 
 -- | Takes care of cleaning up 'Config' resources
 shutdownApp :: Config -> IO ()

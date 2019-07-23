@@ -12,53 +12,32 @@ import           Error                    ( AppError(..), AuthError(..), toServa
 import           Types                    ( App, AppT, Config (..), runAppT )
 
 type ChatBotAPI' auths = (Auth auths MiniUser :> Protected) :<|> Unprotected
-type ChatBotAPI        = Unprotected -- ChatBotAPI' '[Cookie, JWT]
-
-type IntAPI' = Compose IntServer'
-
-newtype IntServer' r = IntServer' {
-    intServerHello :: r :- Get '[JSON] Int
- } deriving Generic
-
-intServer' :: MonadIO m => ServerT IntAPI' (AppT m)
-intServer' = toServant $ IntServer' {
-    intServerHello = liftIO $ (\b -> if b then 1 else 2) <$> randomIO
-}
-
-type EmptyAPI' = Compose EmptyServer'
-
-newtype EmptyServer' r = EmptyServer' {
-    emptyServerHello :: r :- Get '[JSON] ()
- } deriving Generic
-
-
-emptyServer' :: MonadIO m => ServerT EmptyAPI' (AppT m)
-emptyServer' = toServant $ EmptyServer' {
-    emptyServerHello = return ()
-}
+type ChatBotAPI        = ChatBotAPI' '[Cookie, JWT]
 
 type Protected = Compose ProtectedServer
 
 -- | Lives behind authorization. Only logged in users can visit these pages.
 newtype ProtectedServer route = ProtectedServer {
-    protectedServerEmptyApi :: route :- EmptyAPI'
+    protectedRandomInt :: route :- "protected_random_int" :> Get '[JSON] Int
   } deriving Generic
+
+protectedServer :: MonadIO m => MiniUser -> ServerT Protected (AppT m)
+protectedServer _ = toServant $ ProtectedServer {
+    protectedRandomInt = liftIO $ (\b -> if b then 1 else 2) <$> randomIO
+}
 
 type Unprotected = Compose UnprotectedServer
 
 -- | Not protected by any authorization. Anyone can visit these pages.
 newtype UnprotectedServer route = UnprotectedServer {
-    unprotectedServerEmptyApi :: route :- "random_int" :> IntAPI'
+    unprotectedRandomInt :: route :- "random_int" :> Get '[JSON] Int
   } deriving Generic
 
 -- |
 unprotectedServer :: MonadIO m => ServerT Unprotected (AppT m)
-unprotectedServer = intServer'
-
--- |
-protectedServer :: MonadIO m => AuthResult MiniUser -> ServerT Protected (AppT m)
-protectedServer (Authenticated _) = emptyServer'
-protectedServer _ = throwAll (AppAuthError NoAuthError)
+unprotectedServer = toServant $ UnprotectedServer {
+    unprotectedRandomInt = liftIO $ (\b -> if b then 1 else 2) <$> randomIO
+}
 
 -- | The main application for the Proverlays backend.
 app :: Config -> Application
@@ -71,10 +50,13 @@ app cfg = serveWithContext
     convertApp cfg' appt = Handler $
         liftIO (runAppT appt cfg') >>= either (throwError . toServantErr) return
 
+    protectedServer' (Authenticated u) = protectedServer u
+    protectedServer' _ = throwAll (AppAuthError NoAuthError)
+
     mainServer :: Server ChatBotAPI
     mainServer = hoistServerWithContext
         (Proxy :: Proxy ChatBotAPI)
         (Proxy :: Proxy '[CookieSettings, JWTSettings])
         (convertApp cfg)
-        ({-protectedServer :<|> -}unprotectedServer)
+        (protectedServer' :<|> unprotectedServer)
 
