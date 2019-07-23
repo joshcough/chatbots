@@ -11,7 +11,7 @@ import           Data.Aeson                  ((.=))
 import           Database.Persist.Postgresql (insert)
 import           Database.Esqueleto
 import qualified Database.Persist.Postgresql as P
-import           Logging                     (logDebug)
+import           Logging                     (logDebug, logDebug_)
 import           Types                       (AppT', runDb)
 
 import           ChatBot.Config              (ChannelName(..))
@@ -24,6 +24,7 @@ class Monad m => CommandsDb m where
     insertCommand :: ChannelName -> Text -> Text -> m (Entity DbCommand)
     getCommand :: ChannelName -> Text -> m (Maybe (Entity DbCommand))
     deleteCommand :: ChannelName -> Text -> m ()
+    getAllCommands :: m [Entity DbCommand]
 
 class Monad m => QuotesDb m where
     insertQuote :: ChannelName -> Text -> m (Entity DbQuote)
@@ -48,6 +49,9 @@ instance (HasConfig c, MonadIO m) => CommandsDb (AppT' e m c) where
                 &&.
                 (command ^. DbCommandName) ==. val commandName
              )
+    getAllCommands = do
+        $(logDebug_) "getAllCommands"
+        runDb $ select $ from $ \command -> pure command
 
 instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
     insertQuote (ChannelName channel) quoteText = do

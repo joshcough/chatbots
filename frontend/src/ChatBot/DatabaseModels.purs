@@ -10,14 +10,18 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
 import Prim (Int, String)
+import Data.Argonaut (class DecodeJson, class EncodeJson)
+import Data.Argonaut.Generic (genericDecodeJson, genericEncodeJson)
 
 import Prelude
 
+-- TODO: run the bridge again and fix this type up
+-- might require not using DbCommand at all, but having a real model.
 newtype DbCommand
   = DbCommand
-      { dbCommandChannel :: String
-      , dbCommandName :: String
-      , dbCommandBody :: String
+      { channel :: String
+      , name :: String
+      , body :: String
       }
 
 
@@ -25,10 +29,16 @@ derive instance eqDbCommand :: Eq DbCommand
 derive instance ordDbCommand :: Ord DbCommand
 derive instance genericDbCommand :: Generic DbCommand _
 derive instance newtypeDbCommand :: Newtype DbCommand _
+
+instance decodeDbCommand :: DecodeJson DbCommand where
+    decodeJson = genericDecodeJson
+instance encodeDbCommand :: EncodeJson DbCommand where
+    encodeJson = genericEncodeJson
+
 --------------------------------------------------------------------------------
-_DbCommand :: Iso' DbCommand { dbCommandChannel :: String
-                             , dbCommandName :: String
-                             , dbCommandBody :: String }
+_DbCommand :: Iso' DbCommand { channel :: String
+                             , name :: String
+                             , body :: String }
 _DbCommand = _Newtype
 --------------------------------------------------------------------------------
 newtype DbQuote
@@ -43,6 +53,12 @@ derive instance eqDbQuote :: Eq DbQuote
 derive instance ordDbQuote :: Ord DbQuote
 derive instance genericDbQuote :: Generic DbQuote _
 derive instance newtypeDbQuote :: Newtype DbQuote _
+
+instance decodeDbQuote :: DecodeJson DbQuote where
+    decodeJson = genericDecodeJson
+instance encodeDbQuote :: EncodeJson DbQuote where
+    encodeJson = genericEncodeJson
+
 --------------------------------------------------------------------------------
 _DbQuote :: Iso' DbQuote { dbQuoteChannel :: String
                          , dbQuoteText :: String
