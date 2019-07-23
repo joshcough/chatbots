@@ -32,3 +32,9 @@ cabal.sandbox.config
 *.aux
 *.hp
 .idea/workspace.xml
+frontend/.spago
+frontend/.cache
+output
+frontend/node_modules/
+ghci_local
+out/
