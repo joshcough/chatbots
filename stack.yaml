@@ -13,6 +13,8 @@ packages:
     git: https://github.com/collegevine/rollbar.git
     commit: 08d7405292d71b94ea3c0562716330e77cfb93d8
   extra-dep: true
+# from https://github.com/shmish111/purescript-bridge/tree/aeson-fix
+# also, see: https://github.com/eskimor/purescript-bridge/issues/44
 - location:
     git: https://github.com/shmish111/purescript-bridge.git
     commit: dc500a47c8330526a78c5cfac84ddb923cd5c8a5
