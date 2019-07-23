@@ -1,11 +1,11 @@
 <component name="libraryTable">
   <library name="HTTP-4000.3.12">
     <CLASSES>
-      <root url="file://$USER_HOME$/Library/Caches/com.github.rikvdkleij.intellij-haskell/lib/twitchaoe-server/HTTP-4000.3.12" />
+      <root url="file://$USER_HOME$/Library/Caches/com.github.rikvdkleij.intellij-haskell/lib/chatbots/HTTP-4000.3.12" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="file://$USER_HOME$/Library/Caches/com.github.rikvdkleij.intellij-haskell/lib/twitchaoe-server/HTTP-4000.3.12" />
+      <root url="file://$USER_HOME$/Library/Caches/com.github.rikvdkleij.intellij-haskell/lib/chatbots/HTTP-4000.3.12" />
     </SOURCES>
   </library>
 </component>

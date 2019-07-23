@@ -1,11 +1,11 @@
 <component name="libraryTable">
   <library name="cryptonite-0.25">
     <CLASSES>
-      <root url="file://$USER_HOME$/Library/Caches/com.github.rikvdkleij.intellij-haskell/lib/twitchaoe-server/cryptonite-0.25" />
+      <root url="file://$USER_HOME$/Library/Caches/com.github.rikvdkleij.intellij-haskell/lib/chatbots/cryptonite-0.25" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="file://$USER_HOME$/Library/Caches/com.github.rikvdkleij.intellij-haskell/lib/twitchaoe-server/cryptonite-0.25" />
+      <root url="file://$USER_HOME$/Library/Caches/com.github.rikvdkleij.intellij-haskell/lib/chatbots/cryptonite-0.25" />
     </SOURCES>
   </library>
 </component>
