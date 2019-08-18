@@ -15,13 +15,11 @@ import Data.Argonaut.Generic (genericDecodeJson, genericEncodeJson)
 
 import Prelude
 
--- TODO: run the bridge again and fix this type up
--- might require not using DbCommand at all, but having a real model.
 newtype DbCommand
   = DbCommand
-      { channel :: String
-      , name :: String
-      , body :: String
+      { dbCommandChannel :: String
+      , dbCommandName :: String
+      , dbCommandBody :: String
       }
 
 
@@ -36,9 +34,9 @@ instance encodeDbCommand :: EncodeJson DbCommand where
     encodeJson = genericEncodeJson
 
 --------------------------------------------------------------------------------
-_DbCommand :: Iso' DbCommand { channel :: String
-                             , name :: String
-                             , body :: String }
+_DbCommand :: Iso' DbCommand { dbCommandChannel :: String
+                             , dbCommandName :: String
+                             , dbCommandBody :: String }
 _DbCommand = _Newtype
 --------------------------------------------------------------------------------
 newtype DbQuote

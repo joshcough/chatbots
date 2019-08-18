@@ -1,8 +1,5 @@
-# HTML Hello World
-
-## Quickstart
-
 ```
 npm install
-npm start
+npm run build
+open index.html
 ```

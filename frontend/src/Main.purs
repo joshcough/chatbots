@@ -2,8 +2,10 @@ module Main where
 
 import Prelude
 
+import Elmish (boot, nat)
 import Effect (Effect)
-import HTMLHelloWorld (main')
+import Commands (def)
+import Types (runOpM)
 
 main :: Effect Unit
-main = main'
+main = boot { domElementId: "app" , def: nat runOpM def }

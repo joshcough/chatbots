@@ -31,6 +31,7 @@ class Monad m => QuotesDb m where
     getQuote :: ChannelName -> Int -> m (Maybe (Entity DbQuote))
     getQuoteByPK :: Int64 -> m (Maybe DbQuote)
     deleteQuote :: ChannelName -> Int -> m ()
+    getAllQuotes :: m [Entity DbQuote]
 
 instance (HasConfig c, MonadIO m) => CommandsDb (AppT' e m c) where
     insertCommand (ChannelName channel) commandName commandText = do
@@ -83,3 +84,6 @@ instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
                 &&.
                 (quote ^. DbQuoteQid) ==. val qid
              )
+    getAllQuotes = do
+        $(logDebug_) "getAllQuotes"
+        runDb $ select $ from $ \quote -> pure quote
