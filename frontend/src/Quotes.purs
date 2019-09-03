@@ -4,17 +4,16 @@ module Quotes
     ) where
 
 import Prelude
-import ChatBot.DatabaseModels (DbQuote(..))
+import ChatBot.Models (Quote(..))
 import Control.Monad.Error.Class (class MonadError)
 import Effect.Aff.Class (class MonadAff)
---import Elmish.HTML as R
 import Elmish (ComponentDef, DispatchMsgFn, ReactComponent, ReactElement, Transition(..), createElement', pureUpdate)
 import Network.HTTP (HttpException, Method(..), buildReq, httpJSON, noData)
 import Types (OpM)
 
 data Message = GotQuotes (Array Quote)
 
-type Quote = { channel :: String, qid :: Int, text :: String }
+type UXQuote = { channel :: String, qid :: Int, name :: String }
 
 type State = { quotes :: Array Quote }
 
@@ -27,15 +26,13 @@ def =
   where
     update s (GotQuotes qs) = pureUpdate s { quotes = qs }
 
-foreign import view_ :: ReactComponent
-  { quotes :: Array Quote
-  }
+foreign import view_ :: ReactComponent { quotes :: Array UXQuote }
 
 view :: State -> DispatchMsgFn Message -> ReactElement
-view s dispatch = createElement' view_ { quotes: s.quotes }
+view s dispatch = createElement' view_ { quotes: f <$> s.quotes }
+  where
+  f (Quote r) = { channel: r.quoteChannel, qid: r.quoteQid, name: r.quoteName }
 
 getQuotes :: forall m . MonadAff m => MonadError HttpException m => m (Array Quote)
-getQuotes = map (map mkQuote) (httpJSON $ buildReq GET "http://localhost:8081/chatbot/quotes" noData)
-  where
-  mkQuote :: DbQuote -> Quote
-  mkQuote (DbQuote r) = { channel: r.dbQuoteChannel, qid: r.dbQuoteQid, text: r.dbQuoteText }
+getQuotes = httpJSON $ buildReq GET "http://localhost:8081/chatbot/quotes" noData
+

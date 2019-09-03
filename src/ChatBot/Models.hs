@@ -9,6 +9,8 @@ module ChatBot.Models
   (
     ChatMessage(..)
   , ChannelName(..)
+  , Command(..)
+  , Quote(..)
   ) where
 
 import Protolude
@@ -56,3 +58,15 @@ deriving instance ToJSON UserInfo
 deriving instance Generic RawIrcMsg
 deriving instance FromJSON RawIrcMsg
 deriving instance ToJSON RawIrcMsg
+
+data Command = Command {
+    commandChannel :: Text
+  , commandName :: Text
+  , commandBody :: Text
+} deriving (Eq, Generic, Ord, Show, ToJSON, FromJSON)
+
+data Quote = Quote {
+    quoteChannel :: Text
+  , quoteName :: Text
+  , quoteQid :: Int
+} deriving (Eq, Generic, Ord, Show, ToJSON, FromJSON)
