@@ -1,20 +1,24 @@
 import React from "react"
-import { Row, Col } from "react-bootstrap"
+import { Table } from "react-bootstrap"
 
 export const View = props =>
   <div>
-    <Row>
-        <Col md={3}>Channel</Col>
-        <Col md={3}>Command Name</Col>
-        <Col md={3}>Command Body</Col>
-    </Row>
-    {props.commands.length > 0 ?
-        props.commands.map((c, _) =>
-            <Row>
-                <Col md={3}>{c.channel}</Col>
-                <Col md={3}>{c.name}</Col>
-                <Col md={3}>{c.body}</Col>
-            </Row>
-        )
-        : "No commands found." }
+   <Table striped bordered hover>
+     <thead>
+       <tr>
+         <th>Channel</th>
+         <th>Command Name</th>
+         <th>Command Body</th>
+       </tr>
+     </thead>
+     <tbody>
+        {props.commands.map((c, _) =>
+          <tr>
+            <td>{c.channel}</td>
+            <td>{c.name}</td>
+            <td>{c.body}</td>
+          </tr>
+         )}
+     </tbody>
+   </Table>
   </div>

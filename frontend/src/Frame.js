@@ -1,1 +1,0 @@
-exports.view_ = require("/src/Frame.jsx").Main

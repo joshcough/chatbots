@@ -1,0 +1,1 @@
+exports.view_ = require("/src/Components/Tabs.jsx").Main

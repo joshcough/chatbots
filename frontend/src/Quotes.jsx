@@ -1,20 +1,24 @@
 import React from "react"
-import { Row, Col } from "react-bootstrap"
+import { Table } from "react-bootstrap"
 
 export const View = props =>
   <div>
-    <Row>
-        <Col md={3}>Channel</Col>
-        <Col md={3}>Quote Id</Col>
-        <Col md={3}>Quote</Col>
-    </Row>
-    {props.quotes.length > 0 ?
-        props.quotes.map((q, _) =>
-            <Row>
-                <Col md={3}>{q.channel}</Col>
-                <Col md={3}>{q.qid}</Col>
-                <Col md={3}>{q.body}</Col>
-            </Row>
-        )
-        : "No quotes found." }
+   <Table striped bordered hover>
+     <thead>
+       <tr>
+         <th>Channel</th>
+         <th>Quote Id</th>
+         <th>Quote</th>
+       </tr>
+     </thead>
+     <tbody>
+        {props.quotes.map((q, _) =>
+          <tr>
+            <td>{q.channel}</td>
+            <td>{q.qid}</td>
+            <td>{q.body}</td>
+          </tr>
+         )}
+     </tbody>
+   </Table>
   </div>

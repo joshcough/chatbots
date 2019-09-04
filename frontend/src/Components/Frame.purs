@@ -1,4 +1,4 @@
-module Frame
+module Components.Frame
     ( Item
     , State
     , frame
