@@ -16,19 +16,19 @@ module Types (
 
 import Protolude
 
-import           Control.Lens                         (view, (^.))
-import           Control.Monad                        (when)
-import           Control.Monad.Except                 (ExceptT(..), MonadError(..), liftIO, runExceptT)
-import           Control.Monad.Reader                 (MonadIO, MonadReader, ReaderT(..))
-import           Data.Aeson                           ((.=))
-import           Database.Persist.Sql                 (SqlPersistT, runSqlPool)
-import           Network.HTTP.Nano                    (HttpError)
-import           Web.Rollbar                          (ToRollbarEvent(..), rollbar)
+import Control.Lens ((^.), view)
+import Control.Monad (when)
+import Control.Monad.Except (ExceptT(..), MonadError(..), liftIO, runExceptT)
+import Control.Monad.Reader (MonadIO, MonadReader, ReaderT(..))
+import Data.Aeson ((.=))
+import Database.Persist.Sql (SqlPersistT, runSqlPool)
+import Network.HTTP.Nano (HttpError)
+import Web.Rollbar (ToRollbarEvent(..), rollbar)
 
-import           Config                               (Config(..), configPool, HasConfig)
-import           Error
-import           Logging
-import           Util.Utils                           (tShow)
+import Config (Config(..), HasConfig, configPool)
+import Error
+import Logging
+import Util.Utils (tShow)
 
 import Network.HTTP.Nano.Types (HasHttpCfg)
 import Web.Rollbar.Types (HasRollbarCfg)

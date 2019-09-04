@@ -2,15 +2,15 @@ module Api (app) where
 
 import Protolude
 
-import           Control.Monad.Except     ( MonadIO, liftIO, throwError )
-import           ServantHelpers
-import           Servant.Auth.Server      hiding (throwAll)
-import           System.Random            (randomIO)
+import Control.Monad.Except (MonadIO, liftIO, throwError)
+import Servant.Auth.Server hiding (throwAll)
+import ServantHelpers
+import System.Random (randomIO)
 
-import           Auth.Models              ( MiniUser )
-import           ChatBot.ChatBotAPI       ( ChatBotAPI, chatBotServer )
-import           Error                    ( AppError(..), AuthError(..), toServantErr, throwAll )
-import           Types                    ( App, AppT, Config (..), runAppT )
+import Auth.Models (MiniUser)
+import ChatBot.ChatBotAPI (ChatBotAPI, chatBotServer)
+import Error (AppError(..), AuthError(..), throwAll, toServantErr)
+import Types (App, AppT, Config(..), runAppT)
 
 type TopLevelAPI' auths = (Auth auths MiniUser :> Protected) :<|> Unprotected
 type TopLevelAPI        = TopLevelAPI' '[Cookie, JWT]

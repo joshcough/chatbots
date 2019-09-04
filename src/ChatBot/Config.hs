@@ -11,17 +11,17 @@ module ChatBot.Config
   , configFromFile
   ) where
 
-import Protolude
 import Prelude (userError)
+import Protolude
 
-import           Control.Concurrent.Chan (Chan)
-import           Control.Lens.TH         (makeClassy)
-import           Data.Aeson              (ToJSON, FromJSON, eitherDecode)
-import qualified Data.ByteString.Lazy    as B
-import           Data.Text               (Text)
-import           Irc.RawIrcMsg           (RawIrcMsg)
-import           GHC.Generics            (Generic)
-import qualified Settings                as S
+import Control.Concurrent.Chan (Chan)
+import Control.Lens.TH (makeClassy)
+import Data.Aeson (FromJSON, ToJSON, eitherDecode)
+import qualified Data.ByteString.Lazy as B
+import Data.Text (Text)
+import GHC.Generics (Generic)
+import Irc.RawIrcMsg (RawIrcMsg)
+import qualified Settings as S
 
 import ChatBot.Models (ChannelName(..))
 

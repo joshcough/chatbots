@@ -3,15 +3,15 @@ module ChatBot.ChatBotAPI (
   , chatBotServer
   ) where
 
+import Control.Monad.Except (MonadIO)
+import Database.Esqueleto (Entity(..))
 import Protolude
-import           Control.Monad.Except        (MonadIO)
-import           Database.Esqueleto          (Entity(..))
-import           ServantHelpers
+import ServantHelpers
 
-import           ChatBot.DatabaseModels      (DbCommand(..), DbQuote(..))
-import           ChatBot.Models              (Command(..), Quote(..))
-import           ChatBot.Storage             (CommandsDb(..), QuotesDb(..))
-import           Types                       (AppT)
+import ChatBot.DatabaseModels (DbCommand(..), DbQuote(..))
+import ChatBot.Models (Command(..), Quote(..))
+import ChatBot.Storage (CommandsDb(..), QuotesDb(..))
+import Types (AppT)
 
 type ChatBotAPI = "chatbot" :> Compose ChatBot
 

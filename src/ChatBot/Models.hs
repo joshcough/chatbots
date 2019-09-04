@@ -15,15 +15,15 @@ module ChatBot.Models
 
 import Protolude
 
-import           Control.Lens.TH      (makeClassy)
-import           Control.Monad        (mzero)
-import           Data.Aeson           (Value(..), ToJSON(..), FromJSON(..))
-import           Data.Text            (Text)
-import           GHC.Generics         (Generic)
-import           Irc.Identifier       (Identifier, idText, mkId)
-import           Irc.RawIrcMsg        (RawIrcMsg(..), TagEntry(..))
-import           Irc.UserInfo         (UserInfo(..))
-import           Web.HttpApiData         (FromHttpApiData(..))
+import Control.Lens.TH (makeClassy)
+import Control.Monad (mzero)
+import Data.Aeson (FromJSON(..), ToJSON(..), Value(..))
+import Data.Text (Text)
+import GHC.Generics (Generic)
+import Irc.Identifier (Identifier, idText, mkId)
+import Irc.RawIrcMsg (RawIrcMsg(..), TagEntry(..))
+import Irc.UserInfo (UserInfo(..))
+import Web.HttpApiData (FromHttpApiData(..))
 
 newtype ChannelName = ChannelName { _unChannelName :: Text }
     deriving stock (Eq, Ord, Show, Generic)

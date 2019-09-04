@@ -1,9 +1,9 @@
 
 module PSBridge where
 
-import Protolude
-import qualified Auth.PSBridge     as Auth
+import qualified Auth.PSBridge as Auth
 import qualified ChatBot.PSBridge as ChatBot
+import Protolude
 
 main :: IO ()
 main = do

@@ -6,17 +6,17 @@ module ChatBot.Storage (
 
 import Protolude hiding (from)
 
-import           Control.Monad.Except        (MonadIO)
-import           Data.Aeson                  ((.=))
-import           Database.Persist.Postgresql (insert)
-import           Database.Esqueleto
+import Control.Monad.Except (MonadIO)
+import Data.Aeson ((.=))
+import Database.Esqueleto
+import Database.Persist.Postgresql (insert)
 import qualified Database.Persist.Postgresql as P
-import           Logging                     (logDebug, logDebug_)
-import           Types                       (AppT', runDb)
+import Logging (logDebug, logDebug_)
+import Types (AppT', runDb)
 
-import           ChatBot.Config              (ChannelName(..))
-import           ChatBot.DatabaseModels      (DbCommand(..), DbQuote(..), EntityField(..))
-import           Config                      (HasConfig)
+import ChatBot.Config (ChannelName(..))
+import ChatBot.DatabaseModels (DbCommand(..), DbQuote(..), EntityField(..))
+import Config (HasConfig)
 
 type ChatBotDB m = (CommandsDb m, QuotesDb m)
 

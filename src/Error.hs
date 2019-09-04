@@ -20,8 +20,6 @@ module Error(
 
 import Protolude
 
-import Util.Utils (tShow)
-
 import Control.Exception (Exception)
 import Control.Lens (prism, makeClassyPrisms)
 import Control.Monad.Except (MonadError, catchError, throwError)
@@ -33,6 +31,7 @@ import Data.Text (Text, unpack)
 import Network.HTTP.Nano (AsHttpError(..), HttpError)
 import Servant ((:<|>) (..), ServantErr(..), err400, err401, err403, err404, err409, err500)
 import Web.Rollbar (Event(..), EventLevel(..), ToRollbarEvent(..))
+import Util.Utils (tShow)
 
 ---
 ---

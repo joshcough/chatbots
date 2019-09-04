@@ -1,14 +1,14 @@
 module ChatBotDbSpec (spec) where
 
 import Protolude
-import           Test.Hspec
+import Test.Hspec
 
-import           ChatBot.Config (ChannelName(..))
-import           ChatBot.DatabaseModels (DbQuote(..))
-import           ChatBot.Storage (QuotesDb(..), insertQuote)
-import           Database.Persist (Entity(..))
-import           Helpers
-import           Types (runAppToIO)
+import ChatBot.Config (ChannelName(..))
+import ChatBot.DatabaseModels (DbQuote(..))
+import ChatBot.Storage (QuotesDb(..), insertQuote)
+import Database.Persist (Entity(..))
+import Helpers
+import Types (runAppToIO)
 
 art :: ChannelName
 art = ChannelName "artoftroll"

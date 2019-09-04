@@ -3,16 +3,16 @@ module Init where
 
 import Protolude
 
-import           Control.Concurrent          (forkIO)
-import           Control.Exception           (bracket)
-import qualified Data.Pool                   as Pool
-import           Network.Wai                 (Application)
-import           Network.Wai.Handler.Warp    (run)
-import           Network.Wai.Middleware.Cors (simpleCors)
+import Control.Concurrent (forkIO)
+import Control.Exception (bracket)
+import qualified Data.Pool as Pool
+import Network.Wai (Application)
+import Network.Wai.Handler.Warp (run)
+import Network.Wai.Middleware.Cors (simpleCors)
 
-import           Api                         (app)
-import           ChatBot.ChatBotWS           (runBot)
-import           Config                      (Config (..), acquireConfig)
+import Api (app)
+import ChatBot.ChatBotWS (runBot)
+import Config (Config(..), acquireConfig)
 
 -- | An action that creates a WAI 'Application' together with its resources,
 --   runs it, and tears it down on exit

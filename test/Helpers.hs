@@ -1,12 +1,12 @@
 module Helpers where
 
-import Protolude
 import Prelude (IO)
+import Protolude
 
-import           Data.Text                   (pack)
-import           Database.Persist.Sql        (rawExecute)
-import           Config                      (Config (..), acquireConfig)
-import           Types                       (runAppToIO, runDb)
+import Config (Config(..), acquireConfig)
+import Data.Text (pack)
+import Database.Persist.Sql (rawExecute)
+import Types (runAppToIO, runDb)
 
 ---
 --- Setup and teardown helpers

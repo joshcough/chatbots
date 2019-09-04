@@ -6,33 +6,32 @@ module ChatBot.ChatBotWS
 
 import Protolude
 
-import           Control.Concurrent.Chan (writeChan)
-import           Control.Lens.TH         (makeClassy)
-import           Control.Monad           (forever, forM_)
-import qualified Data.Map                as Map
-import           Data.String.Conversions (cs)
-import           Network.Socket          (withSocketsDo)
-import           Data.Text               (Text)
-import qualified Data.Text               as T
-import           Irc.Commands            (ircCapReq, ircJoin, ircNick, ircPass, ircPing, ircPong, ircPrivmsg)
-import qualified Irc.Identifier          as Irc
-import           Irc.Message             (IrcMsg(..), cookIrcMsg)
-import           Irc.RawIrcMsg           (RawIrcMsg(..), parseRawIrcMsg, renderRawIrcMsg)
-import qualified Irc.UserInfo            as Irc
-import qualified Network.WebSockets      as WS
-import           Text.Trifecta           (Result(..), parseString, whiteSpace)
+import Control.Concurrent.Chan (writeChan)
+import Control.Lens.TH (makeClassy)
+import Control.Monad (forM_, forever)
+import qualified Data.Map as Map
+import Data.String.Conversions (cs)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Irc.Commands (ircCapReq, ircJoin, ircNick, ircPass, ircPing, ircPong, ircPrivmsg)
+import qualified Irc.Identifier as Irc
+import Irc.Message (IrcMsg(..), cookIrcMsg)
+import Irc.RawIrcMsg (RawIrcMsg(..), parseRawIrcMsg, renderRawIrcMsg)
+import qualified Irc.UserInfo as Irc
+import Network.Socket (withSocketsDo)
+import qualified Network.WebSockets as WS
+import Text.Trifecta (Result(..), parseString, whiteSpace)
 
-import           ChatBot.Commands        (Command(..), Response(..), builtinCommands, getCommandFromDb)
-import           ChatBot.Config          (ChatBotConfig(..), ChatBotExecutionConfig(..))
-import           ChatBot.Models          (ChatMessage(..), ChannelName(..))
-import           Config                  (Config(..), HasConfig(..))
-import           Error                   (ChatBotError, miscError)
-import           Types                   (AppTEnv', runAppToIO)
+import ChatBot.Commands (Command(..), Response(..), builtinCommands, getCommandFromDb)
+import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..))
+import ChatBot.Models (ChannelName(..), ChatMessage(..))
+import Config (Config(..), HasConfig(..))
+import Error (ChatBotError, miscError)
 import Logging (HasLoggingCfg(..))
+import Types (AppTEnv', runAppToIO)
 
-import qualified Data.Text.IO              as T
-import           Data.Aeson.Encode.Pretty       (encodePretty)
-
+import Data.Aeson.Encode.Pretty (encodePretty)
+import qualified Data.Text.IO as T
 
 data ConfigAndConnection = ConfigAndConnection {
    _configAndConnectionConfig :: Config

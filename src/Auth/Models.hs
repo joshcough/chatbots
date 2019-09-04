@@ -15,13 +15,13 @@ module Auth.Models (
 
 import Protolude
 
-import           Data.Aeson             (FromJSON, ToJSON)
-import           Data.Int               (Int64)
-import           Data.Text              (Text)
-import           Data.UUID              (UUID)
-import           GHC.Generics           (Generic)
-import           Servant.Auth.Server
-import           Web.HttpApiData        (FromHttpApiData(..))
+import Data.Aeson (FromJSON, ToJSON)
+import Data.Int (Int64)
+import Data.Text (Text)
+import Data.UUID (UUID)
+import GHC.Generics (Generic)
+import Servant.Auth.Server
+import Web.HttpApiData (FromHttpApiData(..))
 
 data Login = Login {
     loginEmail    :: Text

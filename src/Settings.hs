@@ -1,13 +1,13 @@
 
 module Settings where
 
-import Protolude
 import Prelude (error)
+import Protolude
 
-import           Data.Text                   (Text, pack, unpack)
-import qualified Data.Text                   as T
-import           Safe                        (readMay)
-import           System.Environment          (getEnv, lookupEnv)
+import Data.Text (Text, pack, unpack)
+import qualified Data.Text as T
+import Safe (readMay)
+import System.Environment (getEnv, lookupEnv)
 
 -- | Looks up a text setting in the environment, with a provided default
 lookupTextSetting :: Text -> Text -> IO Text

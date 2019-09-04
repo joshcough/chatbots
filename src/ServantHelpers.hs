@@ -19,14 +19,15 @@ module ServantHelpers (
 
 import Protolude
 
-import           Control.Monad.Except        (MonadError)
---import           Database.Persist.Postgresql (fromSqlKey)
-import           Data.Text                   (Text)
-import           Servant
-import           Servant.API.Generic         hiding (toServant)
+import Control.Monad.Except (MonadError)
+
+--import Database.Persist.Postgresql (fromSqlKey)
+import Data.Text (Text)
+import Error (AppError(..), AuthError(..), ChatBotError, ChatBotError'(..))
+import Servant
+import Servant.API.Generic hiding (toServant)
 import qualified Servant.API.Generic as S
-import           Servant.Server.Generic      (AsServerT, genericServerT)
-import           Error                       (AppError(..), AuthError(..), ChatBotError, ChatBotError'(..))
+import Servant.Server.Generic (AsServerT, genericServerT)
 
 ---
 --- servant generic helpers
