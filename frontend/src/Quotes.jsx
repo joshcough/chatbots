@@ -8,13 +8,13 @@ export const View = props =>
         <Col md={3}>Quote Id</Col>
         <Col md={3}>Quote</Col>
     </Row>
-    {props.commands.length > 0 ?
-        props.commands.map((c, _) =>
+    {props.quotes.length > 0 ?
+        props.quotes.map((q, _) =>
             <Row>
-                <Col md={3}>{c.channel}</Col>
-                <Col md={3}>{c.qid}</Col>
-                <Col md={3}>{c.text}</Col>
+                <Col md={3}>{q.channel}</Col>
+                <Col md={3}>{q.qid}</Col>
+                <Col md={3}>{q.body}</Col>
             </Row>
         )
-        : "No commands found." }
+        : "No quotes found." }
   </div>

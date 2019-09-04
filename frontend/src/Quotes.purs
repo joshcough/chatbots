@@ -13,7 +13,7 @@ import Types (OpM)
 
 data Message = GotQuotes (Array Quote)
 
-type UXQuote = { channel :: String, qid :: Int, name :: String }
+type UXQuote = { channel :: String, qid :: Int, body :: String }
 
 type State = { quotes :: Array Quote }
 
@@ -31,7 +31,7 @@ foreign import view_ :: ReactComponent { quotes :: Array UXQuote }
 view :: State -> DispatchMsgFn Message -> ReactElement
 view s dispatch = createElement' view_ { quotes: f <$> s.quotes }
   where
-  f (Quote r) = { channel: r.quoteChannel, qid: r.quoteQid, name: r.quoteName }
+  f (Quote r) = { channel: r.quoteChannel, qid: r.quoteQid, body: r.quoteName }
 
 getQuotes :: forall m . MonadAff m => MonadError HttpException m => m (Array Quote)
 getQuotes = httpJSON $ buildReq GET "http://localhost:8081/chatbot/quotes" noData
