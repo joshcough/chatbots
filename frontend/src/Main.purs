@@ -8,14 +8,18 @@ import Elmish as Elmish
 import Elmish.Component (ComponentDef)
 import Elmish.Dispatch (DispatchMsgFn, dispatchMsgFn)
 import Elmish.React (ReactElement)
-import Components.Frame as Frame
 import Components.Tabs as Tabs
 import Commands as Commands
 import Quotes as Quotes
 import Types (OpM, runOpM)
+import Debug.Trace (spy)
+import Components.Window as Window
 
 main :: Effect Unit
 main = do
+  params <- Window.getSearchParams
+  pure $ spy (show params) unit
+
   commands <- go "Commands" Commands.def
   quotes   <- go "Quotes"  Quotes.def
   Elmish.boot { domElementId: "app", def: Tabs.tabs [commands, quotes] }

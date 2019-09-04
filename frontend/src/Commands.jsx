@@ -3,7 +3,7 @@ import { Table } from "react-bootstrap"
 
 export const View = props =>
   <div>
-   <Table striped bordered hover>
+   <Table striped bordered hover variant="dark">
      <thead>
        <tr>
          <th>Channel</th>

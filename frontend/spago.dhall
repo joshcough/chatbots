@@ -11,6 +11,8 @@
     , "http-methods"
     , "affjax"
     , "react-basic"
+    , "uri"
+    , "web-html"
     ]
 , packages =
     ./packages.dhall
