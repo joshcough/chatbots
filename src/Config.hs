@@ -7,8 +7,6 @@ module Config (
   , Config(..)
   , Environment(..)
   , acquireConfig
-  -- TODO: just to shut up the compiler. Please fix.
-  , acquireChatBotConfigFromEnv
   , HasConfig(..)
   ) where
 
@@ -33,7 +31,7 @@ import           System.IO                            (stdout)
 import           Web.Rollbar                          (RollbarCfg(..), HasRollbarCfg(..))
 import qualified Web.Rollbar                          as RB
 
-import           ChatBot.Config                       (ChatBotConfig(..), ChatBotExecutionConfig(..), configFromFile)
+import           ChatBot.Config                       (ChatBotConfig(..), ChatBotExecutionConfig(..), configFromEnv)
 import           Logging                              (HasLoggingCfg, LoggingCfg)
 import qualified Logging
 import qualified KeyGen                               as KG
@@ -98,7 +96,7 @@ acquireConfig = do
     _configAwsEnv           <- acquireAwsConfig
     _configRollbar          <- mkRollbar
     _configLogging          <- mkLoggingCfg
-    _configChatBot          <- configFromFile "chatbot.json"
+    _configChatBot          <- configFromEnv
     _configChatBotExecution <- acquireChatBotExecutionConfig
     pure Config {..}
 
@@ -125,14 +123,6 @@ acquireAwsConfig = do
     _awsConfigEnv                     <- do lgr <- newLogger Debug stdout
                                             newEnv Discover <&> set envLogger lgr
     return AwsConfig {..}
-
--- |
-acquireChatBotConfigFromEnv :: IO ChatBotConfig
-acquireChatBotConfigFromEnv = do
-    _cbConfigNick <- S.lookupTextSetting "CHATBOT_NICK" "ProverlaysBot"
-    _cbConfigPass <- S.lookupRequiredSetting "CHATBOT_PASS"
-    let _cbConfigChannels = ["#artofthetroll"]
-    return ChatBotConfig{..}
 
 -- |
 acquireChatBotExecutionConfig :: IO ChatBotExecutionConfig
