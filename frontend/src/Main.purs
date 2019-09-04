@@ -15,7 +15,7 @@ import Types (OpM, runOpM)
 
 main :: Effect Unit
 main = do
-    commands <- go "Comands" Commands.def
+    commands <- go "Commands" Commands.def
     quotes   <- go "Quotes"  Quotes.def
     Elmish.boot { domElementId: "app", def: Frame.frame [commands, quotes] }
 
