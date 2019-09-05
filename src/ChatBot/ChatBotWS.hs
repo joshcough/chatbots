@@ -22,7 +22,7 @@ import Network.Socket (withSocketsDo)
 import qualified Network.WebSockets as WS
 import Text.Trifecta (Result(..), parseString, whiteSpace)
 
-import ChatBot.Commands (Command(..), Response(..), builtinCommands, getCommandFromDb)
+import ChatBot.Commands (BotCommand(..), Response(..), builtinCommands, getCommandFromDb)
 import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..))
 import ChatBot.Models (ChannelName(..), ChatMessage(..))
 import Config (Config(..), HasConfig(..))
@@ -102,7 +102,7 @@ findAndRunCommand (ChatMessage _ channel input _) =
    in case Map.lookup name builtinCommands
         -- default command
             of
-        Just (Command args body) ->
+        Just (BotCommand args body) ->
           case parseString (optional whiteSpace >> args) mempty (cs rest) of
             Success a -> body channel a
             Failure _ -> return $ RespondWith "Sorry, I don't understand that."

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3e52e2b77dcd11fa6a6e5ded05e9a56461b92efbf6064ac2945bebc0f7a65c83
+-- hash: 84b5be4d1845a5124dde6c6779e42925dad1b4d216a7c26d9bc2eea126f2048c
 
 name:           chatbots
 version:        0.1.0.0
@@ -30,6 +30,7 @@ library
       Auth.Models
       Auth.PSBridge
       ChatBot.ChatBotAPI
+      ChatBot.ChatBotMonad
       ChatBot.ChatBotWS
       ChatBot.Commands
       ChatBot.Config

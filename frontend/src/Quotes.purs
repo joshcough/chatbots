@@ -31,7 +31,7 @@ foreign import view_ :: ReactComponent { quotes :: Array UXQuote }
 view :: State -> DispatchMsgFn Message -> ReactElement
 view s dispatch = createElement' view_ { quotes: f <$> s.quotes }
   where
-  f (Quote r) = { channel: channelName r.quoteChannel, qid: r.quoteQid, body: r.quoteName }
+  f (Quote r) = { channel: channelName r.quoteChannel, qid: r.quoteQid, body: r.quoteBody }
   channelName (ChannelName r) = r._unChannelName
 
 getQuotes :: forall m . MonadAff m => MonadError HttpException m => ChannelName -> m (Array Quote)

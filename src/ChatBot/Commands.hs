@@ -1,5 +1,5 @@
 module ChatBot.Commands
-  ( Command(..)
+  ( BotCommand(..)
   , Response(..)
   , builtinCommands
   , getCommandFromDb
@@ -10,25 +10,24 @@ import Protolude
 import qualified Data.Map as Map
 import Data.String.Conversions (cs)
 import Data.Text (Text)
-import Database.Persist (Entity(..))
 import Text.Trifecta (Parser)
 
-import ChatBot.DatabaseModels (DbCommand(..), DbQuote(..))
-import ChatBot.Models (ChannelName(..))
-import ChatBot.Parsers ((~~), commandName, number, slurp)
+import ChatBot.Models (ChannelName(..), Command(..), Quote(..))
+import ChatBot.Parsers ((~~), number, slurp)
+import qualified ChatBot.Parsers as P
 import ChatBot.Storage (CommandsDb(..), QuotesDb(..))
 import Config (HasConfig)
 import Types (AppTEnv')
 
-data Command m =
-  forall a. Command (Parser a) (ChannelName -> a -> m Response)
+data BotCommand m =
+  forall a. BotCommand (Parser a) (ChannelName -> a -> m Response)
 
 data Response
   = RespondWith Text
   | Nada
 
 builtinCommands ::
-     (HasConfig c, MonadIO m) => Map Text (Command (AppTEnv' e m c))
+     (HasConfig c, MonadIO m) => Map Text (BotCommand (AppTEnv' e m c))
 builtinCommands =
   Map.fromList
     [ ("!echo", echoCommand)
@@ -38,33 +37,33 @@ builtinCommands =
     , ("!delComm", deleteCommandCommand)
     ]
 
-echoCommand :: Applicative m => Command m
-echoCommand = Command slurp $ const $ pure . RespondWith
+echoCommand :: Applicative m => BotCommand m
+echoCommand = BotCommand slurp $ const $ pure . RespondWith
 
-addQuoteCommand :: QuotesDb m => Command m
+addQuoteCommand :: QuotesDb m => BotCommand m
 addQuoteCommand =
-  Command slurp $ \c t -> do
-    (Entity _ (DbQuote _ _ qid)) <- insertQuote c t
-    pure $ RespondWith $ cs $ "added quote #" ++ show qid ++ ": " ++ cs t
+  BotCommand slurp $ \c t -> do
+    q <- insertQuote c t
+    pure $ RespondWith $ cs $ "added quote #" ++ show (quoteQid q) ++ ": " ++ cs t
 
-getQuoteCommand :: QuotesDb m => Command m
-getQuoteCommand = Command number $ \c n -> f n <$> getQuote c n
+getQuoteCommand :: QuotesDb m => BotCommand m
+getQuoteCommand = BotCommand number $ \c n -> f n <$> getQuote c n
   where
     f n Nothing = RespondWith $ "I couldn't find quote: #" <> show n
-    f _ (Just (Entity _ (DbQuote _ t _))) = RespondWith t
+    f _ (Just q) = RespondWith $ quoteBody q
 
-addCommandCommand :: CommandsDb m => Command m
-addCommandCommand = Command (commandName ~~ slurp) $ \c (n, t) -> do
-    _ <- insertCommand c n t
+addCommandCommand :: CommandsDb m => BotCommand m
+addCommandCommand = BotCommand (P.commandName ~~ slurp) $ \c (n, t) -> do
+    insertCommand c n t
     pure $ RespondWith $ cs $ "added command:" <> n
 
-deleteCommandCommand :: CommandsDb m => Command m
-deleteCommandCommand  = Command commandName $ \c n -> do
+deleteCommandCommand :: CommandsDb m => BotCommand m
+deleteCommandCommand  = BotCommand P.commandName $ \c n -> do
     deleteCommand c n
     pure $ RespondWith $ cs $ "deleted command:" <> n
 
 getCommandFromDb :: CommandsDb m => ChannelName -> Text -> m (Maybe Text)
-getCommandFromDb c = fmap (fmap (dbCommandBody . entityVal)) . getCommand c
+getCommandFromDb c = fmap (fmap commandBody) . getCommand c
 
 --import           Network.HTTP            (getRequest, getResponseBody, simpleHTTP)
 --fetchUrl :: MonadIO m => ConvertibleStrings a String => a -> m String

@@ -65,7 +65,7 @@ _Command = _Newtype
 newtype Quote
   = Quote
       { quoteChannel :: ChannelName
-      , quoteName :: String
+      , quoteBody :: String
       , quoteQid :: Int
       }
 
@@ -82,7 +82,7 @@ instance encodeQuote :: EncodeJson Quote where
 
 --------------------------------------------------------------------------------
 _Quote :: Iso' Quote { quoteChannel :: ChannelName
-                     , quoteName :: String
+                     , quoteBody :: String
                      , quoteQid :: Int }
 _Quote = _Newtype
 --------------------------------------------------------------------------------

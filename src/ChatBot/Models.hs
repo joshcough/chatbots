@@ -64,7 +64,7 @@ data Command = Command {
 
 data Quote = Quote {
     quoteChannel :: ChannelName
-  , quoteName :: Text
+  , quoteBody :: Text
   , quoteQid :: Int
 } deriving stock (Eq, Ord, Read, Show, Generic)
   deriving anyclass (FromJSON, ToJSON)

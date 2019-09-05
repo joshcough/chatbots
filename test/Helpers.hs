@@ -22,7 +22,7 @@ setupTeardown runTestsWith = do
 setupTeardownDb :: Config -> IO ()
 setupTeardownDb config = runAppToIO config . runDb $ truncateTables
     where
-    tables = ["quotes"]
+    tables = ["commands", "quotes"]
     truncateTables = rawExecute (pack $ "TRUNCATE TABLE " ++ intercalate ", " tables ++ " RESTART IDENTITY CASCADE") []
 
 getTestConfig :: IO Config
