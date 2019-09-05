@@ -46,9 +46,9 @@ unprotectedServer = toServant $ UnprotectedServer {..}
 -- | The main application for the Proverlays backend.
 app :: Config -> Application
 app cfg = serveWithContext
-            (Proxy :: Proxy (TopLevelAPI :<|> Raw))
+            (Proxy :: Proxy (TopLevelAPI :<|> Raw))-- :<|> Raw))
             (_configCookies cfg :. _configJWT cfg :. EmptyContext)
-            (mainServer :<|> serveDirectoryFileServer "frontend")
+            (mainServer :<|> serveDirectoryFileServer "frontend") -- :<|> Tagged app2)
     where
     convertApp :: Config -> App a -> Handler a
     convertApp cfg' appt = Handler $
@@ -63,4 +63,3 @@ app cfg = serveWithContext
         (Proxy :: Proxy '[CookieSettings, JWTSettings])
         (convertApp cfg)
         (protectedServer' :<|> unprotectedServer)
-

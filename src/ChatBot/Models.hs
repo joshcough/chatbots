@@ -1,8 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric  #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE TemplateHaskell #-}
-
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module ChatBot.Models
@@ -26,7 +21,7 @@ import Irc.UserInfo (UserInfo(..))
 import Web.HttpApiData (FromHttpApiData(..))
 
 newtype ChannelName = ChannelName { _unChannelName :: Text }
-    deriving stock (Eq, Ord, Show, Generic)
+    deriving stock (Eq, Ord, Read, Show, Generic)
     deriving anyclass (FromJSON, ToJSON)
 
 makeClassy ''ChannelName
@@ -39,7 +34,8 @@ data ChatMessage = ChatMessage {
   , cmChannel :: ChannelName
   , cmBody :: Text
   , cmRawMessage :: RawIrcMsg
-} deriving (Eq, Generic, Show, ToJSON, FromJSON)
+} deriving stock (Eq, Show, Generic)
+  deriving anyclass (FromJSON, ToJSON)
 
 instance FromJSON Identifier where
     parseJSON (String s) = pure $ mkId s
@@ -60,13 +56,15 @@ deriving instance FromJSON RawIrcMsg
 deriving instance ToJSON RawIrcMsg
 
 data Command = Command {
-    commandChannel :: Text
+    commandChannel :: ChannelName
   , commandName :: Text
   , commandBody :: Text
-} deriving (Eq, Generic, Ord, Show, ToJSON, FromJSON)
+} deriving stock (Eq, Ord, Read, Show, Generic)
+  deriving anyclass (FromJSON, ToJSON)
 
 data Quote = Quote {
-    quoteChannel :: Text
+    quoteChannel :: ChannelName
   , quoteName :: Text
   , quoteQid :: Int
-} deriving (Eq, Generic, Ord, Show, ToJSON, FromJSON)
+} deriving stock (Eq, Ord, Read, Show, Generic)
+  deriving anyclass (FromJSON, ToJSON)

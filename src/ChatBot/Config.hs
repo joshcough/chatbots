@@ -25,7 +25,6 @@ import qualified Settings as S
 
 import ChatBot.Models (ChannelName(..))
 
-
 data ChatBotConfig = ChatBotConfig
   { _cbConfigNick :: Text
   , _cbConfigPass :: Text
@@ -51,5 +50,5 @@ configFromEnv :: IO ChatBotConfig
 configFromEnv = do
     _cbConfigNick <- S.lookupRequiredSetting "CHATBOT_NICK"
     _cbConfigPass <- S.lookupRequiredSetting "CHATBOT_PASS"
-    let _cbConfigChannels = ["#artofthetroll"]
+    let _cbConfigChannels = ["#artofthetroll"] --, "#daut"]
     return ChatBotConfig{..}

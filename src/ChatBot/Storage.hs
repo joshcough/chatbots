@@ -25,6 +25,7 @@ class Monad m => CommandsDb m where
     getCommand :: ChannelName -> Text -> m (Maybe (Entity DbCommand))
     deleteCommand :: ChannelName -> Text -> m ()
     getAllCommands :: m [Entity DbCommand]
+    getCommands :: ChannelName -> m [Entity DbCommand]
 
 class Monad m => QuotesDb m where
     insertQuote :: ChannelName -> Text -> m (Entity DbQuote)
@@ -32,6 +33,7 @@ class Monad m => QuotesDb m where
     getQuoteByPK :: Int64 -> m (Maybe DbQuote)
     deleteQuote :: ChannelName -> Int -> m ()
     getAllQuotes :: m [Entity DbQuote]
+    getQuotes :: ChannelName -> m [Entity DbQuote]
 
 instance (HasConfig c, MonadIO m) => CommandsDb (AppT' e m c) where
     insertCommand (ChannelName channel) commandName commandText = do
@@ -53,6 +55,12 @@ instance (HasConfig c, MonadIO m) => CommandsDb (AppT' e m c) where
     getAllCommands = do
         $(logDebug_) "getAllCommands"
         runDb $ select $ from $ \command -> pure command
+
+    getCommands (ChannelName channel) = do
+        $(logDebug) "getCommands" ["channel" .= channel]
+        runDb $ select $ from $ \command -> do
+            where_ $ (command ^. DbCommandChannel) ==. val channel
+            pure command
 
 instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
     insertQuote (ChannelName channel) quoteText = do
@@ -87,3 +95,9 @@ instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
     getAllQuotes = do
         $(logDebug_) "getAllQuotes"
         runDb $ select $ from $ \quote -> pure quote
+
+    getQuotes (ChannelName channel) = do
+        $(logDebug) "getCommands" ["channel" .= channel]
+        runDb $ select $ from $ \command -> do
+            where_ $ (command ^. DbQuoteChannel) ==. val channel
+            pure command

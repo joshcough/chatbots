@@ -12,7 +12,8 @@ main = writePSTypes "frontend/src" (buildBridge defaultBridge) myTypes
 -- TODO: there are more types in Models that maybe should be added here
 myTypes :: [SumType 'Haskell]
 myTypes = [
-    go (Proxy :: Proxy Command)
+    go (Proxy :: Proxy ChannelName)
+  , go (Proxy :: Proxy Command)
   , go (Proxy :: Proxy Quote)
   ]
   where

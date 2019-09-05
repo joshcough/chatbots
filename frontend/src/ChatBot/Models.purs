@@ -15,9 +15,32 @@ import Data.Argonaut.Generic (genericDecodeJson, genericEncodeJson)
 
 import Prelude
 
+newtype ChannelName
+  = ChannelName
+      { _unChannelName :: String
+      }
+
+
+derive instance eqChannelName :: Eq ChannelName
+derive instance ordChannelName :: Ord ChannelName
+derive instance genericChannelName :: Generic ChannelName _
+derive instance newtypeChannelName :: Newtype ChannelName _
+
+instance decodeChannelName :: DecodeJson ChannelName where
+    decodeJson = genericDecodeJson
+instance encodeChannelName :: EncodeJson ChannelName where
+    encodeJson = genericEncodeJson
+
+--------------------------------------------------------------------------------
+_ChannelName :: Iso' ChannelName { _unChannelName :: String }
+_ChannelName = _Newtype
+
+unChannelName :: Lens' ChannelName String
+unChannelName = _Newtype <<< prop (SProxy :: SProxy "_unChannelName")
+--------------------------------------------------------------------------------
 newtype Command
   = Command
-      { commandChannel :: String
+      { commandChannel :: ChannelName
       , commandName :: String
       , commandBody :: String
       }
@@ -34,14 +57,14 @@ instance encodeCommand :: EncodeJson Command where
     encodeJson = genericEncodeJson
 
 --------------------------------------------------------------------------------
-_Command :: Iso' Command { commandChannel :: String
+_Command :: Iso' Command { commandChannel :: ChannelName
                          , commandName :: String
                          , commandBody :: String }
 _Command = _Newtype
 --------------------------------------------------------------------------------
 newtype Quote
   = Quote
-      { quoteChannel :: String
+      { quoteChannel :: ChannelName
       , quoteName :: String
       , quoteQid :: Int
       }
@@ -56,8 +79,10 @@ instance decodeQuote :: DecodeJson Quote where
     decodeJson = genericDecodeJson
 instance encodeQuote :: EncodeJson Quote where
     encodeJson = genericEncodeJson
-    
+
 --------------------------------------------------------------------------------
-_Quote :: Iso' Quote { quoteChannel :: String, quoteName :: String, quoteQid :: Int }
+_Quote :: Iso' Quote { quoteChannel :: ChannelName
+                     , quoteName :: String
+                     , quoteQid :: Int }
 _Quote = _Newtype
 --------------------------------------------------------------------------------
