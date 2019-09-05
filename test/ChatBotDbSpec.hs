@@ -15,24 +15,22 @@ art = ChannelName "artoftroll"
 daut :: ChannelName
 daut = ChannelName "daut"
 
--- beforeAll :: IO a -> SpecWith a -> Spec
-
 spec :: Spec
-spec = around setupTeardown $
+spec = withDB $
     describe "Quotes" $ do
-        it "can insert quote" $ \config -> do
+        it "can insert quote" $ \(_, config) -> do
             qid <- runAppToIO config $
                 insertQ art "i am so good at this game"
             qid `shouldBe` 0
 
-        it "can insert many quotes in same channel" $ \config -> do
+        it "can insert many quotes in same channel" $ \(_, config) -> do
             (q1, q2) <- runAppToIO config $ do
                 q1 <- insertQ art "look what i can do"
                 q2 <- insertQ art "bam"
                 pure (q1, q2)
             (q1, q2) `shouldBe` (0, 1)
 
-        it "can insert many quotes in different channels" $ \config -> do
+        it "can insert many quotes in different channels" $ \(_, config) -> do
             (q1, q2, q3, q4) <- runAppToIO config $ do
                 q1 <- insertQ art "look what i can do - art"
                 q2 <- insertQ art "bam - art"

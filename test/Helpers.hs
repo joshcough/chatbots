@@ -1,4 +1,4 @@
-module Helpers where
+module Helpers (withDB) where
 
 import Prelude (IO)
 import Protolude
@@ -9,6 +9,7 @@ import Data.Text (pack)
 import Database.Persist.Sql (rawExecute)
 import Database.PostgreSQL.Simple.Options (Options(..))
 import Database.Postgres.Temp (DB(..), startLocalhost, stop, defaultOptions)
+import Test.Hspec
 import Turtle.Prelude
 import Turtle.Shell
 import Types (runAppToIO, runDb)
@@ -17,34 +18,28 @@ import Types (runAppToIO, runDb)
 --- Setup and teardown helpers
 ---
 
-setupTeardown :: (Config -> IO ()) -> IO ()
-setupTeardown runTestsWith = do
-    (db, connStr) <- createDatabase
-    putStrLn $ "CONNECTION STRING: " <> connStr
-    config <- acquireConfigWithConnStr connStr
-    setupTeardownDb config
-    runTestsWith config
-    void $ stop db
-
-createDatabase :: IO (DB, Text)
+createDatabase :: IO (DB, Config)
 createDatabase = do
     Right db@DB{..} <- startLocalhost defaultOptions
-    let connStr = myToConnectionString options
+    let connStr = toConnectionString options
     sh $ do export "DBM_DATABASE" connStr
             proc "moo-postgresql" ["upgrade"] empty
-    return (db, connStr)
+    config <- acquireConfigWithConnStr connStr
+    return (db, config)
 
 -- https://stackoverflow.com/questions/5342440/reset-auto-increment-counter-in-postgres
-setupTeardownDb :: Config -> IO ()
-setupTeardownDb config = runAppToIO config . runDb $ truncateTables
+truncateDb :: Config -> IO ()
+truncateDb config = runAppToIO config . runDb $ truncateTables
     where
     tables = ["commands", "quotes"]
     truncateTables = rawExecute (pack $ "TRUNCATE TABLE " ++ intercalate ", " tables ++ " RESTART IDENTITY CASCADE") []
 
-myToConnectionString :: Options -> Text
-myToConnectionString Options {..} = "postgresql://" <> user <> "@" <> host <> ":" <> port <> "/" <> cs oDbname
+toConnectionString :: Options -> Text
+toConnectionString Options {..} = "postgresql://" <> user <> "@" <> host <> ":" <> port <> "/" <> cs oDbname
     where
     host = cs $ fromMaybe "localhost" oHost
     user = cs $ fromMaybe "josh" oUser
     port = show $ fromMaybe 5432 oPort
 
+withDB :: SpecWith (DB, Config) -> Spec
+withDB = beforeAll createDatabase . afterAll (void . stop . fst) . after (truncateDb . snd)

@@ -57,7 +57,8 @@ makeClassy ''AwsConfig
 
 -- | The Config for our application
 data Config = Config
-    { _configPool :: ConnectionPool
+    { _configConnStr :: Text
+    , _configPool :: ConnectionPool
     , _configEnv :: Environment
     , _configPort :: Port
     , _configHttp :: HttpCfg
@@ -90,10 +91,10 @@ acquireConfig :: IO Config
 acquireConfig = acquireConfigWithConnStr =<< S.lookupRequiredSetting "DATABASE_URL"
 
 acquireConfigWithConnStr :: Text -> IO Config
-acquireConfigWithConnStr connStr = do
+acquireConfigWithConnStr _configConnStr = do
     _configPort             <- S.lookupReadableSetting "PORT" 8081
     _configEnv              <- S.lookupReadableSetting "ENV" Development
-    _configPool             <- makePool connStr _configEnv
+    _configPool             <- makePool _configConnStr _configEnv
     _configHttp             <- mkHttp
     let _configCookies      = defaultCookieSettings
     _configJWT              <- acquireJWT _configEnv
