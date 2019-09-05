@@ -63,7 +63,9 @@ default-extensions:
 
 dependencies:
   - base
+  - mtl
   - protolude
+  - string-conversions
 
 library:
   source-dirs: src
@@ -95,7 +97,6 @@ library:
     - MissingH
     - monad-control
     - monad-logger
-    - mtl
     - nano-http >=0.1.1
     - network
     - persistent
@@ -117,7 +118,6 @@ library:
     - servant-server >= 0.13 && <= 0.14.1
     - servant-websockets
     - stm
-    - string-conversions
     - template-haskell
     - text
     - time
@@ -150,9 +150,9 @@ tests:
       - chatbots
       - hedgehog
       - hspec
-      - mtl
       - persistent
       - persistent-postgresql
+      - postgres-options
       - QuickCheck
       - quickcheck-instances
       - tasty
@@ -160,6 +160,8 @@ tests:
       - tasty-hedgehog
       - tasty-quickcheck
       - text
+      - tmp-postgres
+      - turtle
     ghc-options:
       - -Wall
       - -Werror

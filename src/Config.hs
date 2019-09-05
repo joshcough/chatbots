@@ -7,6 +7,7 @@ module Config (
   , Config(..)
   , Environment(..)
   , acquireConfig
+  , acquireConfigWithConnStr
   , HasConfig(..)
   ) where
 
@@ -86,10 +87,13 @@ instance HasLoggingCfg Config where
 
 -- | Allocates resources for 'Config'
 acquireConfig :: IO Config
-acquireConfig = do
+acquireConfig = acquireConfigWithConnStr =<< S.lookupRequiredSetting "DATABASE_URL"
+
+acquireConfigWithConnStr :: Text -> IO Config
+acquireConfigWithConnStr connStr = do
     _configPort             <- S.lookupReadableSetting "PORT" 8081
     _configEnv              <- S.lookupReadableSetting "ENV" Development
-    _configPool             <- acquirePool _configEnv
+    _configPool             <- makePool connStr _configEnv
     _configHttp             <- mkHttp
     let _configCookies      = defaultCookieSettings
     _configJWT              <- acquireJWT _configEnv
@@ -99,11 +103,6 @@ acquireConfig = do
     _configChatBot          <- configFromEnv
     _configChatBotExecution <- acquireChatBotExecutionConfig
     pure Config {..}
-
--- |
-acquirePool :: Environment -> IO ConnectionPool
-acquirePool env = flip makePool env =<< S.lookupRequiredSetting "DATABASE_URL"
-
 
 -- |
 acquireJWT :: Environment -> IO JWTSettings

@@ -32,6 +32,9 @@ extra-deps:
 - dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075
 - yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d
 - HsSyck-0.53@sha256:a987ae2163811bdebfd4f2e2dcb7c75e9d2d68afd97d196f969d6a74786e43da
+- tmp-postgres-0.3.0.0
+- port-utils-0.2.1.0@sha256:0e7cdb91e40cadedc528260bd5919414876c6f9eb250f9f54ace9fe7a12384ab
+- postgres-options-0.1.0.1@sha256:42331140b3c2e608c87005bc7636271b53db20fce7fd091cd4341128db3b47ad
 resolver: lts-12.26
 
 #extra-include-dirs:

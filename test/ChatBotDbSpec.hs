@@ -4,9 +4,8 @@ import Protolude
 import Test.Hspec
 
 import ChatBot.Config (ChannelName(..))
-import ChatBot.DatabaseModels (DbQuote(..))
+import ChatBot.Models (Quote(..))
 import ChatBot.Storage (QuotesDb(..), insertQuote)
-import Database.Persist (Entity(..))
 import Helpers
 import Types (runAppToIO)
 
@@ -15,6 +14,8 @@ art = ChannelName "artoftroll"
 
 daut :: ChannelName
 daut = ChannelName "daut"
+
+-- beforeAll :: IO a -> SpecWith a -> Spec
 
 spec :: Spec
 spec = around setupTeardown $
@@ -41,4 +42,4 @@ spec = around setupTeardown $
             (q1, q2, q3, q4) `shouldBe` (0, 1, 0, 1)
 
 insertQ :: QuotesDb f => ChannelName -> Text -> f Int
-insertQ c = fmap (dbQuoteQid . entityVal) . insertQuote c
+insertQ c = fmap quoteQid . insertQuote c

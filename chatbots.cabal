@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 84b5be4d1845a5124dde6c6779e42925dad1b4d216a7c26d9bc2eea126f2048c
+-- hash: 1b21c67e828d5b156c40cd1a1bac405bc3bbaf6f1001f4981d931d50b73e9f14
 
 name:           chatbots
 version:        0.1.0.0
@@ -136,7 +136,9 @@ executable chatbots-server
   build-depends:
       base
     , chatbots
+    , mtl
     , protolude
+    , string-conversions
   default-language: Haskell2010
 
 test-suite spec
@@ -159,11 +161,15 @@ test-suite spec
     , mtl
     , persistent
     , persistent-postgresql
+    , postgres-options
     , protolude
     , quickcheck-instances
+    , string-conversions
     , tasty
     , tasty-hedgehog
     , tasty-hunit
     , tasty-quickcheck
     , text
+    , tmp-postgres
+    , turtle
   default-language: Haskell2010
