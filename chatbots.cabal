@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1b21c67e828d5b156c40cd1a1bac405bc3bbaf6f1001f4981d931d50b73e9f14
+-- hash: fd1ad9fe76cb9c92874ac1c61a3d6e245ee75b6d189735c492bf5d464a568345
 
 name:           chatbots
 version:        0.1.0.0
@@ -156,6 +156,8 @@ test-suite spec
       QuickCheck
     , base
     , chatbots
+    , directory
+    , exceptions
     , hedgehog
     , hspec
     , mtl

@@ -148,6 +148,7 @@ tests:
       - test
     dependencies:
       - chatbots
+      - exceptions
       - hedgehog
       - hspec
       - persistent
@@ -162,6 +163,7 @@ tests:
       - text
       - tmp-postgres
       - turtle
+      - directory
     ghc-options:
       - -Wall
       - -Werror
