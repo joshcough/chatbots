@@ -75,7 +75,7 @@ processMessage rawIrcMsg = processMessage' (cookIrcMsg rawIrcMsg)
       send conn (ircPong xs)
     processMessage' (Privmsg userInfo channelName msgBody)
       | T.take 1 msgBody == "!" = processUserMessage rawIrcMsg userInfo channelName msgBody
-    processMessage' (Privmsg _ _ _) = return () -- just a regular user message.
+    processMessage' Privmsg{} = return () -- just a regular user message.
     processMessage' _ = do
       liftIO $ T.putStr "couldn't process message: "
       liftIO $ T.putStrLn . cs $ encodePretty rawIrcMsg

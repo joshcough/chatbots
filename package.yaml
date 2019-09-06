@@ -63,7 +63,6 @@ default-extensions:
 
 dependencies:
   - base
-  - mtl
   - protolude
   - string-conversions
 
@@ -73,30 +72,21 @@ library:
     - aeson
     - aeson-pretty
     - amazonka
-    - amazonka-s3
-    - async
-    - bcrypt
-    - binary
-    - blaze-html
-    - blaze-markup
     - bytestring
-    - conduit
     - containers
     - directory
     - esqueleto
     - exceptions
     - fast-logger
     - filepath
-    - foreign-store
-    - HTTP
     - http-api-data
     - irc-core
     - jose
     - lens
     - lens-aeson
-    - MissingH
     - monad-control
     - monad-logger
+    - mtl
     - nano-http >=0.1.1
     - network
     - persistent
@@ -106,18 +96,13 @@ library:
     - postgresql-simple
     - purescript-bridge >= 0.13
     - random
-    - resourcet
     - resource-pool
     - rollbar
     - safe
     - servant >= 0.13 && <= 0.14.1
     - servant-auth >=0.3.1.0
     - servant-auth-server
-    - servant-blaze
-    - servant-multipart
     - servant-server >= 0.13 && <= 0.14.1
-    - servant-websockets
-    - stm
     - template-haskell
     - text
     - time
@@ -132,7 +117,6 @@ library:
     - wai-cors
     - warp
     - websockets
-    - zip
 
 executables:
   chatbots-server:
@@ -148,22 +132,12 @@ tests:
       - test
     dependencies:
       - chatbots
-      - exceptions
-      - hedgehog
       - hspec
       - persistent
-      - persistent-postgresql
       - postgres-options
-      - QuickCheck
-      - quickcheck-instances
-      - tasty
-      - tasty-hunit
-      - tasty-hedgehog
-      - tasty-quickcheck
       - text
       - tmp-postgres
       - turtle
-      - directory
     ghc-options:
       - -Wall
       - -Werror

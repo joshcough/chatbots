@@ -1,11 +1,10 @@
-cabal-version: 1.12
-
--- This file has been generated from package.yaml by hpack version 0.31.1.
+-- This file has been generated from package.yaml by hpack version 0.28.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: fd1ad9fe76cb9c92874ac1c61a3d6e245ee75b6d189735c492bf5d464a568345
+-- hash: 3932223e6f9a8304ae3ed436a23169d216eada837e5d3de75ba2c72b7a8ae4e7
 
+cabal-version:  >= 1.10
 name:           chatbots
 version:        0.1.0.0
 category:       Web
@@ -56,27 +55,17 @@ library
   default-extensions: ApplicativeDo BangPatterns ConstraintKinds DataKinds DefaultSignatures DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DerivingStrategies DeriveTraversable EmptyCase ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedLabels OverloadedStrings PatternSynonyms RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TemplateHaskell TupleSections TypeApplications TypeFamilies TypeFamilyDependencies TypeOperators
   ghc-options: -Wall -Werror -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Wimplicit-prelude
   build-depends:
-      HTTP
-    , MissingH
-    , aeson
+      aeson
     , aeson-pretty
     , amazonka
-    , amazonka-s3
-    , async
     , base
-    , bcrypt
-    , binary
-    , blaze-html
-    , blaze-markup
     , bytestring
-    , conduit
     , containers
     , directory
     , esqueleto
     , exceptions
     , fast-logger
     , filepath
-    , foreign-store
     , http-api-data
     , irc-core
     , jose
@@ -96,17 +85,12 @@ library
     , purescript-bridge >=0.13
     , random
     , resource-pool
-    , resourcet
     , rollbar
     , safe
     , servant >=0.13 && <=0.14.1
     , servant-auth >=0.3.1.0
     , servant-auth-server
-    , servant-blaze
-    , servant-multipart
     , servant-server >=0.13 && <=0.14.1
-    , servant-websockets
-    , stm
     , string-conversions
     , template-haskell
     , text
@@ -122,7 +106,6 @@ library
     , wai-cors
     , warp
     , websockets
-    , zip
   default-language: Haskell2010
 
 executable chatbots-server
@@ -136,7 +119,6 @@ executable chatbots-server
   build-depends:
       base
     , chatbots
-    , mtl
     , protolude
     , string-conversions
   default-language: Haskell2010
@@ -153,24 +135,13 @@ test-suite spec
   default-extensions: ApplicativeDo BangPatterns ConstraintKinds DataKinds DefaultSignatures DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DerivingStrategies DeriveTraversable EmptyCase ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedLabels OverloadedStrings PatternSynonyms RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TemplateHaskell TupleSections TypeApplications TypeFamilies TypeFamilyDependencies TypeOperators
   ghc-options: -Wall -Werror -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Wimplicit-prelude -Wall -Werror -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Wimplicit-prelude -threaded
   build-depends:
-      QuickCheck
-    , base
+      base
     , chatbots
-    , directory
-    , exceptions
-    , hedgehog
     , hspec
-    , mtl
     , persistent
-    , persistent-postgresql
     , postgres-options
     , protolude
-    , quickcheck-instances
     , string-conversions
-    , tasty
-    , tasty-hedgehog
-    , tasty-hunit
-    , tasty-quickcheck
     , text
     , tmp-postgres
     , turtle
