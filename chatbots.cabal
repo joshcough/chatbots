@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4856f1a560ffa0bad807402a752db8d609dd07a7173acad8e841229a5c7d75ad
+-- hash: a4bfdded78ddbc259422eebe96f49040f036fdc0085ea58392ad37c463669ef2
 
 name:           chatbots
 version:        0.1.0.0
@@ -38,6 +38,7 @@ library
       ChatBot.Models
       ChatBot.Parsers
       ChatBot.PSBridge
+      ChatBot.Sender
       ChatBot.Storage
       Config
       Error

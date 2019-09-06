@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-}
+
 module ChatBot.ChatBotWS
   ( runBot
   ) where
@@ -13,7 +15,7 @@ import qualified Data.Text as T
 import Irc.Commands (ircCapReq, ircJoin, ircNick, ircPass, ircPing, ircPong, ircPrivmsg)
 import qualified Irc.Identifier as Irc
 import Irc.Message (IrcMsg(..), cookIrcMsg)
-import Irc.RawIrcMsg (RawIrcMsg(..), parseRawIrcMsg, renderRawIrcMsg)
+import Irc.RawIrcMsg (RawIrcMsg(..), parseRawIrcMsg)
 import qualified Irc.UserInfo as Irc
 import Network.Socket (withSocketsDo)
 import qualified Network.WebSockets as WS
@@ -22,12 +24,15 @@ import Text.Trifecta (Result(..), parseString, whiteSpace)
 import ChatBot.Commands (BotCommand(..), Response(..), builtinCommands, getCommandFromDb)
 import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..))
 import ChatBot.Models (ChannelName(..), ChatMessage(..))
-import Config (Config(..), ConfigAndConnection(..))
+import Config (Config(..), ConfigAndConnection(..), HasConfig(..))
 import Error (ChatBotError, miscError)
 import Types (AppTEnv', runAppToIO)
 
 import Data.Aeson.Encode.Pretty (encodePretty)
 import qualified Data.Text.IO as T
+import Control.Lens (view)
+import ChatBot.Sender (Sender(..))
+import ChatBot.Storage (CommandsDb, QuotesDb)
 
 twitchIrcUrl :: Text
 twitchIrcUrl = "irc-ws.chat.twitch.tv"
@@ -42,29 +47,32 @@ app :: App ()
 app = authorize >> twitchListener
 
 twitchListener :: App ()
-twitchListener =
-  forever $ do
+twitchListener = forever $ do
     ConfigAndConnection _ conn <- ask
     msg <- liftIO $ T.strip <$> WS.receiveData conn
     liftIO $ print msg
     maybe (throwError $ miscError "Server sent invalid message!") processMessage (parseRawIrcMsg msg)
 
-processMessage :: RawIrcMsg -> App ()
-processMessage rawIrcMsg = processMessage' (cookIrcMsg rawIrcMsg)
-  where
-    processMessage' (Ping xs) = do
-      ConfigAndConnection _ conn <- ask
-      send conn (ircPong xs)
-    processMessage' (Privmsg userInfo channelName msgBody)
-      | T.take 1 msgBody == "!" = processUserMessage rawIrcMsg userInfo channelName msgBody
-    processMessage' Privmsg{} = return () -- just a regular user message.
-    processMessage' _ = do
-      liftIO $ T.putStr "couldn't process message: "
-      liftIO $ T.putStrLn . cs $ encodePretty rawIrcMsg
+class Monad m => MessageProcessor m where
+    processMessage :: RawIrcMsg -> m ()
 
-processUserMessage :: RawIrcMsg -> Irc.UserInfo -> Irc.Identifier -> Text -> App ()
+instance (Monad m, MonadIO m, QuotesDb m, CommandsDb m, MonadReader c m, HasConfig c, Sender m) => MessageProcessor m
+    where
+    processMessage rawIrcMsg = processMessage' (cookIrcMsg rawIrcMsg)
+      where
+        processMessage' (Ping xs) = send (ircPong xs)
+        processMessage' (Privmsg userInfo channelName msgBody)
+          | T.take 1 msgBody == "!" = processUserMessage rawIrcMsg userInfo channelName msgBody
+        processMessage' Privmsg{} = return () -- just a regular user message.
+        processMessage' _ = do
+          liftIO $ T.putStr "couldn't process message: "
+          liftIO $ T.putStrLn . cs $ encodePretty rawIrcMsg
+
+processUserMessage ::
+    (MonadIO m, QuotesDb m, CommandsDb m, MonadReader c m, HasConfig c, Sender m) =>
+    RawIrcMsg -> Irc.UserInfo -> Irc.Identifier -> Text -> m ()
 processUserMessage rawIrcMsg userInfo channelName msgBody = do
-  ConfigAndConnection conf _ <- ask
+  conf <- view config
   let outputChan = _cbecOutputChan $ _configChatBotExecution conf
   case _msgParams rawIrcMsg of
     [_, _] -> do
@@ -78,7 +86,7 @@ processUserMessage rawIrcMsg userInfo channelName msgBody = do
       liftIO $ writeChan outputChan rawIrcMsg
     params -> putStr $ "<Unhandled params>: " ++ show params
 
-findAndRunCommand :: ChatMessage -> App Response
+findAndRunCommand :: (QuotesDb m, CommandsDb m, MonadReader c m, HasConfig c) => ChatMessage -> m Response
 findAndRunCommand (ChatMessage _ channel input _) =
   let (name, rest) = T.breakOn " " input
    in case Map.lookup name builtinCommands
@@ -93,29 +101,22 @@ findAndRunCommand (ChatMessage _ channel input _) =
           where f (Just body) = RespondWith body
                 f Nothing = RespondWith "I couldn't find that command."
 
-say :: ChannelName -> Text -> App ()
+say :: (MonadIO m, MonadReader c m, HasConfig c, Sender m) => ChannelName -> Text -> m ()
 say (ChannelName twitchChannel) msg = do
-  ConfigAndConnection conf conn <- ask
-  send conn $ ircPrivmsg twitchChannel msg
+  conf <- view config
+  send $ ircPrivmsg twitchChannel msg
   let outputChan = _cbecOutputChan $ _configChatBotExecution conf
   liftIO $ writeChan outputChan $ ircPrivmsg twitchChannel msg
 
-authorize :: App ()
+authorize :: (MonadIO m, MonadReader c m, HasConfig c, Sender m) => m ()
 authorize = do
-  ConfigAndConnection conf conn <- ask
-  let chatBotConf = _configChatBot conf
-  send conn (ircPass $ _cbConfigPass chatBotConf)
-  send conn (ircNick $ _cbConfigNick chatBotConf)
-  send conn (ircCapReq ["twitch.tv/membership"])
-  send conn (ircCapReq ["twitch.tv/commands"])
-  send conn (ircCapReq ["twitch.tv/tags"])
+  chatBotConf <- view configChatBot
+  send (ircPass $ _cbConfigPass chatBotConf)
+  send (ircNick $ _cbConfigNick chatBotConf)
+  send (ircCapReq ["twitch.tv/membership"])
+  send (ircCapReq ["twitch.tv/commands"])
+  send (ircCapReq ["twitch.tv/tags"])
   forM_ (_cbConfigChannels chatBotConf) $ \c -> do
-    send conn (ircJoin c Nothing)
+    send (ircJoin c Nothing)
     say (ChannelName c) "Hello!"
-  send conn (ircPing ["ping"])
-
-class Sender c m where
-  send :: c -> RawIrcMsg -> m ()
-
-instance MonadIO m => Sender WS.Connection m where
-  send conn msg = liftIO $ WS.sendTextData conn (renderRawIrcMsg msg)
+  send (ircPing ["ping"])

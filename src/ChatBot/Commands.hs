@@ -17,8 +17,8 @@ import ChatBot.Models (ChannelName(..), Command(..), Quote(..))
 import ChatBot.Parsers ((~~), number, slurp, anything)
 import qualified ChatBot.Parsers as P
 import ChatBot.Storage (CommandsDb(..), QuotesDb(..))
-import Config (Config(..), ConfigAndConnection(..))
-import Types (AppTEnv')
+import Config (Config(..), HasConfig(..))
+import Control.Lens (view)
 
 data BotCommand m =
   forall a. BotCommand (Parser a) (ChannelName -> a -> m Response)
@@ -27,7 +27,7 @@ data Response
   = RespondWith Text
   | Nada
 
-builtinCommands :: (MonadIO m) => Map Text (BotCommand (AppTEnv' e m ConfigAndConnection))
+builtinCommands :: (CommandsDb m, QuotesDb m, MonadReader c m, HasConfig c) => Map Text (BotCommand m)
 builtinCommands =
   Map.fromList
     [ ("!echo", echoCommand)
@@ -53,9 +53,9 @@ getQuoteCommand = BotCommand number $ \c n -> f n <$> getQuote c n
     f n Nothing = RespondWith $ "I couldn't find quote: #" <> show n
     f _ (Just q) = RespondWith $ quoteBody q
 
-getQuotesUrlCommand :: (MonadIO m) => BotCommand (AppTEnv' e m ConfigAndConnection)
+getQuotesUrlCommand :: (CommandsDb m, MonadReader c m, HasConfig c) => BotCommand m
 getQuotesUrlCommand = BotCommand anything $ \(ChannelName c) _ -> do
-    ConfigAndConnection conf _ <- ask
+    conf <- view config
     let url = "https://" <> _configHost conf <> ":" <> show (_configPort conf) <> "/" <> "?stream=" <> T.drop 1 c
     pure $ RespondWith url
 

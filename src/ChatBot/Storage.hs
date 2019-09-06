@@ -68,7 +68,7 @@ instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
         --   channel, quote, select count(*) + 1 from quotes where channel = channel
         -- )
         runDb $ do
-            qid <- fmap length $ select $ from $ \quote -> do
+            qid <- fmap ((+1) . length) $ select $ from $ \quote -> do
                      where_ $ (quote ^. DbQuoteChannel) ==. val channel
                      return quote
             _ <- insert $ DbQuote channel quoteText qid
