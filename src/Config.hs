@@ -5,6 +5,7 @@
 module Config (
     AwsConfig(..)
   , Config(..)
+  , ConfigAndConnection(..)
   , Environment(..)
   , acquireConfig
   , acquireConfigWithConnStr
@@ -27,6 +28,7 @@ import Database.PostgreSQL.Simple.Internal (postgreSQLConnectionString)
 import Database.PostgreSQL.Simple.URL (parseDatabaseUrl)
 import Network.HTTP.Nano (HasHttpCfg(..), HttpCfg(..), tlsManager)
 import Network.Wai.Handler.Warp (Port)
+import qualified Network.WebSockets as WS
 import Servant.Auth.Server (CookieSettings, JWTSettings, defaultCookieSettings, defaultJWTSettings) --, generateKey)
 import System.IO (stdout)
 import Web.Rollbar (HasRollbarCfg(..), RollbarCfg(..))
@@ -34,7 +36,7 @@ import qualified Web.Rollbar as RB
 
 import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..), configFromEnv)
 import qualified KeyGen as KG
-import Logging (HasLoggingCfg, LoggingCfg)
+import Logging (HasLoggingCfg(..), LoggingCfg)
 import qualified Logging
 import qualified Settings as S
 
@@ -57,10 +59,11 @@ makeClassy ''AwsConfig
 
 -- | The Config for our application
 data Config = Config
-    { _configConnStr :: Text
+    { _configHost :: Text
+    , _configPort :: Port
+    , _configConnStr :: Text
     , _configPool :: ConnectionPool
     , _configEnv :: Environment
-    , _configPort :: Port
     , _configHttp :: HttpCfg
     , _configCookies :: CookieSettings
     , _configJWT :: JWTSettings
@@ -82,6 +85,21 @@ instance HasRollbarCfg Config where
 instance HasLoggingCfg Config where
     loggingCfg = configLogging
 
+data ConfigAndConnection =
+  ConfigAndConnection
+    { _configAndConnectionConfig :: Config
+    , _configAndConnectionConn :: WS.Connection
+    }
+
+makeClassy ''ConfigAndConnection
+
+instance HasLoggingCfg ConfigAndConnection where
+  loggingCfg = configAndConnectionConfig . loggingCfg
+
+instance HasConfig ConfigAndConnection where
+  config = configAndConnectionConfig
+
+
 ---
 ---
 ---
@@ -92,6 +110,7 @@ acquireConfig = acquireConfigWithConnStr =<< S.lookupRequiredSetting "DATABASE_U
 
 acquireConfigWithConnStr :: Text -> IO Config
 acquireConfigWithConnStr _configConnStr = do
+    _configHost             <- S.lookupReadableSetting "HOSTNAME" "localhost"
     _configPort             <- S.lookupReadableSetting "PORT" 8081
     _configEnv              <- S.lookupReadableSetting "ENV" Development
     _configPool             <- makePool _configConnStr _configEnv

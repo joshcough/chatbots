@@ -4,7 +4,7 @@ import Prelude
 
 import Data.Array (mapMaybe, head)
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
@@ -29,26 +29,21 @@ import Network.Endpoints (getStreams)
 main :: Effect Unit
 main = launchAff_ $ do
   streams <- runOpM getStreams
-  mStream <- liftEffect $ getStreamFromUrlParams
-  liftEffect $ case mStream of
-    Just s -> do
-      let c = ChannelName { _unChannelName : "#" <> s }
-      -- commands <- go "Commands" $ Commands.def c
-      -- quotes   <- go "Quotes" $ Quotes.def streams c
-      -- Elmish.boot { domElementId: "app", def: Tabs.tabs [commands, quotes] }
-      Elmish.boot { domElementId: "app", def: Elmish.nat runOpM $ Quotes.def streams c }
-    Nothing -> Elmish.boot { domElementId: "app", def: emptyDef }
+  liftEffect $ do
+    mStream <- getStreamFromUrlParams
+    let c = ChannelName { _unChannelName : fromMaybe "#daut" mStream }
+    Elmish.boot { domElementId: "app", def: Elmish.nat runOpM $ Quotes.def streams c }
 
-  where
-  go :: forall msg state. String -> ComponentDef OpM msg state -> Effect { title :: String, view :: ReactElement }
-  go title def = do
-    render <- Elmish.construct (Elmish.nat runOpM def)
-    pure { title: title, view: render onError }
-
-  onError :: DispatchMsgFn Unit
-  onError = dispatchMsgFn log (const $ pure unit)
-
-  emptyDef = { init: Transition {} [], update: \_ _ -> pureUpdate {}, view: \_ _ -> empty }
+--  where
+--  go :: forall msg state. String -> ComponentDef OpM msg state -> Effect { title :: String, view :: ReactElement }
+--  go title def = do
+--    render <- Elmish.construct (Elmish.nat runOpM def)
+--    pure { title: title, view: render onError }
+--
+--  onError :: DispatchMsgFn Unit
+--  onError = dispatchMsgFn log (const $ pure unit)
+--
+--  emptyDef = { init: Transition {} [], update: \_ _ -> pureUpdate {}, view: \_ _ -> empty }
 
 -- TODO: this _could_ be an (Array String) if i feel like it. not sure yet.
 getStreamFromUrlParams :: Effect (Maybe String)
@@ -58,5 +53,5 @@ getStreamFromUrlParams = getStreamFromParams' <$> Window.getSearchParams
   getStreamFromParams' (Left e) = Nothing
   getStreamFromParams' (Right (QP.QueryPairs ps)) = head $ mapMaybe f ps
     where
-    f (Tuple k (Just v)) | k == "stream" = Just v
+    f (Tuple k (Just v)) | k == "stream" = Just $ "#" <> v
     f _ = Nothing

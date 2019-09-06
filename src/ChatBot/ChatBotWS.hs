@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module ChatBot.ChatBotWS
   ( runBot
   ) where
@@ -7,7 +5,6 @@ module ChatBot.ChatBotWS
 import Protolude
 
 import Control.Concurrent.Chan (writeChan)
-import Control.Lens.TH (makeClassy)
 import Control.Monad (forM_, forever)
 import qualified Data.Map as Map
 import Data.String.Conversions (cs)
@@ -25,21 +22,12 @@ import Text.Trifecta (Result(..), parseString, whiteSpace)
 import ChatBot.Commands (BotCommand(..), Response(..), builtinCommands, getCommandFromDb)
 import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..))
 import ChatBot.Models (ChannelName(..), ChatMessage(..))
-import Config (Config(..), HasConfig(..))
+import Config (Config(..), ConfigAndConnection(..))
 import Error (ChatBotError, miscError)
-import Logging (HasLoggingCfg(..))
 import Types (AppTEnv', runAppToIO)
 
 import Data.Aeson.Encode.Pretty (encodePretty)
 import qualified Data.Text.IO as T
-
-data ConfigAndConnection =
-  ConfigAndConnection
-    { _configAndConnectionConfig :: Config
-    , _configAndConnectionConn :: WS.Connection
-    }
-
-makeClassy ''ConfigAndConnection
 
 twitchIrcUrl :: Text
 twitchIrcUrl = "irc-ws.chat.twitch.tv"
@@ -47,12 +35,6 @@ twitchIrcUrl = "irc-ws.chat.twitch.tv"
 runBot :: Config -> IO ()
 runBot conf =
   withSocketsDo $ WS.runClient (cs twitchIrcUrl) 80 "/" $ \conn -> runAppToIO (ConfigAndConnection conf conn) app
-
-instance HasLoggingCfg ConfigAndConnection where
-  loggingCfg = configAndConnectionConfig . loggingCfg
-
-instance HasConfig ConfigAndConnection where
-  config = configAndConnectionConfig
 
 type App = AppTEnv' ChatBotError IO ConfigAndConnection
 

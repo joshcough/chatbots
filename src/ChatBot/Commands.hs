@@ -10,13 +10,14 @@ import Protolude
 import qualified Data.Map as Map
 import Data.String.Conversions (cs)
 import Data.Text (Text)
+import qualified Data.Text as T
 import Text.Trifecta (Parser)
 
 import ChatBot.Models (ChannelName(..), Command(..), Quote(..))
-import ChatBot.Parsers ((~~), number, slurp)
+import ChatBot.Parsers ((~~), number, slurp, anything)
 import qualified ChatBot.Parsers as P
 import ChatBot.Storage (CommandsDb(..), QuotesDb(..))
-import Config (HasConfig)
+import Config (Config(..), ConfigAndConnection(..))
 import Types (AppTEnv')
 
 data BotCommand m =
@@ -26,8 +27,7 @@ data Response
   = RespondWith Text
   | Nada
 
-builtinCommands ::
-     (HasConfig c, MonadIO m) => Map Text (BotCommand (AppTEnv' e m c))
+builtinCommands :: (MonadIO m) => Map Text (BotCommand (AppTEnv' e m ConfigAndConnection))
 builtinCommands =
   Map.fromList
     [ ("!echo", echoCommand)
@@ -35,6 +35,7 @@ builtinCommands =
     , ("!quote", getQuoteCommand)
     , ("!addComm", addCommandCommand)
     , ("!delComm", deleteCommandCommand)
+    , ("!quotes", getQuotesUrlCommand)
     ]
 
 echoCommand :: Applicative m => BotCommand m
@@ -51,6 +52,12 @@ getQuoteCommand = BotCommand number $ \c n -> f n <$> getQuote c n
   where
     f n Nothing = RespondWith $ "I couldn't find quote: #" <> show n
     f _ (Just q) = RespondWith $ quoteBody q
+
+getQuotesUrlCommand :: (MonadIO m) => BotCommand (AppTEnv' e m ConfigAndConnection)
+getQuotesUrlCommand = BotCommand anything $ \(ChannelName c) _ -> do
+    ConfigAndConnection conf _ <- ask
+    let url = "https://" <> _configHost conf <> ":" <> show (_configPort conf) <> "/" <> "?stream=" <> T.drop 1 c
+    pure $ RespondWith url
 
 addCommandCommand :: CommandsDb m => BotCommand m
 addCommandCommand = BotCommand (P.commandName ~~ slurp) $ \c (n, t) -> do
