@@ -19,6 +19,7 @@ import Types (runAppToIO, runDb)
 
 --
 -- NOTE: if having trouble with db, do this: DBLOGGING=VERBOSE stack test
+-- Also: for quieter tests: LOG_LEVEL=LevelError stack test
 --
 
 ---
@@ -35,7 +36,7 @@ withDB = beforeAll createDatabase . afterAll (snd . fst) . after (truncateDb . s
       (db, io) <- startDb verbosity
       config <- acquireConfigWithConnStr $ toConnectionString db
       return ((db, io), config)
-    
+
     -- https://stackoverflow.com/questions/5342440/reset-auto-increment-counter-in-postgres
     truncateDb :: Config -> IO ()
     truncateDb config = runAppToIO config . runDb $ truncateTables
@@ -43,14 +44,14 @@ withDB = beforeAll createDatabase . afterAll (snd . fst) . after (truncateDb . s
       tables = ["commands", "quotes"]
       truncateStatement = "TRUNCATE TABLE " <> intercalate ", " tables <> " RESTART IDENTITY CASCADE"
       truncateTables = rawExecute (pack truncateStatement) []
-    
+
     toConnectionString :: DB -> Text
     toConnectionString DB {..} = "postgresql://" <> user <> "@" <> host <> ":" <> show port <> "/" <> cs oDbname
       where
         Options {..} = options
         host = cs $ fromMaybe "localhost" oHost
         user = cs $ fromMaybe "josh" oUser
-    
+
     startDb :: DBLogging -> IO (DB, IO ())
     startDb verbosity = mask $ \restore -> do
       (outHandle, errHandle) <- case verbosity of
