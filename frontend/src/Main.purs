@@ -7,6 +7,8 @@ import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
+import Effect.Aff (launchAff_)
+import Effect.Class (liftEffect)
 import Effect.Console (log)
 import Elmish as Elmish
 import Elmish.Component (ComponentDef)
@@ -22,16 +24,19 @@ import Components.Window as Window
 import URI.Extra.QueryPairs as QP
 import ChatBot.Models (ChannelName(..))
 import Elmish (Transition(..), pureUpdate)
+import Network.Endpoints (getStreams)
 
 main :: Effect Unit
-main = do
-  mStream <- getStreamFromParams
-  case mStream of
+main = launchAff_ $ do
+  streams <- runOpM getStreams
+  mStream <- liftEffect $ getStreamFromUrlParams
+  liftEffect $ case mStream of
     Just s -> do
       let c = ChannelName { _unChannelName : "#" <> s }
-      commands <- go "Commands" $ Commands.def c
-      quotes   <- go "Quotes" $ Quotes.def c
-      Elmish.boot { domElementId: "app", def: Tabs.tabs [commands, quotes] }
+      -- commands <- go "Commands" $ Commands.def c
+      -- quotes   <- go "Quotes" $ Quotes.def streams c
+      -- Elmish.boot { domElementId: "app", def: Tabs.tabs [commands, quotes] }
+      Elmish.boot { domElementId: "app", def: Elmish.nat runOpM $ Quotes.def streams c }
     Nothing -> Elmish.boot { domElementId: "app", def: emptyDef }
 
   where
@@ -46,8 +51,8 @@ main = do
   emptyDef = { init: Transition {} [], update: \_ _ -> pureUpdate {}, view: \_ _ -> empty }
 
 -- TODO: this _could_ be an (Array String) if i feel like it. not sure yet.
-getStreamFromParams :: Effect (Maybe String)
-getStreamFromParams = getStreamFromParams' <$> Window.getSearchParams
+getStreamFromUrlParams :: Effect (Maybe String)
+getStreamFromUrlParams = getStreamFromParams' <$> Window.getSearchParams
   where
   getStreamFromParams' :: forall e. Either e (QP.QueryPairs String String) -> Maybe String
   getStreamFromParams' (Left e) = Nothing

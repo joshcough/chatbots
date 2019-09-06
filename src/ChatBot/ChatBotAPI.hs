@@ -14,13 +14,15 @@ import ChatBot.ChatBotMonad (ChatBotMonad(..))
 type ChatBotAPI = "chatbot" :> Compose ChatBot
 
 data ChatBot route = ChatBot {
-    chatBotGetCommands :: route :- "commands" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Command]
+    chatBotGetStreams :: route :- "streams" :> Post '[JSON] [ChannelName]
+  , chatBotGetCommands :: route :- "commands" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Command]
   , chatBotGetQuotes :: route :- "quotes" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Quote]
   } deriving Generic
 
 -- | The server that runs the ChatBotAPI
 chatBotServer :: (MonadIO m) => ServerT ChatBotAPI (AppT m)
 chatBotServer = toServant $ ChatBot {
-    chatBotGetCommands = getCommands
+    chatBotGetStreams = getStreams
+  , chatBotGetCommands = getCommands
   , chatBotGetQuotes = getQuotes
   }

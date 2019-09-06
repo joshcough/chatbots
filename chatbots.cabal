@@ -1,10 +1,11 @@
--- This file has been generated from package.yaml by hpack version 0.28.2.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.1.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3932223e6f9a8304ae3ed436a23169d216eada837e5d3de75ba2c72b7a8ae4e7
+-- hash: 4856f1a560ffa0bad807402a752db8d609dd07a7173acad8e841229a5c7d75ad
 
-cabal-version:  >= 1.10
 name:           chatbots
 version:        0.1.0.0
 category:       Web

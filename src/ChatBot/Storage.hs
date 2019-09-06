@@ -9,6 +9,7 @@ import Protolude hiding (from)
 import Control.Monad.Except (MonadIO)
 import Data.Aeson ((.=))
 import Database.Esqueleto
+import Data.List (nub, sort)
 import Database.Persist.Postgresql (insert)
 import qualified Database.Persist.Postgresql as P
 import Logging (logDebug)
@@ -28,6 +29,7 @@ class Monad m => CommandsDb m where
     getCommands :: ChannelName -> m [Command]
 
 class Monad m => QuotesDb m where
+    getStreams :: m [ChannelName]
     insertQuote :: ChannelName -> Text -> m Quote
     getQuote :: ChannelName -> Int -> m (Maybe Quote)
     deleteQuote :: ChannelName -> Int -> m ()
@@ -57,6 +59,9 @@ instance (HasConfig c, MonadIO m) => CommandsDb (AppT' e m c) where
             pure command
 
 instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
+    getStreams = do
+        $(logDebug) "getStreams" []
+        fmap (sort . nub . fmap dbQuoteToChannel) . runDb $ select $ from pure
     insertQuote c@(ChannelName channel) quoteText = do
         $(logDebug) "insertQuote" ["channel" .= channel, "quoteText" .= quoteText]
         -- insert into quotes values (
@@ -82,10 +87,10 @@ instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
                 (quote ^. DbQuoteQid) ==. val qid
              )
     getQuotes (ChannelName channel) = do
-        $(logDebug) "getCommands" ["channel" .= channel]
-        fmap (fmap dbQuoteToQuote) . runDb $ select $ from $ \command -> do
-            where_ $ (command ^. DbQuoteChannel) ==. val channel
-            pure command
+        $(logDebug) "getQuotes" ["channel" .= channel]
+        fmap (fmap dbQuoteToQuote) . runDb $ select $ from $ \quote -> do
+            where_ $ (quote ^. DbQuoteChannel) ==. val channel
+            pure quote
 
 dbCommandToCommand :: Entity DbCommand -> Command
 dbCommandToCommand (Entity _ (DbCommand chan name body)) = Command (ChannelName chan) name body
@@ -93,3 +98,5 @@ dbCommandToCommand (Entity _ (DbCommand chan name body)) = Command (ChannelName 
 dbQuoteToQuote :: Entity DbQuote -> Quote
 dbQuoteToQuote (Entity _ (DbQuote chan name qid)) = Quote (ChannelName chan) name qid
 
+dbQuoteToChannel :: Entity DbQuote -> ChannelName
+dbQuoteToChannel (Entity _ (DbQuote chan _ _)) = ChannelName chan

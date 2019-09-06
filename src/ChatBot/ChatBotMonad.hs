@@ -11,9 +11,11 @@ import Types (AppT')
 import Config (HasConfig)
 
 class Monad m => ChatBotMonad m where
+  getStreams :: m [ChannelName]
   getCommands :: ChannelName -> m [Command]
   getQuotes :: ChannelName -> m [Quote]
 
 instance (HasConfig c, MonadIO m) => ChatBotMonad (AppT' e m c) where
+  getStreams = Storage.getStreams
   getCommands = Storage.getCommands
   getQuotes = Storage.getQuotes
