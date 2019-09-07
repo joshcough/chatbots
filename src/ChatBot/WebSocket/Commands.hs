@@ -1,4 +1,4 @@
-module ChatBot.Commands
+module ChatBot.WebSocket.Commands
   ( BotCommand(..)
   , Response(..)
   , builtinCommands

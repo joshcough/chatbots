@@ -1,4 +1,4 @@
-module ChatBot.ChatBotAPI (
+module ChatBot.Server.ChatBotAPI (
     ChatBotAPI
   , chatBotServer
   ) where
@@ -9,7 +9,7 @@ import ServantHelpers hiding (Stream)
 
 import ChatBot.Models (Command(..), Quote(..), ChannelName(..))
 import Types (AppT)
-import ChatBot.ChatBotMonad (ChatBotMonad(..))
+import ChatBot.Server.ChatBotServerMonad (ChatBotServerMonad(..))
 
 type ChatBotAPI = "chatbot" :> Compose ChatBot
 

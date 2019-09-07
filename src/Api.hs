@@ -8,7 +8,7 @@ import ServantHelpers
 import System.Random (randomIO)
 
 import Auth.Models (MiniUser)
-import ChatBot.ChatBotAPI (ChatBotAPI, chatBotServer)
+import ChatBot.Server.ChatBotAPI (ChatBotAPI, chatBotServer)
 import Error (AppError(..), AuthError(..), throwAll, toServantErr)
 import Types (App, AppT, Config(..), runAppT)
 

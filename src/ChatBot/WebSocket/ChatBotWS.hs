@@ -1,4 +1,6 @@
-module ChatBot.ChatBotWS
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+
+module ChatBot.WebSocket.ChatBotWS
   ( runBot
   ) where
 
@@ -8,11 +10,11 @@ import Control.Monad (forever)
 import Data.String.Conversions (cs)
 import Data.Text (Text)
 import qualified Data.Text as T
-import Irc.RawIrcMsg (parseRawIrcMsg)
+import Irc.RawIrcMsg (parseRawIrcMsg, renderRawIrcMsg)
 import Network.Socket (withSocketsDo)
 import qualified Network.WebSockets as WS
 
-import ChatBot.MessageProcessor (MessageProcessor(..), authorize)
+import ChatBot.WebSocket.MessageProcessor (MessageProcessor(..), Sender(..), authorize)
 import Config (ConfigAndConnection(..), Config)
 import Error (ChatBotError, miscError)
 import Types (AppTEnv', runAppToIO)
@@ -20,12 +22,17 @@ import Types (AppTEnv', runAppToIO)
 twitchIrcUrl :: Text
 twitchIrcUrl = "irc-ws.chat.twitch.tv"
 
+type App = AppTEnv' ChatBotError IO ConfigAndConnection
+
+instance Sender App where
+  send msg = do
+    ConfigAndConnection _ conn <- ask
+    liftIO $ WS.sendTextData conn (renderRawIrcMsg msg)
+
 runBot :: Config -> IO ()
 runBot conf =
   withSocketsDo $ WS.runClient (cs twitchIrcUrl) 80 "/" $ \conn ->
     runAppToIO (ConfigAndConnection conf conn) app
-
-type App = AppTEnv' ChatBotError IO ConfigAndConnection
 
 app :: App ()
 app = authorize >> twitchListener

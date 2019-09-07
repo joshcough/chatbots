@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module ChatBot.MessageProcessor
+module ChatBot.WebSocket.MessageProcessor
   ( MessageProcessor(..)
   , Sender(..)
   , authorize
@@ -22,7 +22,7 @@ import qualified Irc.UserInfo as Irc
 import qualified Network.WebSockets as WS
 import Text.Trifecta (Result(..), parseString, whiteSpace)
 
-import ChatBot.Commands (BotCommand(..), Response(..), builtinCommands, getCommandFromDb)
+import ChatBot.WebSocket.Commands (BotCommand(..), Response(..), builtinCommands, getCommandFromDb)
 import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..))
 import ChatBot.Models (ChannelName(..), ChatMessage(..))
 import Config (Config(..), ConfigAndConnection(..), HasConfig(..))
@@ -34,16 +34,8 @@ import qualified Data.Text.IO as T
 import Control.Lens (view)
 import ChatBot.Storage (CommandsDb, QuotesDb)
 
-type App = AppTEnv' ChatBotError IO ConfigAndConnection
-
 class Sender m where
   send :: RawIrcMsg -> m ()
-
-instance Sender App where
-  send msg = do
-    ConfigAndConnection _ conn <- ask
-    liftIO $ WS.sendTextData conn (renderRawIrcMsg msg)
-
 
 class Monad m => MessageProcessor m where
     processMessage :: RawIrcMsg -> m ()

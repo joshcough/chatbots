@@ -7,7 +7,7 @@ module Types (
   , AppTEnv
   , AppTEnv'
   , App
-  , ProverlaysM
+  , ChatBotM
   , runAppT
   , runAppToIO
   , runAppTInTest
@@ -37,7 +37,7 @@ import Web.Rollbar.Types (HasRollbarCfg)
 ---
 ---
 
-type ProverlaysM m = (MonadError ChatBotError m, MonadLoggerJSON m)
+type ChatBotM m = (MonadError ChatBotError m, MonadLoggerJSON m)
 
 type AppT m = AppT' ChatBotError m Config
 type AppTEnv' e m r = ReaderT r (ExceptT e (LoggingJSONT m))
