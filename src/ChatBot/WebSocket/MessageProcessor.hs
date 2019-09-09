@@ -9,30 +9,26 @@ module ChatBot.WebSocket.MessageProcessor
 import Protolude
 
 import Control.Concurrent.Chan (writeChan)
+import Control.Lens (view)
 import Control.Monad (forM_)
+import Data.Aeson.Encode.Pretty (encodePretty)
 import qualified Data.Map as Map
 import Data.String.Conversions (cs)
 import Data.Text (Text)
 import qualified Data.Text as T
+import qualified Data.Text.IO as T
 import Irc.Commands (ircCapReq, ircJoin, ircNick, ircPass, ircPing, ircPong, ircPrivmsg)
 import qualified Irc.Identifier as Irc
 import Irc.Message (IrcMsg(..), cookIrcMsg)
-import Irc.RawIrcMsg (RawIrcMsg(..), renderRawIrcMsg)
+import Irc.RawIrcMsg (RawIrcMsg(..))
 import qualified Irc.UserInfo as Irc
-import qualified Network.WebSockets as WS
 import Text.Trifecta (Result(..), parseString, whiteSpace)
 
-import ChatBot.WebSocket.Commands (BotCommand(..), Response(..), builtinCommands, getCommandFromDb)
 import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..))
 import ChatBot.Models (ChannelName(..), ChatMessage(..))
-import Config (Config(..), ConfigAndConnection(..), HasConfig(..))
-import Error (ChatBotError)
-import Types (AppTEnv')
-
-import Data.Aeson.Encode.Pretty (encodePretty)
-import qualified Data.Text.IO as T
-import Control.Lens (view)
 import ChatBot.Storage (CommandsDb, QuotesDb)
+import ChatBot.WebSocket.Commands (BotCommand(..), Response(..), builtinCommands, getCommandFromDb)
+import Config (Config(..), HasConfig(..))
 
 class Sender m where
   send :: RawIrcMsg -> m ()
