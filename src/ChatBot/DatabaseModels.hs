@@ -2,11 +2,13 @@
 
 module ChatBot.DatabaseModels where
 
+import Prelude (error)
 import Protolude
 
 import Data.Text (Text)
+import Database.Persist
 import Database.Persist.Postgresql.JSON ()
-import Database.Persist.TH (mkDeleteCascade, mkPersist, persistLowerCase, share, sqlSettings)
+import Database.Persist.TH
 
 share [mkPersist sqlSettings, mkDeleteCascade sqlSettings] [persistLowerCase|
 DbCommand json sql=commands

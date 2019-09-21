@@ -60,6 +60,7 @@ default-extensions:
   - TypeFamilies
   - TypeFamilyDependencies
   - TypeOperators
+  - UndecidableInstances
 
 dependencies:
   - base

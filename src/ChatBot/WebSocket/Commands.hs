@@ -14,9 +14,9 @@ import qualified Data.Text as T
 import Text.Trifecta (Parser)
 
 import ChatBot.Models (ChannelName(..), Command(..), Quote(..))
-import ChatBot.Parsers ((~~), number, slurp, anything)
-import qualified ChatBot.Parsers as P
 import ChatBot.Storage (CommandsDb(..), QuotesDb(..))
+import ChatBot.WebSocket.Parsers ((~~), anything, number, slurp)
+import qualified ChatBot.WebSocket.Parsers as P
 import Config (Config(..), HasConfig(..))
 import Control.Lens (view)
 
@@ -61,6 +61,7 @@ getQuotesUrlCommand = BotCommand anything $ \(ChannelName c) _ -> do
 
 addCommandCommand :: CommandsDb m => BotCommand m
 addCommandCommand = BotCommand (P.commandName ~~ slurp) $ \c (n, t) -> do
+    -- TODO: here is where i would intercept !addComm !quoteN commands. just check if n is quote* or something.
     insertCommand c n t
     pure $ RespondWith $ cs $ "added command:" <> n
 
