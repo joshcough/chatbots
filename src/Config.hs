@@ -110,7 +110,7 @@ acquireConfig = acquireConfigWithConnStr =<< S.lookupRequiredSetting "DATABASE_U
 
 acquireConfigWithConnStr :: Text -> IO Config
 acquireConfigWithConnStr _configConnStr = do
-    _configHost             <- S.lookupReadableSetting "HOSTNAME" "localhost"
+    _configHost             <- S.lookupTextSetting "HOSTNAME" "localhost"
     _configPort             <- S.lookupReadableSetting "PORT" 8081
     _configEnv              <- S.lookupReadableSetting "ENV" Development
     _configPool             <- makePool _configConnStr _configEnv
