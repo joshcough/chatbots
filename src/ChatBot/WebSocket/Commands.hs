@@ -17,7 +17,7 @@ import ChatBot.Models (ChannelName(..), Command(..), Quote(..))
 import ChatBot.Storage (CommandsDb(..), QuotesDb(..))
 import ChatBot.WebSocket.Parsers ((~~), anything, number, slurp)
 import qualified ChatBot.WebSocket.Parsers as P
-import Config (Config(..), HasConfig(..))
+import Config (Config(..), HasConfig(..),  Environment(Development))
 import Control.Lens (view)
 
 data BotCommand m =
@@ -56,7 +56,11 @@ getQuoteCommand = BotCommand number $ \c n -> f n <$> getQuote c n
 getQuotesUrlCommand :: (CommandsDb m, MonadReader c m, HasConfig c) => BotCommand m
 getQuotesUrlCommand = BotCommand anything $ \(ChannelName c) _ -> do
     conf <- view config
-    let url = "https://" <> _configHost conf <> ":" <> show (_configPort conf) <> "/" <> "?stream=" <> T.drop 1 c
+    let env = _configEnv conf
+    let f p = "https://" <> _configHost conf <> p <> "/" <> "?stream=" <> T.drop 1 c
+    let url = if env == Development
+              then  f (":" <> show (_configPort conf))
+              else f ""
     pure $ RespondWith url
 
 addCommandCommand :: CommandsDb m => BotCommand m

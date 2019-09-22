@@ -154,8 +154,8 @@ acquireChatBotExecutionConfig = do
 
 -- | rollbar
 mkRollbar :: IO RollbarCfg
-mkRollbar = RollbarCfg  <$> (RB.AccessToken <$> S.lookupRequiredSetting "ROLLBAR_TOKEN")
-                        <*> (RB.Environment <$> S.lookupRequiredSetting "ROLLBAR_ENVIRONMENT")
+mkRollbar = RollbarCfg  <$> (RB.AccessToken <$> S.lookupTextSetting "<ROLLBAR_TOKEN>" "ROLLBAR_TOKEN")
+                        <*> (RB.Environment <$> S.lookupTextSetting "<ROLLBAR_ENVIRONMENT>" "ROLLBAR_ENVIRONMENT")
                         <*> (fmap . fmap) RB.Host (S.lookupOptionalSetting "ROLLBAR_HOST")
                         <*> (fmap . fmap) RB.CodeVersion (S.lookupOptionalSetting "SOURCE_VERSION")
                         <*> S.lookupReadableSetting "ROLLBAR_MUTE" False
