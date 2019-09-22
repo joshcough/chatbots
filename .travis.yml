@@ -1,4 +1,3 @@
-# Use new container infrastructure to enable caching
 sudo: false
 
 # thanks to http://stackoverflow.com/a/24600210/3780203
@@ -18,7 +17,8 @@ addons:
 # The different configurations we want to test. You could also do things like
 # change flags or use --stack-yaml to point to a different file.
 env:
-- ARGS=""
+- ROLLBAR_TOKEN="todo"
+- ROLLBAR_ENVIRONMENT="test"
 
 before_install:
 # Download and unpack the stack executable
@@ -28,11 +28,6 @@ before_install:
 
 services:
 - postgresql
-
-before_script:
-- psql -c 'create database test;' -U postgres
-- psql -c 'create role test LOGIN CREATEDB;' -U postgres
-- psql -c 'create database "perservant-test";' -U test
 
 # This line does all of the work: installs GHC if necessary, build the library,
 # executables, and test suites, and runs the test suites. --no-terminal works
