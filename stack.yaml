@@ -15,6 +15,7 @@ extra-deps:
 - persistent-template-2.7.2
 - port-utils-0.2.1.0@sha256:0e7cdb91e40cadedc528260bd5919414876c6f9eb250f9f54ace9fe7a12384ab
 - postgres-options-0.1.0.1@sha256:42331140b3c2e608c87005bc7636271b53db20fce7fd091cd4341128db3b47ad
+- tmp-postgres-0.3.0.0
 - git: https://github.com/bitemyapp/esqueleto.git
   commit: 3db6361d2c42b37e782ff05830c07d88a1afdf91
 - git: https://github.com/ralphmorton/nano-http.git
