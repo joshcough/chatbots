@@ -9,12 +9,24 @@ import ChatBot.Models (ChannelName, Command, Quote)
 import Control.Monad.Error.Class (class MonadError)
 import Effect.Aff.Class (class MonadAff)
 import Network.HTTP (HttpException, Method(..), buildReq, httpJSON, jsonData, noData)
+import Types ( OpM, Config )
+import Control.Monad.Reader.Trans (ask)
+import Data.Maybe (Maybe, fromMaybe)
+import Affjax.RequestBody as Request
+import Data.Argonaut.Decode (class DecodeJson)
 
-getStreams :: forall m . MonadAff m => MonadError HttpException m => m (Array ChannelName)
-getStreams = httpJSON $ buildReq POST "http://localhost:8081/chatbot/streams" noData
+getStreams :: OpM (Array ChannelName)
+getStreams = doPost "/streams" noData
 
-getQuotes :: forall m . MonadAff m => MonadError HttpException m => ChannelName -> m (Array Quote)
-getQuotes c = httpJSON $ buildReq POST "http://localhost:8081/chatbot/quotes" (jsonData c)
+getQuotes :: ChannelName -> OpM (Array Quote)
+getQuotes c = doPost "/quotes" (jsonData c)
 
-getCommands :: forall m . MonadAff m => MonadError HttpException m => ChannelName -> m (Array Command)
-getCommands c = httpJSON $ buildReq POST "http://localhost:8081/chatbot/commands" (jsonData c)
+getCommands :: ChannelName -> OpM (Array Command)
+getCommands c = doPost "/commands" (jsonData c)
+
+doPost :: forall a. DecodeJson a => String -> Maybe Request.RequestBody -> OpM a
+doPost restOfUrl dat = do
+  {hostname} <- ask
+  -- let baseUrl = (fromMaybe "http://localhost:8081" hostname) <> "/chatbot"
+  let baseUrl = (fromMaybe "" hostname) <> "/chatbot"
+  httpJSON $ buildReq POST (baseUrl <> restOfUrl) dat

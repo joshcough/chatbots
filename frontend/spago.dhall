@@ -13,6 +13,8 @@
     , "react-basic"
     , "uri"
     , "web-html"
+    , "numbers"
+    , "node-process"
     ]
 , packages =
     ./packages.dhall

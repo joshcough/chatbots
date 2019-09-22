@@ -1,5 +1,5 @@
 module Types
-    ( OpM, OpM', runOpM, runOpM'
+    ( OpM, OpM', Config, runOpM
     ) where
 
 import Prelude
@@ -9,14 +9,14 @@ import Control.Monad.Reader.Trans (ReaderT, runReaderT)
 import Data.Either (either)
 import Effect.Aff (Aff, error)
 import Network.HTTP (HttpException)
+import Data.Maybe (Maybe)
+
+type Config = { hostname :: Maybe String }
 
 type OpM' c = ReaderT c (ExceptT HttpException Aff)
-type OpM = OpM' Unit
+type OpM = OpM' Config
 
-runOpM :: forall a . OpM a -> Aff a
-runOpM = runOpM' unit
-
-runOpM' :: forall context a . context -> OpM' context a -> Aff a
-runOpM' context f = do
+runOpM :: forall context a . context -> OpM' context a -> Aff a
+runOpM context f = do
   res <- runExceptT (runReaderT f context)
   either (throwError <<< error <<< show) pure res

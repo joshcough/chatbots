@@ -28,11 +28,13 @@ import Network.Endpoints (getStreams)
 
 main :: Effect Unit
 main = launchAff_ $ do
-  streams <- runOpM getStreams
+  -- hostname <- liftEffect $ lookupEnv "HOSTNAME"
+  let config = {hostname:Nothing}
+  streams <- runOpM config getStreams
   liftEffect $ do
     mStream <- getStreamFromUrlParams
-    let c = ChannelName { _unChannelName : fromMaybe "#daut" mStream }
-    Elmish.boot { domElementId: "app", def: Elmish.nat runOpM $ Quotes.def streams c }
+    let c = ChannelName { _unChannelName : fromMaybe "#artofthetroll" mStream }
+    Elmish.boot { domElementId: "app", def: Elmish.nat (runOpM config) $ Quotes.def streams c }
 
 --  where
 --  go :: forall msg state. String -> ComponentDef OpM msg state -> Effect { title :: String, view :: ReactElement }
