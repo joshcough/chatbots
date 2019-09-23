@@ -6,17 +6,16 @@ module ChatBot.WebSocket.ChatBotWS
 
 import Protolude
 
+import ChatBot.WebSocket.MessageProcessor (MessageProcessor(..), Sender(..), authorize, frontendListener)
+import Config (Config, ConfigAndConnection(..))
 import Control.Monad (forever)
 import Data.String.Conversions (cs)
 import Data.Text (Text)
 import qualified Data.Text as T
+import Error (ChatBotError, miscError)
 import Irc.RawIrcMsg (parseRawIrcMsg, renderRawIrcMsg)
 import Network.Socket (withSocketsDo)
 import qualified Network.WebSockets as WS
-
-import ChatBot.WebSocket.MessageProcessor (MessageProcessor(..), Sender(..), authorize)
-import Config (ConfigAndConnection(..), Config)
-import Error (ChatBotError, miscError)
 import Types (AppTEnv', runAppToIO)
 
 twitchIrcUrl :: Text
@@ -31,11 +30,10 @@ instance Sender App where
 
 runBot :: Config -> IO ()
 runBot conf =
-  withSocketsDo $ WS.runClient (cs twitchIrcUrl) 80 "/" $ \conn ->
-    runAppToIO (ConfigAndConnection conf conn) app
-
-app :: App ()
-app = authorize >> twitchListener
+  withSocketsDo $ WS.runClient (cs twitchIrcUrl) 80 "/" $ \conn -> do
+    let f = runAppToIO (ConfigAndConnection conf conn)
+    _ <- forkIO $ f frontendListener
+    f $ authorize >> twitchListener
 
 twitchListener :: App ()
 twitchListener = forever $ do

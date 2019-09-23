@@ -3,20 +3,21 @@ module ChatBot.Server.ChatBotAPI (
   , chatBotServer
   ) where
 
+import ChatBot.Models (ChannelName(..), Command(..), Quote(..))
+import ChatBot.Server.ChatBotServerMonad (ChatBotServerMonad(..))
 import Control.Monad.Except (MonadIO)
 import Protolude
 import ServantHelpers hiding (Stream)
-
-import ChatBot.Models (Command(..), Quote(..), ChannelName(..))
 import Types (AppT)
-import ChatBot.Server.ChatBotServerMonad (ChatBotServerMonad(..))
 
 type ChatBotAPI = "chatbot" :> Compose ChatBot
 
-data ChatBot route = ChatBot {
-    chatBotGetStreams :: route :- "streams" :> Post '[JSON] [ChannelName]
-  , chatBotGetCommands :: route :- "commands" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Command]
-  , chatBotGetQuotes :: route :- "quotes" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Quote]
+data ChatBot r = ChatBot {
+    chatBotGetStreams :: r :- "streams" :> Post '[JSON] [ChannelName]
+  , chatBotGetCommands :: r :- "commands" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Command]
+  , chatBotGetQuotes :: r :- "quotes" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Quote]
+  , chatBotConnectConnect :: r :- "connect" :> Capture "channel" ChannelName :> Get '[JSON] ()
+  , chatBotConnectDisconnect :: r :- "disconnect" :> Capture "channel" ChannelName :> Get '[JSON] ()
   } deriving Generic
 
 -- | The server that runs the ChatBotAPI
@@ -25,4 +26,6 @@ chatBotServer = toServant $ ChatBot {
     chatBotGetStreams = getStreams
   , chatBotGetCommands = getCommands
   , chatBotGetQuotes = getQuotes
+  , chatBotConnectConnect = channelConnect
+  , chatBotConnectDisconnect = channelDisconnect
   }

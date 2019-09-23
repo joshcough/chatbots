@@ -7,12 +7,11 @@ module ChatBot.Storage (
 import Protolude hiding (from)
 
 import Control.Monad.Except (MonadIO)
-import Data.Aeson ((.=))
 import Database.Esqueleto
 import Data.List (nub, sort)
 import Database.Persist.Postgresql (insert)
 import qualified Database.Persist.Postgresql as P
-import Logging (logDebug)
+import Logging (logDebug, (.=))
 import Types (AppT', runDb)
 
 import ChatBot.Config (ChannelName(..))

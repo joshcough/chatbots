@@ -7,6 +7,7 @@ module ChatBot.Config
     ChannelName(..)
   , ChatBotConfig(..)
   , ChatBotExecutionConfig(..)
+  , ChatBotFrontendMessage(..)
   , configFromEnv
   , configFromFile
   ) where
@@ -28,14 +29,17 @@ import ChatBot.Models (ChannelName(..))
 data ChatBotConfig = ChatBotConfig
   { _cbConfigNick :: Text
   , _cbConfigPass :: Text
-  , _cbConfigChannels :: [Text]
   } deriving stock (Eq, Ord, Show, Generic)
     deriving anyclass (FromJSON, ToJSON)
 
 makeClassy ''ChatBotConfig
 
-newtype ChatBotExecutionConfig = ChatBotExecutionConfig {
+data ChatBotFrontendMessage = ConnectTo ChannelName | DisconnectFrom ChannelName
+    deriving (Eq, Generic, Ord, Show, ToJSON, FromJSON)
+
+data ChatBotExecutionConfig = ChatBotExecutionConfig {
     _cbecOutputChan :: Chan RawIrcMsg
+  , _cbecInputChan :: Chan ChatBotFrontendMessage
 }
 
 makeClassy ''ChatBotExecutionConfig
@@ -50,5 +54,4 @@ configFromEnv :: IO ChatBotConfig
 configFromEnv = do
     _cbConfigNick <- S.lookupRequiredSetting "CHATBOT_NICK"
     _cbConfigPass <- S.lookupRequiredSetting "CHATBOT_PASS"
-    let _cbConfigChannels = ["#artofthetroll"] --, "#daut"]
     return ChatBotConfig{..}

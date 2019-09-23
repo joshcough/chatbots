@@ -145,12 +145,7 @@ acquireAwsConfig = do
 
 -- |
 acquireChatBotExecutionConfig :: IO ChatBotExecutionConfig
-acquireChatBotExecutionConfig = do
-    -- TODO: this isn't even being used...
-    -- i think i need to bring it back, and use it to terminate websockets and things
-    _cbecOutputChan <- newChan
-    _cbecInputChan <- newChan
-    return ChatBotExecutionConfig{..}
+acquireChatBotExecutionConfig = ChatBotExecutionConfig <$> newChan <*> newChan
 
 -- | rollbar
 mkRollbar :: IO RollbarCfg
