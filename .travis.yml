@@ -13,6 +13,7 @@ addons:
   apt:
     packages:
     - libgmp-dev
+  postgresql: "11.2"
 
 # The different configurations we want to test. You could also do things like
 # change flags or use --stack-yaml to point to a different file.
@@ -22,17 +23,25 @@ env:
 
 before_install:
 # Download and unpack the stack executable
-- mkdir -p ~/.local/bin
-- export PATH=$HOME/.local/bin:$PATH
-- travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+  - mkdir -p ~/.local/bin
+  - export PATH=$HOME/.local/bin:$PATH
+  - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+  - sudo apt-get update
+  - sudo apt-get --yes remove postgresql\*
+  - sudo apt-get install -y postgresql-11 postgresql-client-11
+  - sudo cp /etc/postgresql/{9.6,11}/main/pg_hba.conf
+  - sudo service postgresql restart 11
+
+before_script:
+  - psql --version
 
 services:
-- postgresql
+  - postgresql
 
 # This line does all of the work: installs GHC if necessary, build the library,
 # executables, and test suites, and runs the test suites. --no-terminal works
 # around some quirks in Travis's terminal implementation.
-script: stack --no-terminal --install-ghc build
+script: stack --no-terminal --install-ghc test
 
 # Caching so the next build will be fast too.
 cache:
