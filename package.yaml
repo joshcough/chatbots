@@ -73,6 +73,7 @@ library:
     - aeson
     - aeson-pretty
     - amazonka
+    - bcrypt
     - bytestring
     - containers
     - directory

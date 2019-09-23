@@ -67,9 +67,8 @@ processUserMessage rawIrcMsg userInfo channelName msgBody = do
 findAndRunCommand :: (QuotesDb m, CommandsDb m, MonadReader c m, HasConfig c) => ChatMessage -> m Response
 findAndRunCommand (ChatMessage _ channel input _) =
   let (name, rest) = T.breakOn " " input
-   in case Map.lookup name builtinCommands
+   in case Map.lookup name builtinCommands of
         -- default command
-            of
         Just (BotCommand args body) ->
           case parseString (optional whiteSpace >> args) mempty (cs rest) of
             Success a -> body channel a
@@ -77,7 +76,7 @@ findAndRunCommand (ChatMessage _ channel input _) =
         -- not a default command, look in the db for it.
         Nothing -> f <$> getCommandFromDb channel name
           where f (Just body) = RespondWith body
-                f Nothing = RespondWith "I couldn't find that command."
+                f Nothing = Nada
 
 say :: (MonadIO m, MonadReader c m, HasConfig c, Sender m) => ChannelName -> Text -> m ()
 say (ChannelName twitchChannel) msg = do

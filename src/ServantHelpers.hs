@@ -9,7 +9,7 @@ module ServantHelpers (
   , maybeOr401
   , maybeOr404
   , maybeOr500
---  , adminOr401
+  , adminOr401
 --  , callerIsUserOr401
 --  , callerIsUserOrIsAdminElse401
 --  , callerIsOnTeamOrIsAdminElse401
@@ -17,13 +17,11 @@ module ServantHelpers (
   , unexpected
   ) where
 
-import Protolude
-
+import Auth.Models (User(..))
 import Control.Monad.Except (MonadError)
-
---import Database.Persist.Postgresql (fromSqlKey)
 import Data.Text (Text)
 import Error (AppError(..), AuthError(..), ChatBotError, ChatBotError'(..))
+import Protolude
 import Servant
 import Servant.API.Generic hiding (toServant)
 import qualified Servant.API.Generic as S
@@ -72,9 +70,9 @@ maybeOr500 msg = maybeOrErr (AppUnexpectedError msg)
 maybeOrErr :: MonadError (AppError e) m => AppError e -> Maybe a -> (a -> m b) -> m b
 maybeOrErr err = flip $ maybe (throwError err)
 
----- |
---adminOr401 :: UserData u => MonadError (AppError e) m => u -> m a -> m a
---adminOr401 u m = orNoAuth m $ isAdmin u
+-- |
+adminOr401 :: MonadError (AppError e) m => User -> m a -> m a
+adminOr401 u m = orNoAuth m $ userAdmin u
 --
 ---- |
 --callerIsUserOr401 :: UserData u => MonadError (AppError e) m => u -> DbUserId -> m a -> m a
@@ -91,7 +89,7 @@ maybeOrErr err = flip $ maybe (throwError err)
 ---- |
 --userIsOnTeamElse401 :: UserData u => MonadError (AppError e) m => u -> DbTeamId -> m a -> m a
 --userIsOnTeamElse401 user tid m = orNoAuth m $ getTeamId user == fromSqlKey tid
---
----- |
---orNoAuth :: MonadError (AppError e) m => m a -> Bool -> m a
---orNoAuth m b = if b then m else throwError (AppAuthError NoAuthError)
+
+-- |
+orNoAuth :: MonadError (AppError e) m => m a -> Bool -> m a
+orNoAuth m b = if b then m else throwError (AppAuthError NoAuthError)

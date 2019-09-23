@@ -3,6 +3,15 @@ Created: 2019-07-06 23:32:00.000000 UTC
 Depends:
 Apply: |
 
+    CREATE TABLE users (
+        id SERIAL PRIMARY KEY,
+        name character varying NOT NULL,
+        email character varying NOT NULL,
+        hashed_password character varying NOT NULL,
+        admin boolean NOT NULL,
+        Unique (email)
+    );
+
     CREATE TABLE commands (
         id SERIAL PRIMARY KEY,
         channel character varying NOT NULL,

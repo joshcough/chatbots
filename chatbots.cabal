@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 39cde8a2c6c21a380ce289e3974f9a166fd3356d0ab5d1556484770c0ce328f7
+-- hash: 0a39203dc4fa193dd4f93edeb252ee3164189a15ba72115a401f4fef62d6e4a7
 
 name:           chatbots
 version:        0.1.0.0
@@ -27,8 +27,11 @@ source-repository head
 library
   exposed-modules:
       Api
+      Auth.DatabaseModels
+      Auth.LoginAPI
       Auth.Models
       Auth.PSBridge
+      Auth.UserStorage
       ChatBot.Config
       ChatBot.DatabaseModels
       ChatBot.Models
@@ -61,6 +64,7 @@ library
     , aeson-pretty
     , amazonka
     , base
+    , bcrypt
     , bytestring
     , containers
     , directory

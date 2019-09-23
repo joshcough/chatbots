@@ -63,7 +63,6 @@
     <orderEntry type="library" name="websockets-0.12.5.3" level="project" />
     <orderEntry type="library" name="hspec-2.7.1" level="project" />
     <orderEntry type="library" name="postgres-options-0.1.0.1" level="project" />
-    <orderEntry type="library" name="tmp-postgres-0.2.0.0" level="project" />
     <orderEntry type="library" name="turtle-1.5.14" level="project" />
     <orderEntry type="library" name="attoparsec-0.13.2.3" level="project" />
     <orderEntry type="library" name="base-compat-0.10.5" level="project" />
@@ -231,5 +230,11 @@
     <orderEntry type="library" name="x509-validation-1.6.11" level="project" />
     <orderEntry type="library" name="cereal-0.5.8.1" level="project" />
     <orderEntry type="library" name="vector-th-unbox-0.2.1.6" level="project" />
+    <orderEntry type="library" name="bcrypt-0.0.11" level="project" />
+    <orderEntry type="library" name="tmp-postgres-0.3.0.0" level="project" />
+    <orderEntry type="library" name="data-default-0.7.1.1" level="project" />
+    <orderEntry type="library" name="data-default-instances-containers-0.0.1" level="project" />
+    <orderEntry type="library" name="data-default-instances-dlist-0.0.1" level="project" />
+    <orderEntry type="library" name="data-default-instances-old-locale-0.0.1" level="project" />
   </component>
 </module>
