@@ -34,6 +34,7 @@ before_install:
 
 before_script:
   - psql --version
+  - initdb --version
 
 services:
   - postgresql
