@@ -3,6 +3,7 @@ module Api (app) where
 import Protolude
 
 import Auth.Models (User)
+import Auth.LoginAPI (LoginAPI, loginServer)
 import ChatBot.Server.ChatBotAPI
   ( ProtectedChatBotAPI
   , UnprotectedChatBotAPI
@@ -33,14 +34,16 @@ protectedServer u = toServant $ ProtectedServer {
 type Unprotected = Compose UnprotectedServer
 
 -- | Not protected by any authorization. Anyone can visit these pages.
-newtype UnprotectedServer route = UnprotectedServer {
-    unprotectedChatBotApi :: route :- UnprotectedChatBotAPI
+data UnprotectedServer route = UnprotectedServer {
+    unprotectedLoginApi :: route :- LoginAPI
+  , unprotectedChatBotApi :: route :- UnprotectedChatBotAPI
   } deriving Generic
 
 -- |
 unprotectedServer :: (MonadIO m) => ServerT Unprotected (AppT m)
 unprotectedServer = toServant $ UnprotectedServer {..}
     where
+    unprotectedLoginApi = loginServer
     unprotectedChatBotApi = chatBotServerUnprotected
 
 -- | The main application for the Proverlays backend.

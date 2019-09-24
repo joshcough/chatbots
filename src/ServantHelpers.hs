@@ -10,6 +10,7 @@ module ServantHelpers (
   , maybeOr404
   , maybeOr500
   , adminOr401
+  , eitherOr401
 --  , callerIsUserOr401
 --  , callerIsUserOrIsAdminElse401
 --  , callerIsOnTeamOrIsAdminElse401
@@ -63,12 +64,20 @@ maybeOr401 :: MonadError (AppError e) m => Maybe a -> (a -> m b) -> m b
 maybeOr401 = maybeOrErr (AppAuthError NoAuthError)
 
 -- |
+eitherOr401 :: MonadError (AppError e) m => Either e' a -> (a -> m b) -> m b
+eitherOr401 = eitherOrErr (AppAuthError NoAuthError)
+
+-- |
 maybeOr500 :: MonadError (AppError e) m => Text -> Maybe a -> (a -> m b) -> m b
 maybeOr500 msg = maybeOrErr (AppUnexpectedError msg)
 
 -- |
 maybeOrErr :: MonadError (AppError e) m => AppError e -> Maybe a -> (a -> m b) -> m b
 maybeOrErr err = flip $ maybe (throwError err)
+
+-- |
+eitherOrErr :: MonadError (AppError e) m => AppError e -> Either e' a -> (a -> m b) -> m b
+eitherOrErr err e f = either (const $ throwError err) f e
 
 -- |
 adminOr401 :: MonadError (AppError e) m => User -> m a -> m a

@@ -10,7 +10,9 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
 import GHC.Int (Int64)
-import Prim (String)
+import Prim (Boolean, String)
+import Data.Argonaut (class DecodeJson, class EncodeJson)
+import Data.Argonaut.Generic (genericDecodeJson, genericEncodeJson)
 
 import Prelude
 
@@ -19,14 +21,24 @@ newtype User
       { userId :: Int64
       , userName :: String
       , userEmail :: String
+      , userAdmin :: Boolean
       }
 
 
 derive instance eqUser :: Eq User
 derive instance genericUser :: Generic User _
 derive instance newtypeUser :: Newtype User _
+
+instance decodeUser :: DecodeJson User where
+    decodeJson = genericDecodeJson
+instance encodeUser :: EncodeJson User where
+    encodeJson = genericEncodeJson
+
 --------------------------------------------------------------------------------
-_User :: Iso' User { userId :: Int64, userName :: String, userEmail :: String }
+_User :: Iso' User { userId :: Int64
+                   , userName :: String
+                   , userEmail :: String
+                   , userAdmin :: Boolean }
 _User = _Newtype
 --------------------------------------------------------------------------------
 newtype CreateUser
