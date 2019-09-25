@@ -14,4 +14,5 @@ myTypes :: [SumType 'Haskell]
 myTypes = [
     let p = (Proxy :: Proxy User)                in equal p (mkSumType p)
   , let p = (Proxy :: Proxy CreateUser)          in equal p (mkSumType p)
+  , let p = (Proxy :: Proxy Login)               in equal p (mkSumType p)
   ]

@@ -11,16 +11,16 @@ module ServantHelpers (
   , maybeOr500
   , adminOr401
   , eitherOr401
---  , callerIsUserOr401
---  , callerIsUserOrIsAdminElse401
---  , callerIsOnTeamOrIsAdminElse401
---  , userIsOnTeamElse401
+  , callerIsUserOr401
+  , callerIsUserOrIsAdminElse401
   , unexpected
   ) where
 
 import Auth.Models (User(..))
+import Auth.DatabaseModels (DbUserId)
 import Control.Monad.Except (MonadError)
 import Data.Text (Text)
+import Database.Esqueleto (fromSqlKey)
 import Error (AppError(..), AuthError(..), ChatBotError, ChatBotError'(..))
 import Protolude
 import Servant
@@ -82,22 +82,14 @@ eitherOrErr err e f = either (const $ throwError err) f e
 -- |
 adminOr401 :: MonadError (AppError e) m => User -> m a -> m a
 adminOr401 u m = orNoAuth m $ userAdmin u
+
+-- |
+callerIsUserOr401 :: MonadError (AppError e) m => User -> DbUserId -> m a -> m a
+callerIsUserOr401 caller uid m = orNoAuth m $ userId caller == fromSqlKey uid
 --
----- |
---callerIsUserOr401 :: UserData u => MonadError (AppError e) m => u -> DbUserId -> m a -> m a
---callerIsUserOr401 caller uid m = orNoAuth m $ getUserId caller == fromSqlKey uid
---
----- |
---callerIsUserOrIsAdminElse401 :: UserData u => MonadError (AppError e) m => u -> DbUserId -> m a -> m a
---callerIsUserOrIsAdminElse401 caller uid m = orNoAuth m $ isAdmin caller || getUserId caller == fromSqlKey uid
---
----- |
---callerIsOnTeamOrIsAdminElse401 :: UserData u => MonadError (AppError e) m => u -> DbTeamId -> m a -> m a
---callerIsOnTeamOrIsAdminElse401 caller tid m = orNoAuth m $ isAdmin caller || getTeamId caller == fromSqlKey tid
---
----- |
---userIsOnTeamElse401 :: UserData u => MonadError (AppError e) m => u -> DbTeamId -> m a -> m a
---userIsOnTeamElse401 user tid m = orNoAuth m $ getTeamId user == fromSqlKey tid
+-- |
+callerIsUserOrIsAdminElse401 :: MonadError (AppError e) m => User -> DbUserId -> m a -> m a
+callerIsUserOrIsAdminElse401 caller uid m = orNoAuth m $ userAdmin caller || userId caller == fromSqlKey uid
 
 -- |
 orNoAuth :: MonadError (AppError e) m => m a -> Bool -> m a

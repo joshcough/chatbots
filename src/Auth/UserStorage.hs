@@ -1,6 +1,7 @@
 
 module Auth.UserStorage (
     UserDb(..)
+  , encryptPassword
   ) where
 
 import Auth.DatabaseModels (DbUser(..), DbUserId)
@@ -47,12 +48,7 @@ instance MonadIO m => UserDb (SqlPersistT m) where
     createUser (CreateUser name email pw) =
         liftIO (encryptPassword pw) >>= \case
             Nothing -> return Nothing
-            Just pw' -> do
-               newUser <- insert $ DbUser name email (decodeUtf8 pw') False
-               return . Just $ newUser
-        where
-        encryptPassword :: Text -> IO (Maybe ByteString)
-        encryptPassword = hashPasswordUsingPolicy slowerBcryptHashingPolicy . encodeUtf8
+            Just pw' -> fmap Just $ insert $ DbUser name email (decodeUtf8 pw') False
 
     updateUserIfExists uid (User _ name email _) =
         getEntity uid >>= \case
@@ -63,3 +59,7 @@ instance MonadIO m => UserDb (SqlPersistT m) where
 -- |
 entityToUser :: Entity DbUser -> User
 entityToUser (Entity k DbUser {..}) = User (fromSqlKey k) dbUserName dbUserEmail dbUserAdmin
+
+-- |
+encryptPassword :: Text -> IO (Maybe ByteString)
+encryptPassword = hashPasswordUsingPolicy slowerBcryptHashingPolicy . encodeUtf8

@@ -4,6 +4,7 @@ import Protolude
 
 import Auth.Models (User)
 import Auth.LoginAPI (LoginAPI, loginServer)
+import Auth.UserAPI (UserAPI, userServer)
 import ChatBot.Server.ChatBotAPI
   ( ProtectedChatBotAPI
   , UnprotectedChatBotAPI
@@ -22,13 +23,15 @@ type TopLevelAPI        = TopLevelAPI' '[Cookie, JWT]
 type Protected = Compose ProtectedServer
 
 -- | Lives behind authorization. Only logged in users can visit these pages.
-newtype ProtectedServer route = ProtectedServer {
+data ProtectedServer route = ProtectedServer {
     protectedChatBotApi :: route :- ProtectedChatBotAPI
+  , protectedUserApi :: route :- UserAPI
   } deriving Generic
 
 protectedServer :: MonadIO m => User -> ServerT Protected (AppT m)
 protectedServer u = toServant $ ProtectedServer {
     protectedChatBotApi = chatBotServerProtected u
+  , protectedUserApi = userServer u
 }
 
 type Unprotected = Compose UnprotectedServer
