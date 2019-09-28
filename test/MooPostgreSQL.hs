@@ -1,26 +1,21 @@
 module MooPostgreSQL
-    ( runUpgrade
-    )
-where
-
-import Database.HDBC.PostgreSQL (connectPostgreSQL)
-import Prelude  hiding (lookup)
-import System.Exit
+  ( runUpgrade
+  ) where
 
 import Data.Text (Text, unpack)
+import Database.HDBC.PostgreSQL (connectPostgreSQL)
 import Database.Schema.Migrations.Backend.HDBC (hdbcBackend)
-import Moo.Core
-import Moo.Main
+import Moo.Core (CommandOptions(..), loadConfiguration, makeParameters)
+import Moo.Main (mainWithParameters, procArgs)
+import Protolude
+import System.Exit (exitFailure)
 
 runUpgrade :: Text -> IO ()
 runUpgrade connStr = do
   let args = ["upgrade"]
   (_, opts, _) <- procArgs args
-  loadedConf <- loadConfiguration $ _configFilePath opts
-  case loadedConf of
+  loadConfiguration (_configFilePath opts) >>= \case
     Left e -> putStrLn e >> exitFailure
     Right conf -> do
       connection <- connectPostgreSQL $ unpack connStr
-      let backend = hdbcBackend connection
-          parameters = makeParameters conf backend
-      mainWithParameters args parameters
+      mainWithParameters args $ makeParameters conf (hdbcBackend connection)
