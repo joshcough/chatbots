@@ -35,8 +35,8 @@ before_install:
 before_script:
   - psql --version
   - ls -lsa /usr/lib/postgresql
-  - sudo -u postgres ls -lsa /usr/lib/postgresql/bin/*
-  - sudo -u postgres /usr/lib/postgresql/bin/initdb --version
+  - sudo -u postgres ls -lsa /usr/lib/postgresql/11/bin/*
+  - sudo -u postgres /usr/lib/postgresql/11/bin/initdb --version
 
 services:
   - postgresql
@@ -44,7 +44,7 @@ services:
 # This line does all of the work: installs GHC if necessary, build the library,
 # executables, and test suites, and runs the test suites. --no-terminal works
 # around some quirks in Travis's terminal implementation.
-script: PATH=/usr/lib/postgresql/bin:$PATH stack --no-terminal --install-ghc test
+script: PATH=/usr/lib/postgresql/11/bin:$PATH stack --no-terminal --install-ghc test
 
 # Caching so the next build will be fast too.
 cache:
