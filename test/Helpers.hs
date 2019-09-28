@@ -13,9 +13,8 @@ import qualified Database.Postgres.Temp as PG
 import Settings (lookupReadableSetting)
 import System.IO (IOMode(WriteMode), openFile)
 import Test.Hspec
-import Turtle.Prelude hiding (stderr, stdout)
-import Turtle.Shell
 import Types (runAppToIO, runDb)
+import qualified MooPostgreSQL as Moo
 
 --
 -- NOTE: if having trouble with db, do this: DBLOGGING=VERBOSE stack test
@@ -35,7 +34,9 @@ withDB = beforeAll getDatabase . afterAll fst . after (truncateDb . snd)
     getDatabase = lookupReadableSetting "TEST_TYPE" Local >>= \case
         Local -> createTmpDatabase
         Travis -> do
-          config <- acquireConfigWithConnStr "postgresql://postgres@localhost/travis_ci_test"
+          let connStr = "postgresql://postgres@localhost/travis_ci_test"
+          config <- acquireConfigWithConnStr connStr
+          Moo.runUpgrade connStr
           pure (pure (), config)
 
     createTmpDatabase :: IO (IO (), Config)
@@ -49,7 +50,7 @@ withDB = beforeAll getDatabase . afterAll fst . after (truncateDb . snd)
     truncateDb :: Config -> IO ()
     truncateDb config = runAppToIO config . runDb $ truncateTables
       where
-      tables = ["commands", "quotes"]
+      tables = ["users", "commands", "quotes"]
       truncateStatement = "TRUNCATE TABLE " <> intercalate ", " tables <> " RESTART IDENTITY CASCADE"
       truncateTables = rawExecute (pack truncateStatement) []
 
@@ -66,11 +67,7 @@ withDB = beforeAll getDatabase . afterAll fst . after (truncateDb . snd)
         VERBOSE -> pure (stdout, stderr)
         SILENT -> (,) <$> devNull <*> devNull
       db <- PG.startWithHandles PG.Localhost defaultOptions outHandle errHandle >>= either throwIO pure
-      restore (setupDB db >> pure (db, cleanup db)) `onException` cleanup db
+      restore (Moo.runUpgrade (toConnectionString db) >> pure (db, cleanup db)) `onException` cleanup db
       where
         devNull = openFile "/dev/null" WriteMode
-        setupDB db =
-          sh $ do
-            export "DBM_DATABASE" $ toConnectionString db
-            proc "moo-postgresql" ["upgrade"] empty
         cleanup = void . PG.stop

@@ -16,6 +16,14 @@ extra-deps:
 - port-utils-0.2.1.0@sha256:0e7cdb91e40cadedc528260bd5919414876c6f9eb250f9f54ace9fe7a12384ab
 - postgres-options-0.1.0.1@sha256:42331140b3c2e608c87005bc7636271b53db20fce7fd091cd4341128db3b47ad
 - tmp-postgres-0.3.0.0
+- HDBC-postgresql-2.3.2.7
+- dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075,5270
+- time-1.6.0.1@sha256:492067e1b6973db9df64bf0bc851985dabea138d8a35414fe9ee6870b4702c66,4232
+- yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d,1887
+- HsSyck-0.53@sha256:a987ae2163811bdebfd4f2e2dcb7c75e9d2d68afd97d196f969d6a74786e43da,1818
+- directory-1.3.4.0@sha256:500019f04494324d1df16cf83eefeb3f809b2b20b32a32ccd755ee0439c18bfd,2829
+- process-1.6.5.1@sha256:77a9afeb676357f67fe5cf1ad79aca0745fb6f7fb96b786d510af08f622643f6,2468
+- unix-2.7.2.2@sha256:e69269a17b9fa26cb77f3f55e86c39d0a4940ccfa0c4bc20826919d2572076ad,3496
 - git: https://github.com/bitemyapp/esqueleto.git
   commit: 3db6361d2c42b37e782ff05830c07d88a1afdf91
 - git: https://github.com/ralphmorton/nano-http.git

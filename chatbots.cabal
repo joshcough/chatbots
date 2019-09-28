@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ff31b5dbf7db1ebbe83add952e8a3807b7ae5f6a70f80b7dcb8d44d2389258f5
+-- hash: 0f51d74290dc14511a68628daaceab55866dbb4be8801f89ea6727b2e55cf4dc
 
 name:           chatbots
 version:        0.1.0.0
@@ -138,17 +138,22 @@ test-suite spec
       ChatBotDbSpec
       ChatBotMessageProcessorSpec
       Helpers
+      MooPostgreSQL
       Paths_chatbots
   hs-source-dirs:
       test
   default-extensions: ApplicativeDo BangPatterns ConstraintKinds DataKinds DefaultSignatures DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DerivingStrategies DeriveTraversable EmptyCase ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedLabels OverloadedStrings PatternSynonyms RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TemplateHaskell TupleSections TypeApplications TypeFamilies TypeFamilyDependencies TypeOperators UndecidableInstances
   ghc-options: -Wall -Werror -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Wimplicit-prelude -Wall -Werror -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Wimplicit-prelude -threaded
   build-depends:
-      base
+      HDBC >=2.2.1
+    , HDBC-postgresql ==2.3.2.7
+    , base
     , chatbots
+    , dbmigrations >=2
     , hspec
     , persistent
     , postgres-options
+    , process >=1.1
     , protolude
     , string-conversions
     , text
