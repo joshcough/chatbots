@@ -26,16 +26,24 @@ import Types (runAppToIO, runDb)
 --- Setup and teardown helpers
 ---
 data DBLogging = VERBOSE | SILENT deriving Read
+data TestType = Local | Travis deriving Read
 
-withDB :: SpecWith ((DB, IO ()), Config) -> Spec
-withDB = beforeAll createDatabase . afterAll (snd . fst) . after (truncateDb . snd)
+withDB :: SpecWith (IO (), Config) -> Spec
+withDB = beforeAll getDatabase . afterAll fst . after (truncateDb . snd)
   where
-    createDatabase :: IO ((DB, IO ()), Config)
-    createDatabase = do
+    getDatabase :: IO (IO (), Config)
+    getDatabase = lookupReadableSetting "TEST_TYPE" Local >>= \case
+        Local -> createTmpDatabase
+        Travis -> do
+          config <- acquireConfigWithConnStr "postgresql://postgres@localhost/travis_ci_test"
+          pure (pure (), config)
+
+    createTmpDatabase :: IO (IO (), Config)
+    createTmpDatabase = do
       verbosity <- lookupReadableSetting "DBLOGGING" SILENT
-      (db, io) <- startDb verbosity
+      (db, cleanup) <- startDb verbosity
       config <- acquireConfigWithConnStr $ toConnectionString db
-      return ((db, io), config)
+      return (cleanup, config)
 
     -- https://stackoverflow.com/questions/5342440/reset-auto-increment-counter-in-postgres
     truncateDb :: Config -> IO ()
