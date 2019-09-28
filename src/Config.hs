@@ -3,8 +3,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Config (
-    AwsConfig(..)
-  , Config(..)
+    Config(..)
   , ConfigAndConnection(..)
   , Environment(..)
   , acquireConfig
@@ -16,12 +15,8 @@ import Prelude (userError)
 import Protolude
 
 import Control.Concurrent.Chan (newChan)
-import Control.Lens ((<&>), set)
 import Control.Lens.TH (makeClassy)
 import Control.Monad.Logger (runNoLoggingT)
-import Control.Monad.Trans.AWS (Credentials(Discover), LogLevel(Debug), envLogger, newEnv, newLogger)
-import qualified Control.Monad.Trans.AWS as AWS
-import Data.Monoid ((<>))
 import Data.Text (Text, unpack)
 import Database.Persist.Postgresql (ConnectionPool, createPostgresqlPool)
 import Database.PostgreSQL.Simple.Internal (postgreSQLConnectionString)
@@ -30,7 +25,6 @@ import Network.HTTP.Nano (HasHttpCfg(..), HttpCfg(..), tlsManager)
 import Network.Wai.Handler.Warp (Port)
 import qualified Network.WebSockets as WS
 import Servant.Auth.Server (CookieSettings, JWTSettings, defaultCookieSettings, defaultJWTSettings) --, generateKey)
-import System.IO (stdout)
 import Web.Rollbar (HasRollbarCfg(..), RollbarCfg(..))
 import qualified Web.Rollbar as RB
 
@@ -48,15 +42,6 @@ data Environment
     | Production
     deriving (Eq, Show, Read)
 
--- | The AWS Config for our application
-data AwsConfig = AwsConfig
-  { _awsConfigS3RootUrl            :: Text
-  , _awsConfigProverlaysBucketName :: Text
-  , _awsConfigProverlaysBucketUrl  :: Text
-  , _awsConfigEnv                  :: AWS.Env
-  }
-makeClassy ''AwsConfig
-
 -- | The Config for our application
 data Config = Config
     { _configHost :: Text
@@ -67,7 +52,6 @@ data Config = Config
     , _configHttp :: HttpCfg
     , _configCookies :: CookieSettings
     , _configJWT :: JWTSettings
-    , _configAwsEnv :: AwsConfig
     , _configRollbar :: RollbarCfg
     , _configLogging :: LoggingCfg
     , _configChatBot :: ChatBotConfig
@@ -117,7 +101,6 @@ acquireConfigWithConnStr _configConnStr = do
     _configHttp             <- mkHttp
     let _configCookies      = defaultCookieSettings
     _configJWT              <- acquireJWT _configEnv
-    _configAwsEnv           <- acquireAwsConfig
     _configRollbar          <- mkRollbar
     _configLogging          <- mkLoggingCfg
     _configChatBot          <- configFromEnv
@@ -131,17 +114,6 @@ acquireJWT env = defaultJWTSettings <$> mkJWT' env
     mkJWT' Production = KG.readProdKey
     mkJWT' Development = KG.readDevKey
     mkJWT' Test = KG.readTestKey
-
-
--- | Allocates resources for AwsConfig
-acquireAwsConfig :: IO AwsConfig
-acquireAwsConfig = do
-    _awsConfigS3RootUrl               <- S.lookupTextSetting "AWS_S3_ROOT_URL" "https://s3.amazonaws.com/"
-    _awsConfigProverlaysBucketName    <- S.lookupTextSetting "PROVERLAYS_BUCKET" "proverlays"
-    let _awsConfigProverlaysBucketUrl = _awsConfigS3RootUrl <> _awsConfigProverlaysBucketName <> "/"
-    _awsConfigEnv                     <- do lgr <- newLogger Debug stdout
-                                            newEnv Discover <&> set envLogger lgr
-    return AwsConfig {..}
 
 -- |
 acquireChatBotExecutionConfig :: IO ChatBotExecutionConfig
