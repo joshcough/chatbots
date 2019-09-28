@@ -36,7 +36,7 @@ before_script:
   - psql --version
   - ls /usr/lib/postgresql/*
   - ls /usr/lib/postgresql/bin/*
-  - /usr/lib/postgresql/bin/initdb --version
+  - sudo -u postgres -- /usr/lib/postgresql/bin/initdb --version
 
 services:
   - postgresql
