@@ -52,9 +52,34 @@ newtype CreateUser
 derive instance eqCreateUser :: Eq CreateUser
 derive instance genericCreateUser :: Generic CreateUser _
 derive instance newtypeCreateUser :: Newtype CreateUser _
+
+instance decodeCreateUser :: DecodeJson CreateUser where
+    decodeJson = genericDecodeJson
+instance encodeCreateUser :: EncodeJson CreateUser where
+    encodeJson = genericEncodeJson
+
 --------------------------------------------------------------------------------
 _CreateUser :: Iso' CreateUser { createUserName :: String
                                , createUserEmail :: String
                                , createUserPassword :: String }
 _CreateUser = _Newtype
+--------------------------------------------------------------------------------
+newtype Login
+  = Login
+      { loginEmail :: String
+      , loginPassword :: String
+      }
+
+
+derive instance eqLogin :: Eq Login
+derive instance genericLogin :: Generic Login _
+derive instance newtypeLogin :: Newtype Login _
+
+instance decodeLogin :: DecodeJson Login where
+    decodeJson = genericDecodeJson
+instance encodeLogin :: EncodeJson Login where
+    encodeJson = genericEncodeJson
+--------------------------------------------------------------------------------
+_Login :: Iso' Login { loginEmail :: String, loginPassword :: String }
+_Login = _Newtype
 --------------------------------------------------------------------------------
