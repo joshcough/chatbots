@@ -17,10 +17,11 @@ type UnprotectedChatBotAPI = "chatbot" :> Compose ChatBotUnprotected
 --type ProtectedChatBotAPI= "chatbot" :> Compose ChatBotProtected
 
 data ChatBotUnprotected r = ChatBotUnprotected {
-    chatBotGetStreams :: r :- "streams" :> Post '[JSON] [ChannelName]
-  , chatBotGetCommands :: r :- "commands" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Command]
+    chatBotGetCommands :: r :- "commands" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Command]
   , chatBotGetQuestions :: r :- "questions" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Question]
+  , chatBotGetQuestionStreams :: r :- "questions" :> "streams" :> Post '[JSON] [ChannelName]
   , chatBotGetQuotes :: r :- "quotes" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Quote]
+  , chatBotGetQuoteStreams :: r :- "quotes" :> "streams" :> Post '[JSON] [ChannelName]
   --
   , chatBotConnectConnect :: r :- "connect" :> Capture "channel" ChannelName :> Get '[JSON] ()
   , chatBotConnectDisconnect :: r :- "disconnect" :> Capture "channel" ChannelName :> Get '[JSON] ()
@@ -34,7 +35,8 @@ data ChatBotUnprotected r = ChatBotUnprotected {
 -- | The server that runs the ChatBotAPI
 chatBotServerUnprotected :: (MonadIO m) => ServerT UnprotectedChatBotAPI (AppT m)
 chatBotServerUnprotected = toServant $ ChatBotUnprotected {
-    chatBotGetStreams = getStreams
+    chatBotGetQuoteStreams = getQuoteStreams
+  , chatBotGetQuestionStreams = getQuestionStreams
   , chatBotGetCommands = getCommands
   , chatBotGetQuestions = getQuestions
   , chatBotGetQuotes = getQuotes

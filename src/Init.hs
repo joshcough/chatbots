@@ -11,7 +11,7 @@ import Network.Wai.Handler.Warp (run)
 import Network.Wai.Middleware.Cors (simpleCors)
 
 import Api (app)
-import ChatBot.WebSocket.ChatBotWS (runBot)
+import ChatBot.WebSocket.ChatBotWS (runBot, runImporter, runInserter)
 import Config (Config(..), acquireConfig)
 
 -- | An action that creates a WAI 'Application' together with its resources,
@@ -27,6 +27,12 @@ runAppAndBot = bracket acquireConfig shutdownApp runApp'
 
 botOnly :: IO ()
 botOnly = bracket acquireConfig shutdownApp runBot
+
+importer :: IO ()
+importer = bracket acquireConfig shutdownApp runImporter
+
+inserter :: IO ()
+inserter = bracket acquireConfig shutdownApp runInserter
 
 appOnly :: IO ()
 appOnly = bracket acquireConfig shutdownApp runApp'

@@ -12,7 +12,8 @@ import Protolude
 import Types (AppT')
 
 class Monad m => ChatBotServerMonad m where
-  getStreams :: m [ChannelName]
+  getQuoteStreams :: m [ChannelName]
+  getQuestionStreams :: m [ChannelName]
   getCommands :: ChannelName -> m [Command]
   getQuotes :: ChannelName -> m [Quote]
   getQuestions :: ChannelName -> m [Question]
@@ -20,7 +21,8 @@ class Monad m => ChatBotServerMonad m where
   channelDisconnect :: ChannelName -> m ()
 
 instance (HasConfig c, MonadIO m) => ChatBotServerMonad (AppT' e m c) where
-  getStreams = Storage.getQuestionsStreams
+  getQuoteStreams = Storage.getQuoteStreams
+  getQuestionStreams = Storage.getQuestionsStreams
   getCommands = Storage.getCommands
   getQuestions = Storage.getQuestions
   getQuotes = Storage.getQuotes

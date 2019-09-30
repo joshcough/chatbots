@@ -7,18 +7,17 @@ module ChatBot.WebSocket.Commands
 
 import Protolude
 
+import ChatBot.Models (ChannelName(..), Question(..), Quote(..))
+import ChatBot.Storage (CommandsDb(..), QuestionsDb(..), QuotesDb(..))
+import ChatBot.WebSocket.Parsers (anything, number, slurp)
+import Config (Config(..), Environment(Development), HasConfig(..))
+import Control.Lens (view)
 import qualified Data.Map as Map
 import Data.String.Conversions (cs)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Text.Trifecta (Parser)
-
-import ChatBot.Models (ChannelName(..), Question(..)) -- Command(..), Question(..), Quote(..))
-import ChatBot.Storage (CommandsDb(..), QuestionsDb(..), QuotesDb(..))
-import ChatBot.WebSocket.Parsers (anything, number, slurp)
 --import qualified ChatBot.WebSocket.Parsers as P
-import Config (Config(..), HasConfig(..),  Environment(Development))
-import Control.Lens (view)
 
 data BotCommand m =
   forall a. BotCommand (Parser a) (ChannelName -> a -> m Response)
@@ -32,17 +31,16 @@ type Db m = (CommandsDb m, QuestionsDb m, QuotesDb m)
 builtinCommands :: (Db m, MonadReader c m, HasConfig c) => Map Text (BotCommand m)
 builtinCommands =
   Map.fromList
---    [ ("!addQuote", addQuoteCommand)
---    , ("!quote", getQuoteCommand)
---    , ("!quotes", getQuotesUrlCommand)
-    [ ("!addQuestion", addQuestionCommand)
+    [ ("!addQuote", addQuoteCommand)
+    , ("!quote", getQuoteCommand)
+    , ("!quotes", getQuotesUrlCommand)
+    , ("!addQuestion", addQuestionCommand)
     , ("!question", getQuestionCommand)
     , ("!questions", getQuestionsUrlCommand)
 --    , ("!addComm", addCommandCommand)
 --    , ("!delComm", deleteCommandCommand)
     ]
 
-{-
 addQuoteCommand :: QuotesDb m => BotCommand m
 addQuoteCommand =
   BotCommand slurp $ \c t -> do
@@ -57,14 +55,13 @@ getQuoteCommand = BotCommand number $ \c n -> f n <$> getQuote c n
 
 getQuotesUrlCommand :: (CommandsDb m, MonadReader c m, HasConfig c) => BotCommand m
 getQuotesUrlCommand = BotCommand anything $ \(ChannelName c) _ -> do
-    conf <- view config
-    let env = _configEnv conf
-    let f p = "https://" <> _configHost conf <> p <> "/" <> "?stream=" <> T.drop 1 c
-    let url = if env == Development
-              then  f (":" <> show (_configPort conf))
+    Config{..} <- view config
+    let f p = "https://" <> _configHost <> p <> "/" <> "?stream=" <> T.drop 1 c <> "&view=quotes"
+    let url = if _configEnv == Development
+              then  f (":" <> show _configPort)
               else f ""
     pure $ RespondWith url
--}
+
 addQuestionCommand :: QuestionsDb m => BotCommand m
 addQuestionCommand =
   BotCommand slurp $ \c t -> do
@@ -79,11 +76,10 @@ getQuestionCommand = BotCommand number $ \c n -> f n <$> getQuestion c n
 
 getQuestionsUrlCommand :: (QuestionsDb m, MonadReader c m, HasConfig c) => BotCommand m
 getQuestionsUrlCommand = BotCommand anything $ \(ChannelName c) _ -> do
-    conf <- view config
-    let env = _configEnv conf
-    let f p = "https://" <> _configHost conf <> p <> "/" <> "?stream=" <> T.drop 1 c
-    let url = if env == Development
-              then  f (":" <> show (_configPort conf))
+    Config{..} <- view config
+    let f p = "https://" <> _configHost <> p <> "/" <> "?stream=" <> T.drop 1 c <> "&view=questions"
+    let url = if _configEnv == Development
+              then  f (":" <> show _configPort)
               else f ""
     pure $ RespondWith url
 

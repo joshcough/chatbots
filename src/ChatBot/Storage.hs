@@ -29,7 +29,7 @@ class Monad m => CommandsDb m where
     getCommands :: ChannelName -> m [Command]
 
 class Monad m => QuotesDb m where
-    getStreams :: m [ChannelName]
+    getQuoteStreams :: m [ChannelName]
     insertQuote :: ChannelName -> Text -> m Quote
     getQuote :: ChannelName -> Int -> m (Maybe Quote)
     deleteQuote :: ChannelName -> Int -> m ()
@@ -66,7 +66,7 @@ instance (HasConfig c, MonadIO m) => CommandsDb (AppT' e m c) where
             pure command
 
 instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
-    getStreams = do
+    getQuoteStreams = do
         $(logDebug) "getStreams" []
         fmap (sort . nub . fmap dbQuoteToChannel) . runDb $ select $ from pure
     insertQuote c@(ChannelName channel) quoteText = do

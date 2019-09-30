@@ -2,7 +2,8 @@ module Network.Endpoints
     ( getCommands
     , getQuestions
     , getQuotes
-    , getStreams
+    , getQuestionStreams
+    , getQuoteStreams
     , loginToken
     , createUser
     ) where
@@ -19,8 +20,11 @@ import Data.Maybe (Maybe, fromMaybe)
 import Affjax.RequestBody as Request
 import Data.Argonaut.Decode (class DecodeJson)
 
-getStreams :: OpM (Array ChannelName)
-getStreams = doPost "/chatbot/streams" noData
+getQuestionStreams :: OpM (Array ChannelName)
+getQuestionStreams = doPost "/chatbot/questions/streams" noData
+
+getQuoteStreams :: OpM (Array ChannelName)
+getQuoteStreams = doPost "/chatbot/quotes/streams" noData
 
 getQuestions :: ChannelName -> OpM (Array Question)
 getQuestions c = doPost "/chatbot/questions" (jsonData c)
