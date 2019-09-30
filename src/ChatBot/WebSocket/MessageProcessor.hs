@@ -18,7 +18,7 @@ import ChatBot.Models (ChannelName(..), ChatMessage(..))
 import ChatBot.Storage (CommandsDb, QuestionsDb, QuotesDb(..))
 import ChatBot.WebSocket.Commands (BotCommand(..), Response(..), builtinCommands) --, getCommandFromDb)
 import Config (Config(..), HasConfig(..))
-import Control.Concurrent.Chan (writeChan)
+--import Control.Concurrent.Chan (writeChan)
 import Control.Lens (view)
 import qualified Data.Map as Map
 import Data.String.Conversions (cs)
@@ -43,20 +43,6 @@ class Monad m => MessageImporter m where
     processImportMessage :: RawIrcMsg -> m ()
 
 type Db m = (QuestionsDb m, QuotesDb m, CommandsDb m)
-
-instance (Monad m, MonadLoggerJSON m, MonadIO m, Db m, MonadReader c m, Sender m) => MessageImporter m
-    where
-    processImportMessage rawIrcMsg = processImportMessage' (cookIrcMsg rawIrcMsg)
-      where
-        processImportMessage' (Ping xs) = send (ircPong xs)
-        -- TODO: see if uesr is nightbot, dont worry about the !, just get the text from it
-        processImportMessage' (Privmsg userInfo channelName msgBody) = do
-          liftIO $ pure ()
-          $(logDebug) "got message from user" ["userInfo" .= userInfo, "channelName" .= channelName, "msgBody" .= msgBody, "msg" .= rawIrcMsg]
-          when (Irc.userName userInfo == "Nightbot") $ do
-            q <- insertQuote (ChannelName "daut") msgBody
-            $(logDebug) "added quote" ["quote" .= q]
-        processImportMessage' _ = pure () -- $(logDebug) "ignoring message" ["msg" .= rawIrcMsg]
 
 instance (Monad m, MonadLoggerJSON m, MonadIO m, Db m, MonadReader c m, HasConfig c, Sender m) => MessageProcessor m
     where
@@ -83,8 +69,8 @@ processUserMessage rawIrcMsg userInfo channelName msgBody =
         RespondWith t -> say cn t
         Nada -> return () -- T.putStrLn . cs $ encodePretty rawIrcMsg
       -- TODO: we really, really need to drain this channel or things will die fast.
-      outputChan <- _cbecOutputChan . _configChatBotExecution <$> view config
-      liftIO $ writeChan outputChan rawIrcMsg
+--      outputChan <- _cbecOutputChan . _configChatBotExecution <$> view config
+--      liftIO $ writeChan outputChan rawIrcMsg
     params -> $(logDebug) "Unhandled params" ["msg" .= params]
 
 findAndRunCommand :: (Db m, MonadReader c m, HasConfig c) => ChatMessage -> m Response
@@ -102,13 +88,13 @@ findAndRunCommand (ChatMessage _ channel input _) =
 --          where f (Just body) = RespondWith body
 --                f Nothing = Nada
 
-say :: (MonadIO m, MonadLoggerJSON m, MonadReader c m, HasConfig c, Sender m) => ChannelName -> Text -> m ()
+say :: (MonadIO m, MonadLoggerJSON m, Sender m) => ChannelName -> Text -> m ()
 say (ChannelName twitchChannel) msg = do
-  conf <- view config
+--  conf <- view config
   $(logDebug) "sending message" ["chan" .= twitchChannel, "msg" .= msg]
   send $ ircPrivmsg twitchChannel msg
-  let outputChan = _cbecOutputChan $ _configChatBotExecution conf
-  liftIO $ writeChan outputChan $ ircPrivmsg twitchChannel msg
+--  let outputChan = _cbecOutputChan $ _configChatBotExecution conf
+--  liftIO $ writeChan outputChan $ ircPrivmsg twitchChannel msg
 
 authorize :: (MonadIO m, MonadReader c m, HasConfig c, Sender m) => m ()
 authorize = do
@@ -130,8 +116,20 @@ frontendListener = do
     processChatBotFrontendMessage (ConnectTo c) = connectTo c
     processChatBotFrontendMessage (DisconnectFrom c) = disconnectFrom c
 
-connectTo :: (Sender m, MonadIO m, MonadLoggerJSON m, MonadReader c m, HasConfig c) => ChannelName -> m ()
+connectTo :: (Sender m, MonadIO m, MonadLoggerJSON m) => ChannelName -> m ()
 connectTo cn@(ChannelName c) = send (ircJoin ("#" <> c) Nothing) >> say cn "Hello!"
 
-disconnectFrom :: (MonadIO m, MonadLoggerJSON m, MonadReader c m, HasConfig c, Sender m) => ChannelName -> m ()
+disconnectFrom :: (MonadIO m, MonadLoggerJSON m, Sender m) => ChannelName -> m ()
 disconnectFrom cn@(ChannelName c) = say cn "Goodbye!" >> send (ircPart (mkId ("#" <> c)) "")
+
+instance (Monad m, MonadLoggerJSON m, Db m, MonadReader c m, Sender m) => MessageImporter m
+    where
+    processImportMessage rawIrcMsg = processImportMessage' (cookIrcMsg rawIrcMsg)
+      where
+        processImportMessage' (Ping xs) = send (ircPong xs)
+        processImportMessage' (Privmsg userInfo channelName msgBody) = do
+          $(logDebug) "got message from user" ["userInfo" .= userInfo, "channelName" .= channelName, "msgBody" .= msgBody, "msg" .= rawIrcMsg]
+          when (Irc.userName userInfo == "Nightbot") $ do
+            q <- insertQuote (ChannelName "daut") msgBody
+            $(logDebug) "added quote" ["quote" .= q]
+        processImportMessage' _ = pure ()
