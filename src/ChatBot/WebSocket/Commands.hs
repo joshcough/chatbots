@@ -1,5 +1,6 @@
 module ChatBot.WebSocket.Commands
   ( BotCommand(..)
+  , Permission(..)
   , Response(..)
   , builtinCommands
 --  , getCommandFromDb
@@ -12,19 +13,28 @@ import ChatBot.Storage (CommandsDb(..), QuestionsDb(..), QuotesDb(..))
 import ChatBot.WebSocket.Parsers (anything, number, slurp)
 import Config (Config(..), Environment(Development), HasConfig(..))
 import Control.Lens (view)
+import Data.Aeson (FromJSON, ToJSON)
 import qualified Data.Map as Map
 import Data.String.Conversions (cs)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Text.Trifecta (Parser)
---import qualified ChatBot.WebSocket.Parsers as P
 
-data BotCommand m =
-  forall a. BotCommand (Parser a) (ChannelName -> a -> m Response)
+data Permission = ModOnly | Anyone
+  deriving stock (Eq, Show)
 
-data Response
-  = RespondWith Text
-  | Nada
+data View = Questions | Quotes
+  deriving stock (Eq, Show)
+
+data BotCommand m = forall a. BotCommand {
+   bcPermission :: Permission
+ , bcParser :: Parser a
+ , bcExecute :: ChannelName -> a -> m Response
+ }
+
+data Response = RespondWith Text | Nada
+  deriving stock (Eq, Show, Generic)
+  deriving anyclass (FromJSON, ToJSON)
 
 type Db m = (CommandsDb m, QuestionsDb m, QuotesDb m)
 
@@ -42,46 +52,41 @@ builtinCommands =
     ]
 
 addQuoteCommand :: QuotesDb m => BotCommand m
-addQuoteCommand =
-  BotCommand slurp $ \c t -> do
+addQuoteCommand = BotCommand ModOnly slurp $ \c t -> do
     q <- insertQuote c t
     pure $ RespondWith $ cs $ "added quote #" ++ show (quoteQid q) ++ ": " ++ cs t
 
 getQuoteCommand :: QuotesDb m => BotCommand m
-getQuoteCommand = BotCommand number $ \c n -> f n <$> getQuote c n
+getQuoteCommand = BotCommand Anyone number $ \c n -> f n <$> getQuote c n
   where
     f n Nothing = RespondWith $ "I couldn't find quote: #" <> show n
     f _ (Just q) = RespondWith $ quoteBody q
 
 getQuotesUrlCommand :: (CommandsDb m, MonadReader c m, HasConfig c) => BotCommand m
-getQuotesUrlCommand = BotCommand anything $ \(ChannelName c) _ -> do
-    Config{..} <- view config
-    let f p = "https://" <> _configHost <> p <> "/" <> "?stream=" <> T.drop 1 c <> "&view=quotes"
-    let url = if _configEnv == Development
-              then  f (":" <> show _configPort)
-              else f ""
-    pure $ RespondWith url
+getQuotesUrlCommand = BotCommand Anyone anything $ \c _ -> RespondWith <$> mkUrl c Quotes
 
 addQuestionCommand :: QuestionsDb m => BotCommand m
-addQuestionCommand =
-  BotCommand slurp $ \c t -> do
+addQuestionCommand = BotCommand ModOnly slurp $ \c t -> do
     q <- insertQuestion c t
     pure $ RespondWith $ cs $ "added question #" ++ show (questionQid q) ++ ": " ++ cs t
 
 getQuestionCommand :: QuestionsDb m => BotCommand m
-getQuestionCommand = BotCommand number $ \c n -> f n <$> getQuestion c n
+getQuestionCommand = BotCommand Anyone number $ \c n -> f n <$> getQuestion c n
   where
     f n Nothing = RespondWith $ "I couldn't find question: #" <> show n
     f _ (Just q) = RespondWith $ questionBody q
 
 getQuestionsUrlCommand :: (QuestionsDb m, MonadReader c m, HasConfig c) => BotCommand m
-getQuestionsUrlCommand = BotCommand anything $ \(ChannelName c) _ -> do
-    Config{..} <- view config
-    let f p = "https://" <> _configHost <> p <> "/" <> "?stream=" <> T.drop 1 c <> "&view=questions"
-    let url = if _configEnv == Development
-              then  f (":" <> show _configPort)
-              else f ""
-    pure $ RespondWith url
+getQuestionsUrlCommand = BotCommand Anyone anything $ \c _ -> RespondWith <$> mkUrl c Questions
+
+mkUrl :: (MonadReader c m, HasConfig c) => ChannelName -> View -> m Text
+mkUrl (ChannelName c) viewtype = do
+  Config{..} <- view config
+  let ending = T.toLower . show $ viewtype
+  let f p = "https://" <> _configHost <> p <> "/" <> "?stream=" <> T.drop 1 c <> "&view=" <> ending
+  pure $ if _configEnv == Development
+           then f (":" <> show _configPort)
+           else f ""
 
 {-
 addCommandCommand :: CommandsDb m => BotCommand m

@@ -3,6 +3,7 @@
 module ChatBot.Models
   (
     ChatMessage(..)
+  , ChatUser(..)
   , ChannelName(..)
   , Command(..)
   , Question(..)
@@ -30,8 +31,15 @@ makeClassy ''ChannelName
 instance FromHttpApiData ChannelName where
     parseUrlPiece = pure . ChannelName
 
+data ChatUser = ChatUser {
+   cuUserName :: UserInfo
+ , cuMod :: Bool
+ , cuSubscriber :: Bool
+} deriving stock (Eq, Show, Generic)
+  deriving anyclass (FromJSON, ToJSON)
+
 data ChatMessage = ChatMessage {
-    cmUser :: Text
+    cmUser :: ChatUser
   , cmChannel :: ChannelName
   , cmBody :: Text
   , cmRawMessage :: RawIrcMsg

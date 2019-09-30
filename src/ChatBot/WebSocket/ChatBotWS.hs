@@ -54,12 +54,12 @@ twitchListener :: App ()
 twitchListener = forever $ do
     ConfigAndConnection _ conn <- ask
     msg <- liftIO $ T.strip <$> WS.receiveData conn
-    -- TODO: this print is suspect big time
-    liftIO $ print msg
-    maybe (throwError $ miscError "Server sent invalid message!") processMessage (parseRawIrcMsg msg)
+    maybe (throwError $ miscError "Server sent invalid message!")
+          processMessage
+          (parseRawIrcMsg msg)
 
-runImporter :: Config -> IO ()
-runImporter conf =
+runImporter :: ChannelName -> Config -> IO ()
+runImporter chan conf =
   withSocketsDo $ WS.runClient (cs twitchIrcUrl) 80 "/" $ \conn ->
     runAppToIO (ConfigAndConnection conf conn) $ do
         let daut = ChannelName "#daut"
@@ -69,12 +69,14 @@ runImporter conf =
         forM_ [0..561] $ \n -> do
             say daut $ "!quote" <> show (n::Int)
             msg <- liftIO $ T.strip <$> WS.receiveData conn
-            maybe (throwError $ miscError "Server sent invalid message!") processImportMessage (parseRawIrcMsg msg)
+            maybe (throwError $ miscError "Server sent invalid message!")
+                  (processImportMessage chan)
+                  (parseRawIrcMsg msg)
             liftIO $ threadDelay 2000000
         disconnectFrom daut
 
-runInserter :: Config -> IO ()
-runInserter conf =
+runInserter :: ChannelName -> Config -> IO ()
+runInserter cn conf =
     runAppToIO (ConfigAndConnection conf $ error "ununsed") $ do
         f <- liftIO $ readFile "./data/quotes_no_ids.txt"
-        forM_ (lines f) $ insertQuote (ChannelName "#daut")
+        forM_ (lines f) $ insertQuote cn

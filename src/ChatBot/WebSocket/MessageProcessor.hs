@@ -14,9 +14,9 @@ module ChatBot.WebSocket.MessageProcessor
 import Protolude
 
 import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..), ChatBotFrontendMessage(..))
-import ChatBot.Models (ChannelName(..), ChatMessage(..))
+import ChatBot.Models (ChannelName(..), ChatMessage(..), ChatUser(..))
 import ChatBot.Storage (CommandsDb, QuestionsDb, QuotesDb(..))
-import ChatBot.WebSocket.Commands (BotCommand(..), Response(..), builtinCommands) --, getCommandFromDb)
+import ChatBot.WebSocket.Commands (BotCommand(..), Permission(..), Response(..), Permission(..), builtinCommands) --, getCommandFromDb)
 import Config (Config(..), HasConfig(..))
 --import Control.Concurrent.Chan (writeChan)
 import Control.Lens (view)
@@ -28,7 +28,7 @@ import Irc.Commands (ircCapReq, ircJoin, ircNick, ircPart, ircPass, ircPing, irc
 import qualified Irc.Identifier as Irc
 import Irc.Identifier (mkId)
 import Irc.Message (IrcMsg(..), cookIrcMsg)
-import Irc.RawIrcMsg (RawIrcMsg(..))
+import Irc.RawIrcMsg (RawIrcMsg(..), TagEntry(..))
 import qualified Irc.UserInfo as Irc
 import Logging (MonadLoggerJSON, (.=), logDebug)
 import Text.Trifecta (Result(..), parseString, whiteSpace)
@@ -40,7 +40,7 @@ class Monad m => MessageProcessor m where
     processMessage :: RawIrcMsg -> m ()
 
 class Monad m => MessageImporter m where
-    processImportMessage :: RawIrcMsg -> m ()
+    processImportMessage :: ChannelName -> RawIrcMsg -> m ()
 
 type Db m = (QuestionsDb m, QuotesDb m, CommandsDb m)
 
@@ -62,31 +62,43 @@ processUserMessage ::
 processUserMessage rawIrcMsg userInfo channelName msgBody =
   case _msgParams rawIrcMsg of
     [_, _] -> do
-      let cn = ChannelName $ Irc.idText channelName
-      let m = ChatMessage (Irc.userName userInfo) cn msgBody rawIrcMsg
-      response <- findAndRunCommand m
-      case response of
-        RespondWith t -> say cn t
+      let chatMessage = createChatMessage rawIrcMsg userInfo channelName msgBody
+      findAndRunCommand chatMessage >>= \case
+        RespondWith t -> say (cmChannel chatMessage) t
         Nada -> return () -- T.putStrLn . cs $ encodePretty rawIrcMsg
-      -- TODO: we really, really need to drain this channel or things will die fast.
 --      outputChan <- _cbecOutputChan . _configChatBotExecution <$> view config
 --      liftIO $ writeChan outputChan rawIrcMsg
     params -> $(logDebug) "Unhandled params" ["msg" .= params]
 
+createChatMessage :: RawIrcMsg -> Irc.UserInfo -> Irc.Identifier -> Text -> ChatMessage
+createChatMessage rawIrcMsg userInfo channelName msgBody = ChatMessage user cn msgBody rawIrcMsg
+  where
+  cn = ChannelName $ Irc.idText channelName
+  tags = _msgTags rawIrcMsg
+  findBoolTag t = TagEntry t "1" `elem` tags
+  user = ChatUser userInfo (findBoolTag "mod") (findBoolTag "subscriber")
+
 findAndRunCommand :: (Db m, MonadReader c m, HasConfig c) => ChatMessage -> m Response
-findAndRunCommand (ChatMessage _ channel input _) =
-  let (name, rest) = T.breakOn " " input
-   in case Map.lookup name builtinCommands of
-        -- default command
-        Just (BotCommand args body) ->
-          case parseString (optional whiteSpace >> args) mempty (cs rest) of
-            Success a -> body channel a
-            Failure _ -> return $ RespondWith "Sorry, I don't understand that."
-        -- not a default command, look in the db for it.
-        Nothing -> pure Nada
---            f <$> getCommandFromDb channel name
+findAndRunCommand cm =
+  let (name, rest) = T.breakOn " " $ cmBody cm
+  in case Map.lookup name builtinCommands of
+    -- builtin command
+    Just bc -> runBotCommand (cmUser cm) bc cm rest
+    -- not a default command, look in the db for it.
+    Nothing -> pure Nada -- f <$> getCommandFromDb channel name
 --          where f (Just body) = RespondWith body
 --                f Nothing = Nada
+
+runBotCommand :: Monad m => ChatUser -> BotCommand m -> ChatMessage -> Text -> m Response
+runBotCommand cu (BotCommand permission args body) cm rest =
+  case permission of
+    ModOnly | cuMod cu -> go
+    Anyone -> go
+    _ -> pure Nada
+  where
+  go = case parseString (optional whiteSpace >> args) mempty (cs rest) of
+    Success a -> body (cmChannel cm) a
+    Failure _ -> return $ RespondWith "Sorry, I don't understand that."
 
 say :: (MonadIO m, MonadLoggerJSON m, Sender m) => ChannelName -> Text -> m ()
 say (ChannelName twitchChannel) msg = do
@@ -124,12 +136,16 @@ disconnectFrom cn@(ChannelName c) = say cn "Goodbye!" >> send (ircPart (mkId ("#
 
 instance (Monad m, MonadLoggerJSON m, Db m, MonadReader c m, Sender m) => MessageImporter m
     where
-    processImportMessage rawIrcMsg = processImportMessage' (cookIrcMsg rawIrcMsg)
+    processImportMessage chan rawIrcMsg = processImportMessage' (cookIrcMsg rawIrcMsg)
       where
         processImportMessage' (Ping xs) = send (ircPong xs)
         processImportMessage' (Privmsg userInfo channelName msgBody) = do
-          $(logDebug) "got message from user" ["userInfo" .= userInfo, "channelName" .= channelName, "msgBody" .= msgBody, "msg" .= rawIrcMsg]
+          $(logDebug) "got message from user" ["userInfo" .= userInfo
+                                              ,"channelName" .= channelName
+                                              ,"msgBody" .= msgBody
+                                              ,"msg" .= rawIrcMsg
+                                              ]
           when (Irc.userName userInfo == "Nightbot") $ do
-            q <- insertQuote (ChannelName "daut") msgBody
+            q <- insertQuote chan msgBody
             $(logDebug) "added quote" ["quote" .= q]
         processImportMessage' _ = pure ()
