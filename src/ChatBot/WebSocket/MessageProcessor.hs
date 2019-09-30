@@ -135,17 +135,17 @@ disconnectFrom :: (MonadIO m, MonadLoggerJSON m, Sender m) => ChannelName -> m (
 disconnectFrom cn@(ChannelName c) = say cn "Goodbye!" >> send (ircPart (mkId ("#" <> c)) "")
 
 instance (Monad m, MonadLoggerJSON m, Db m, MonadReader c m, Sender m) => MessageImporter m
+  where
+  processImportMessage chan rawIrcMsg = processImportMessage' (cookIrcMsg rawIrcMsg)
     where
-    processImportMessage chan rawIrcMsg = processImportMessage' (cookIrcMsg rawIrcMsg)
-      where
-        processImportMessage' (Ping xs) = send (ircPong xs)
-        processImportMessage' (Privmsg userInfo channelName msgBody) = do
-          $(logDebug) "got message from user" ["userInfo" .= userInfo
-                                              ,"channelName" .= channelName
-                                              ,"msgBody" .= msgBody
-                                              ,"msg" .= rawIrcMsg
-                                              ]
-          when (Irc.userName userInfo == "Nightbot") $ do
-            q <- insertQuote chan msgBody
-            $(logDebug) "added quote" ["quote" .= q]
-        processImportMessage' _ = pure ()
+    processImportMessage' (Ping xs) = send (ircPong xs)
+    processImportMessage' (Privmsg userInfo channelName msgBody) = do
+      $(logDebug) "got message from user" ["userInfo" .= userInfo
+                                          ,"channelName" .= channelName
+                                          ,"msgBody" .= msgBody
+                                          ,"msg" .= rawIrcMsg
+                                          ]
+      when (Irc.userName userInfo == "Nightbot") $ do
+        q <- insertQuote chan msgBody
+        $(logDebug) "added quote" ["quote" .= q]
+    processImportMessage' _ = pure ()
