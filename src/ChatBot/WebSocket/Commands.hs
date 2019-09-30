@@ -66,7 +66,7 @@ getQuotesUrlCommand :: (CommandsDb m, MonadReader c m, HasConfig c) => BotComman
 getQuotesUrlCommand = BotCommand Anyone anything $ \c _ -> RespondWith <$> mkUrl c Quotes
 
 addQuestionCommand :: QuestionsDb m => BotCommand m
-addQuestionCommand = BotCommand ModOnly slurp $ \c t -> do
+addQuestionCommand = BotCommand Anyone slurp $ \c t -> do
     q <- insertQuestion c t
     pure $ RespondWith $ cs $ "added question #" ++ show (questionQid q) ++ ": " ++ cs t
 
