@@ -5,6 +5,7 @@ module ChatBot.Models
     ChatMessage(..)
   , ChannelName(..)
   , Command(..)
+  , Question(..)
   , Quote(..)
   ) where
 
@@ -66,5 +67,12 @@ data Quote = Quote {
     quoteChannel :: ChannelName
   , quoteBody :: Text
   , quoteQid :: Int
+} deriving stock (Eq, Ord, Read, Show, Generic)
+  deriving anyclass (FromJSON, ToJSON)
+
+data Question = Question {
+    questionChannel :: ChannelName
+  , questionBody :: Text
+  , questionQid :: Int
 } deriving stock (Eq, Ord, Read, Show, Generic)
   deriving anyclass (FromJSON, ToJSON)

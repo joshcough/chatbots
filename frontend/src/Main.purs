@@ -17,6 +17,7 @@ import Elmish.React (ReactElement)
 import Elmish.React.DOM (empty)
 import Components.Tabs as Tabs
 import Commands as Commands
+import Questions as Questions
 import Quotes as Quotes
 import Types (OpM, runOpM)
 import Debug.Trace (spy)
@@ -24,7 +25,8 @@ import Components.Window as Window
 import URI.Extra.QueryPairs as QP
 import ChatBot.Models (ChannelName(..))
 import Elmish (Transition(..), pureUpdate)
-import Network.Endpoints (getStreams)
+import Network.Endpoints (getStreams, loginToken)
+import Auth.Models (Login(..))
 
 main :: Effect Unit
 main = launchAff_ $ do
@@ -34,7 +36,7 @@ main = launchAff_ $ do
   liftEffect $ do
     mStream <- getStreamFromUrlParams
     let c = ChannelName { _unChannelName : fromMaybe "#artofthetroll" mStream }
-    Elmish.boot { domElementId: "app", def: Elmish.nat (runOpM config) $ Quotes.def streams c }
+    Elmish.boot { domElementId: "app", def: Elmish.nat (runOpM config) $ Questions.def streams c }
 
 --  where
 --  go :: forall msg state. String -> ComponentDef OpM msg state -> Effect { title :: String, view :: ReactElement }

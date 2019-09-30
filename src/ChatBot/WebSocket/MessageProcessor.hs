@@ -11,8 +11,8 @@ import Protolude
 
 import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..), ChatBotFrontendMessage(..))
 import ChatBot.Models (ChannelName(..), ChatMessage(..))
-import ChatBot.Storage (CommandsDb, QuotesDb)
-import ChatBot.WebSocket.Commands (BotCommand(..), Response(..), builtinCommands, getCommandFromDb)
+import ChatBot.Storage (CommandsDb, QuestionsDb, QuotesDb)
+import ChatBot.WebSocket.Commands (BotCommand(..), Response(..), builtinCommands) --, getCommandFromDb)
 import Config (Config(..), HasConfig(..))
 import Control.Concurrent.Chan (writeChan)
 import Control.Lens (view)
@@ -35,7 +35,9 @@ class Sender m where
 class Monad m => MessageProcessor m where
     processMessage :: RawIrcMsg -> m ()
 
-instance (Monad m, MonadLoggerJSON m, MonadIO m, QuotesDb m, CommandsDb m, MonadReader c m, HasConfig c, Sender m) => MessageProcessor m
+type Db m = (QuestionsDb m, QuotesDb m, CommandsDb m)
+
+instance (Monad m, MonadLoggerJSON m, MonadIO m, Db m, MonadReader c m, HasConfig c, Sender m) => MessageProcessor m
     where
     processMessage rawIrcMsg = processMessage' (cookIrcMsg rawIrcMsg)
       where
@@ -48,7 +50,7 @@ instance (Monad m, MonadLoggerJSON m, MonadIO m, QuotesDb m, CommandsDb m, Monad
         processMessage' _ = $(logDebug) "couldn't process message" ["msg" .= rawIrcMsg]
 
 processUserMessage ::
-    (MonadIO m, MonadLoggerJSON m, QuotesDb m, CommandsDb m, MonadReader c m, HasConfig c, Sender m) =>
+    (MonadIO m, MonadLoggerJSON m, Db m, MonadReader c m, HasConfig c, Sender m) =>
     RawIrcMsg -> Irc.UserInfo -> Irc.Identifier -> Text -> m ()
 processUserMessage rawIrcMsg userInfo channelName msgBody = do
   conf <- view config
@@ -64,7 +66,7 @@ processUserMessage rawIrcMsg userInfo channelName msgBody = do
       liftIO $ writeChan outputChan rawIrcMsg
     params -> $(logDebug) "Unhandled params" ["msg" .= params]
 
-findAndRunCommand :: (QuotesDb m, CommandsDb m, MonadReader c m, HasConfig c) => ChatMessage -> m Response
+findAndRunCommand :: (Db m, MonadReader c m, HasConfig c) => ChatMessage -> m Response
 findAndRunCommand (ChatMessage _ channel input _) =
   let (name, rest) = T.breakOn " " input
    in case Map.lookup name builtinCommands of
@@ -74,9 +76,10 @@ findAndRunCommand (ChatMessage _ channel input _) =
             Success a -> body channel a
             Failure _ -> return $ RespondWith "Sorry, I don't understand that."
         -- not a default command, look in the db for it.
-        Nothing -> f <$> getCommandFromDb channel name
-          where f (Just body) = RespondWith body
-                f Nothing = Nada
+        Nothing -> pure Nada
+--            f <$> getCommandFromDb channel name
+--          where f (Just body) = RespondWith body
+--                f Nothing = Nada
 
 say :: (MonadIO m, MonadReader c m, HasConfig c, Sender m) => ChannelName -> Text -> m ()
 say (ChannelName twitchChannel) msg = do

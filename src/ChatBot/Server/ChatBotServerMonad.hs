@@ -3,7 +3,7 @@ module ChatBot.Server.ChatBotServerMonad (
   ) where
 
 import ChatBot.Config (ChatBotExecutionConfig(..), ChatBotFrontendMessage(..))
-import ChatBot.Models (ChannelName(..), Command(..), Quote(..))
+import ChatBot.Models (ChannelName(..), Command(..), Quote(..), Question(..))
 import qualified ChatBot.Storage as Storage
 import Config (HasConfig, configChatBotExecution)
 import Control.Lens (view)
@@ -15,12 +15,14 @@ class Monad m => ChatBotServerMonad m where
   getStreams :: m [ChannelName]
   getCommands :: ChannelName -> m [Command]
   getQuotes :: ChannelName -> m [Quote]
+  getQuestions :: ChannelName -> m [Question]
   channelConnect :: ChannelName -> m ()
   channelDisconnect :: ChannelName -> m ()
 
 instance (HasConfig c, MonadIO m) => ChatBotServerMonad (AppT' e m c) where
-  getStreams = Storage.getStreams
+  getStreams = Storage.getQuestionsStreams
   getCommands = Storage.getCommands
+  getQuestions = Storage.getQuestions
   getQuotes = Storage.getQuotes
   channelConnect = writeToInputChan . ConnectTo
   channelDisconnect = writeToInputChan . DisconnectFrom

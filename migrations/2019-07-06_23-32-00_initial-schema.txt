@@ -20,6 +20,14 @@ Apply: |
         Unique (channel, name)
     );
 
+    CREATE TABLE questions (
+        id SERIAL PRIMARY KEY,
+        channel character varying NOT NULL,
+        text character varying NOT NULL,
+        qid bigint NOT NULL,
+        Unique (channel, qid)
+    );
+
     CREATE TABLE quotes (
         id SERIAL PRIMARY KEY,
         channel character varying NOT NULL,
@@ -30,4 +38,6 @@ Apply: |
 
 Revert: |
     DROP TABLE IF EXISTS commands;
+    DROP TABLE IF EXISTS questions;
     DROP TABLE IF EXISTS quotes;
+    DROP TABLE IF EXISTS users;

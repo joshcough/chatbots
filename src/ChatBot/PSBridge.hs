@@ -14,6 +14,7 @@ myTypes :: [SumType 'Haskell]
 myTypes = [
     go (Proxy :: Proxy ChannelName)
   , go (Proxy :: Proxy Command)
+  , go (Proxy :: Proxy Question)
   , go (Proxy :: Proxy Quote)
   ]
   where

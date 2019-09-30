@@ -22,4 +22,10 @@ DbQuote json sql=quotes
     text                Text
     qid                 Int
     deriving Show Eq Ord Generic
+
+DbQuestion json sql=questions
+    channel             Text
+    text                Text
+    qid                 Int
+    deriving Show Eq Ord Generic
 |]

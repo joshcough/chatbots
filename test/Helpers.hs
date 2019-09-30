@@ -1,12 +1,13 @@
 module Helpers (withDB) where
 
-import Prelude (IO)
+--import Prelude (IO, String)
 import Protolude
 
 import Config (Config(..), acquireConfigWithConnStr)
 import Data.String.Conversions (cs)
-import Data.Text (pack)
-import Database.Persist.Sql (rawExecute)
+import Data.Text (pack) --, unpack)
+--import Database.Persist (Entity(..))
+import Database.Persist.Sql (rawExecute) --, rawSql)
 import Database.PostgreSQL.Simple.Options (Options(..))
 import Database.Postgres.Temp (DB(..), defaultOptions)
 import qualified Database.Postgres.Temp as PG
@@ -50,7 +51,7 @@ withDB = beforeAll getDatabase . afterAll fst . after (truncateDb . snd)
     truncateDb :: Config -> IO ()
     truncateDb config = runAppToIO config . runDb $ truncateTables
       where
-      tables = ["users", "commands", "quotes"]
+      tables = ["users", "commands", "questions", "quotes"]
       truncateStatement = "TRUNCATE TABLE " <> intercalate ", " tables <> " RESTART IDENTITY CASCADE"
       truncateTables = rawExecute (pack truncateStatement) []
 
@@ -71,3 +72,17 @@ withDB = beforeAll getDatabase . afterAll fst . after (truncateDb . snd)
       where
         devNull = openFile "/dev/null" WriteMode
         cleanup = void . PG.stop
+
+{-
+    -- https://stackoverflow.com/questions/5342440/reset-auto-increment-counter-in-postgres
+    truncateDb :: Config -> IO ()
+    truncateDb config = do
+        tables <- fmap (unpack . entityVal) <$> selectTables config
+        let truncateStatement = "TRUNCATE TABLE " <> intercalate ", " tables <> " RESTART IDENTITY CASCADE"
+        runAppToIO config . runDb $ rawExecute (pack truncateStatement) []
+
+    selectTables :: Config -> IO [Entity Text]
+    selectTables config = runAppToIO config . runDb $ rawSql q []
+      where
+      q = "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE';"
+-}

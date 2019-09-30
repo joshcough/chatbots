@@ -62,6 +62,30 @@ _Command :: Iso' Command { commandChannel :: ChannelName
                          , commandBody :: String }
 _Command = _Newtype
 --------------------------------------------------------------------------------
+newtype Question
+  = Question
+      { questionChannel :: ChannelName
+      , questionBody :: String
+      , questionQid :: Int
+      }
+
+
+derive instance eqQuestion :: Eq Question
+derive instance ordQuestion :: Ord Question
+derive instance genericQuestion :: Generic Question _
+derive instance newtypeQuestion :: Newtype Question _
+
+instance decodeQuestion :: DecodeJson Question where
+    decodeJson = genericDecodeJson
+instance encodeQuestion :: EncodeJson Question where
+    encodeJson = genericEncodeJson
+
+--------------------------------------------------------------------------------
+_Question :: Iso' Question { questionChannel :: ChannelName
+                           , questionBody :: String
+                           , questionQid :: Int }
+_Question = _Newtype
+--------------------------------------------------------------------------------
 newtype Quote
   = Quote
       { quoteChannel :: ChannelName
