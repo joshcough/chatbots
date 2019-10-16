@@ -18,7 +18,7 @@ import qualified Data.Map as Map
 import Data.String.Conversions (cs)
 import Data.Text (Text)
 import qualified Data.Text as T
-import Text.Trifecta (Parser)
+import Text.Trifecta (Parser, optional)
 
 data Permission = ModOnly | Anyone
   deriving stock (Eq, Show)
@@ -42,6 +42,7 @@ builtinCommands :: (Db m, MonadReader c m, HasConfig c) => Map Text (BotCommand 
 builtinCommands =
   Map.fromList
     [ ("!addQuote", addQuoteCommand)
+    , ("!delQuote", delQuoteCommand)
     , ("!quote", getQuoteCommand)
     , ("!quotes", getQuotesUrlCommand)
     , ("!addQuestion", addQuestionCommand)
@@ -56,11 +57,17 @@ addQuoteCommand = BotCommand ModOnly slurp $ \c t -> do
     q <- insertQuote c t
     pure $ RespondWith $ cs $ "added quote #" ++ show (quoteQid q) ++ ": " ++ cs t
 
+delQuoteCommand :: QuotesDb m => BotCommand m
+delQuoteCommand = BotCommand ModOnly number $ \c n -> do
+    deleteQuote c n
+    pure $ RespondWith $ cs $ "deleted quote #" ++ show n
+
 getQuoteCommand :: QuotesDb m => BotCommand m
-getQuoteCommand = BotCommand Anyone number $ \c n -> f n <$> getQuote c n
+getQuoteCommand = BotCommand Anyone (optional number) $ \c mn -> case mn of
+    Nothing -> f "I couldn't find any quotes, man." <$> getRandomQuote c
+    Just n -> f ("I couldn't find quote #" <> show n <> ", man.") <$> getQuote c n
   where
-    f n Nothing = RespondWith $ "I couldn't find quote: #" <> show n
-    f _ (Just q) = RespondWith $ quoteBody q
+    f msg mq = RespondWith $ maybe msg quoteBody mq
 
 getQuotesUrlCommand :: (CommandsDb m, MonadReader c m, HasConfig c) => BotCommand m
 getQuotesUrlCommand = BotCommand Anyone anything $ \c _ -> RespondWith <$> mkUrl c Quotes

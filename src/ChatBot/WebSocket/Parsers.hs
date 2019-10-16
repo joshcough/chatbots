@@ -7,10 +7,7 @@ import Data.Text (Text, pack)
 import Text.Trifecta
 
 (~~) :: Parser a -> Parser b -> Parser (a, b)
-a ~~ b = do
-    a' <- a
-    b' <- b
-    return (a', b')
+a ~~ b = (,) <$> a <*> b
 
 slurp :: DeltaParsing m => m Text
 slurp = cs <$> restOfLine

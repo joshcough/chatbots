@@ -8,11 +8,13 @@ module ChatBot.Storage (
 import Protolude hiding (from)
 
 import Control.Monad.Except (MonadIO)
+import Control.Monad.Fail (MonadFail)
 import Database.Esqueleto
-import Data.List (nub, sort)
+import Data.List (nub, sort, (!!))
 import Database.Persist.Postgresql (insert)
 import qualified Database.Persist.Postgresql as P
 import Logging (logDebug, (.=))
+import System.Random (randomRIO)
 import Types (AppT', runDb)
 
 import ChatBot.Config (ChannelName(..))
@@ -34,6 +36,7 @@ class Monad m => QuotesDb m where
     getQuote :: ChannelName -> Int -> m (Maybe Quote)
     deleteQuote :: ChannelName -> Int -> m ()
     getQuotes :: ChannelName -> m [Quote]
+    getRandomQuote :: ChannelName -> m (Maybe Quote)
 
 class Monad m => QuestionsDb m where
     getQuestionsStreams :: m [ChannelName]
@@ -71,13 +74,8 @@ instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
         fmap (sort . nub . fmap dbQuoteToChannel) . runDb $ select $ from pure
     insertQuote c@(ChannelName channel) quoteText = do
         $(logDebug) "insertQuote" ["channel" .= channel, "quoteText" .= quoteText]
-        -- insert into quotes values (
-        --   channel, quote, select count(*) + 1 from quotes where channel = channel
-        -- )
         runDb $ do
-            qid <- fmap ((+1) . length) $ select $ from $ \quote -> do
-                     where_ $ (quote ^. DbQuoteChannel) ==. val channel
-                     return quote
+            qid <- nextQuoteId c
             _ <- insert $ DbQuote channel quoteText qid
             pure $ Quote c quoteText qid
     getQuote (ChannelName channel) qid = do
@@ -98,6 +96,27 @@ instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
         fmap (fmap dbQuoteToQuote) . runDb $ select $ from $ \quote -> do
             where_ $ (quote ^. DbQuoteChannel) ==. val channel
             pure quote
+
+    getRandomQuote c@(ChannelName channel) = do
+        $(logDebug) "getRandomQuote" ["channel" .= channel]
+        qid <- runDb (quoteIds c) >>= pick
+        getQuote c qid
+
+nextQuoteId :: (MonadFail m, MonadIO m) => ChannelName -> SqlPersistT m Int
+nextQuoteId (ChannelName channel) = do
+    [Value mn] <- select $ from $ \quote -> do
+        where_ $ (quote ^. DbQuoteChannel) ==. val channel
+        return (max_ $ quote ^. DbQuoteQid)
+    pure $ maybe 1 (+1) mn
+
+pick :: MonadIO m => [a] -> m a
+pick xs = liftIO $ (xs !!) <$> randomRIO (0, length xs - 1)
+
+quoteIds :: (MonadIO m) => ChannelName -> SqlPersistT m [Int]
+quoteIds (ChannelName channel) =
+    fmap (fmap unValue) $ select $ from $ \quote -> do
+        where_ $ (quote ^. DbQuoteChannel) ==. val channel
+        return (quote ^. DbQuoteQid)
 
 instance (HasConfig c, MonadIO m) => QuestionsDb (AppT' e m c) where
     getQuestionsStreams = do
