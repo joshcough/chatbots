@@ -55,19 +55,22 @@ builtinCommands =
 addQuoteCommand :: QuotesDb m => BotCommand m
 addQuoteCommand = BotCommand ModOnly slurp $ \c t -> do
     q <- insertQuote c t
-    pure $ RespondWith $ cs $ "added quote #" ++ show (quoteQid q) ++ ": " ++ cs t
+    pure $ RespondWith $ cs $ "Added " <> displayQuote q
 
 delQuoteCommand :: QuotesDb m => BotCommand m
 delQuoteCommand = BotCommand ModOnly number $ \c n -> do
     deleteQuote c n
-    pure $ RespondWith $ cs $ "deleted quote #" ++ show n
+    pure $ RespondWith $ cs $ "Deleted Quote #" ++ show n
 
 getQuoteCommand :: QuotesDb m => BotCommand m
 getQuoteCommand = BotCommand Anyone (optional number) $ \c mn -> case mn of
     Nothing -> f "I couldn't find any quotes, man." <$> getRandomQuote c
     Just n -> f ("I couldn't find quote #" <> show n <> ", man.") <$> getQuote c n
   where
-    f msg mq = RespondWith $ maybe msg quoteBody mq
+    f msg mq = RespondWith $ maybe msg displayQuote mq
+
+displayQuote :: Quote -> Text
+displayQuote Quote {..} = "Quote #" <> show quoteQid <> ": " <> quoteBody
 
 getQuotesUrlCommand :: (CommandsDb m, MonadReader c m, HasConfig c) => BotCommand m
 getQuotesUrlCommand = BotCommand Anyone anything $ \c _ -> RespondWith <$> mkUrl c Quotes

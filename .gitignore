@@ -38,3 +38,4 @@ output
 frontend/node_modules/
 ghci_local
 out/
+/ghci_prod

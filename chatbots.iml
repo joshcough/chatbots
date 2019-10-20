@@ -7,6 +7,11 @@
       <sourceFolder url="file://$MODULE_DIR$/app" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.stack-work" />
+      <excludeFolder url="file://$MODULE_DIR$/admin/.cache" />
+      <excludeFolder url="file://$MODULE_DIR$/admin/.spago" />
+      <excludeFolder url="file://$MODULE_DIR$/admin/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/admin/node_modules" />
+      <excludeFolder url="file://$MODULE_DIR$/admin/output" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

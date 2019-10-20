@@ -30,7 +30,7 @@ import Irc.Identifier (mkId)
 import Irc.Message (IrcMsg(..), cookIrcMsg)
 import Irc.RawIrcMsg (RawIrcMsg(..), TagEntry(..))
 import qualified Irc.UserInfo as Irc
-import Logging (MonadLoggerJSON, (.=), logDebug)
+import Logging (MonadLoggerJSON, (.=), logDebug, logError)
 import Text.Trifecta (Result(..), parseString, whiteSpace)
 
 class Sender m where
@@ -52,9 +52,30 @@ instance (Monad m, MonadLoggerJSON m, MonadIO m, Db m, MonadReader c m, HasConfi
         processMessage' (Pong _) = return ()
         processMessage' (Privmsg userInfo channelName msgBody)
           | T.take 1 msgBody == "!" = processUserMessage rawIrcMsg userInfo channelName msgBody
-        processMessage' Privmsg{} = return () -- just a regular user message.
+        processMessage' Privmsg{} = return () -- just a regular chat message, not a command.
         processMessage' (UnknownMsg _) = return () -- probably a USERSTATE msg or something, don't care.
+        -- if we somehow get "parted" from a channel, log and try to reconnect.
+        processMessage' (Part user channel reason) =
+          whenM (isBot user) $ do
+            $(logError) "PARTED!" ["channel" .= channel, "reason" .= reason, "user" .= user]
+            connectTo $ ChannelName $ Irc.idText channel
+        -- if we somehow "quit", log, and try to rejoin entirely.
+        processMessage' (Quit user reason) =
+          whenM (isBot user) $ do
+            $(logError) "QUIT!" ["reason" .= reason, "user" .= user]
+            authorize
+        -- we somehow got kicked from a channel. for now, just log it.
+        processMessage' (Kick user channel kicker reason) =
+          whenM (isBot user) $
+            $(logError) "GOT KICKED!" ["channel" .= channel, "kicker" .= kicker, "reason" .= reason, "user" .= user]
+
         processMessage' _ = $(logDebug) "couldn't process message" ["msg" .= rawIrcMsg]
+
+isBot :: (MonadReader c m, HasConfig c) => Irc.UserInfo -> m Bool
+isBot (Irc.UserInfo nick name _) = do
+  chatBotConf <- view configChatBot
+  let x = _cbConfigNick chatBotConf
+  return $ x == Irc.idText nick || x == name
 
 processUserMessage ::
     (MonadIO m, MonadLoggerJSON m, Db m, MonadReader c m, HasConfig c, Sender m) =>

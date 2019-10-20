@@ -99,8 +99,9 @@ instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
 
     getRandomQuote c@(ChannelName channel) = do
         $(logDebug) "getRandomQuote" ["channel" .= channel]
-        qid <- runDb (quoteIds c) >>= pick
-        getQuote c qid
+        runDb (quoteIds c) >>= pick >>= \case
+          Nothing -> return Nothing
+          Just qid -> getQuote c qid
 
 nextQuoteId :: (MonadFail m, MonadIO m) => ChannelName -> SqlPersistT m Int
 nextQuoteId (ChannelName channel) = do
@@ -109,8 +110,9 @@ nextQuoteId (ChannelName channel) = do
         return (max_ $ quote ^. DbQuoteQid)
     pure $ maybe 1 (+1) mn
 
-pick :: MonadIO m => [a] -> m a
-pick xs = liftIO $ (xs !!) <$> randomRIO (0, length xs - 1)
+pick :: MonadIO m => [a] -> m (Maybe a)
+pick [] = return Nothing
+pick xs = liftIO $ Just . (xs !!) <$> randomRIO (0, length xs - 1)
 
 quoteIds :: (MonadIO m) => ChannelName -> SqlPersistT m [Int]
 quoteIds (ChannelName channel) =
