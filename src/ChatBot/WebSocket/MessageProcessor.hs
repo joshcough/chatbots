@@ -14,9 +14,9 @@ module ChatBot.WebSocket.MessageProcessor
 import Protolude
 
 import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..), ChatBotFrontendMessage(..))
-import ChatBot.Models (ChannelName(..), ChatMessage(..), ChatUser(..))
+import ChatBot.Models (ChannelName(..), ChatMessage(..), ChatUser(..), ChatUserName(..), trollabotUser)
 import ChatBot.Storage (CommandsDb, QuestionsDb, QuotesDb(..))
-import ChatBot.WebSocket.Commands (BotCommand(..), Permission(..), Response(..), Permission(..), builtinCommands) --, getCommandFromDb)
+import ChatBot.WebSocket.Commands (BotCommand(..), Permission(..), Permission(..), Response(..), builtinCommands) --, getCommandFromDb)
 import Config (Config(..), HasConfig(..))
 --import Control.Concurrent.Chan (writeChan)
 import Control.Lens (view)
@@ -97,7 +97,9 @@ createChatMessage rawIrcMsg userInfo channelName msgBody = ChatMessage user cn m
   cn = ChannelName $ Irc.idText channelName
   tags = _msgTags rawIrcMsg
   findBoolTag t = TagEntry t "1" `elem` tags
-  user = ChatUser userInfo (findBoolTag "mod") (findBoolTag "subscriber")
+  un = Irc.idText $ Irc.userNick userInfo
+  un' = ChatUserName $ if un == "" then Irc.userName userInfo else un
+  user = ChatUser un' (findBoolTag "mod") (findBoolTag "subscriber")
 
 findAndRunCommand :: (Db m, MonadReader c m, HasConfig c) => ChatMessage -> m Response
 findAndRunCommand cm =
@@ -113,13 +115,17 @@ findAndRunCommand cm =
 runBotCommand :: Monad m => ChatUser -> BotCommand m -> ChatMessage -> Text -> m Response
 runBotCommand cu (BotCommand permission args body) cm rest =
   case permission of
-    ModOnly | cuMod cu -> go
+    -- must check if user is streamer too, because streamer is not a mod for some reason.
+    ModOnly | cuMod cu || isStreamer cu cm -> go
     Anyone -> go
     _ -> pure Nada
   where
   go = case parseString (optional whiteSpace >> args) mempty (cs rest) of
-    Success a -> body (cmChannel cm) a
+    Success a -> body (cmChannel cm) cu a
     Failure _ -> return $ RespondWith "Sorry, I don't understand that."
+
+isStreamer :: ChatUser -> ChatMessage -> Bool
+isStreamer (ChatUser (ChatUserName name) _ _) (ChatMessage _ (ChannelName cn) _ _) = cn == name
 
 say :: (MonadIO m, MonadLoggerJSON m, Sender m) => ChannelName -> Text -> m ()
 say (ChannelName twitchChannel) msg = do
@@ -167,6 +173,6 @@ instance (Monad m, MonadLoggerJSON m, Db m, MonadReader c m, Sender m) => Messag
                                           ,"msg" .= rawIrcMsg
                                           ]
       when (Irc.userName userInfo == "Nightbot") $ do
-        q <- insertQuote chan msgBody
+        q <- insertQuote chan trollabotUser msgBody
         $(logDebug) "added quote" ["quote" .= q]
     processImportMessage' _ = pure ()

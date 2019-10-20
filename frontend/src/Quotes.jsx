@@ -22,6 +22,7 @@ export const View = props =>
            <th>Channel</th>
            <th>Quote Id</th>
            <th>Quote</th>
+           <th>Added By</th>
          </tr>
        </thead>
        <tbody>
@@ -30,6 +31,7 @@ export const View = props =>
               <td>{q.channel}</td>
               <td>{q.qid}</td>
               <td>{q.body}</td>
+              <td>{q.addedBy}</td>
             </tr>
            )}
        </tbody>

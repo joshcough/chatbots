@@ -9,17 +9,17 @@ import Protolude hiding (from)
 
 import Control.Monad.Except (MonadIO)
 import Control.Monad.Fail (MonadFail)
+import Data.List ((!!), nub, sort)
 import Database.Esqueleto
-import Data.List (nub, sort, (!!))
 import Database.Persist.Postgresql (insert)
 import qualified Database.Persist.Postgresql as P
-import Logging (logDebug, (.=))
+import Logging ((.=), logDebug)
 import System.Random (randomRIO)
 import Types (AppT', runDb)
 
 import ChatBot.Config (ChannelName(..))
 import ChatBot.DatabaseModels (DbCommand(..), DbQuestion(..), DbQuote(..), EntityField(..))
-import ChatBot.Models (Command(..), Question(..), Quote(..))
+import ChatBot.Models (ChatUserName(..), Command(..), Question(..), Quote(..))
 import Config (HasConfig)
 
 type ChatBotDB m = (CommandsDb m, QuotesDb m)
@@ -32,7 +32,7 @@ class Monad m => CommandsDb m where
 
 class Monad m => QuotesDb m where
     getQuoteStreams :: m [ChannelName]
-    insertQuote :: ChannelName -> Text -> m Quote
+    insertQuote :: ChannelName -> ChatUserName -> Text -> m Quote
     getQuote :: ChannelName -> Int -> m (Maybe Quote)
     deleteQuote :: ChannelName -> Int -> m ()
     getQuotes :: ChannelName -> m [Quote]
@@ -72,12 +72,12 @@ instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
     getQuoteStreams = do
         $(logDebug) "getStreams" []
         fmap (sort . nub . fmap dbQuoteToChannel) . runDb $ select $ from pure
-    insertQuote c@(ChannelName channel) quoteText = do
-        $(logDebug) "insertQuote" ["channel" .= channel, "quoteText" .= quoteText]
+    insertQuote c@(ChannelName channel) user quoteText = do
+        $(logDebug) "insertQuote" ["channel" .= channel, "user" .= user, "quoteText" .= quoteText]
         runDb $ do
             qid <- nextQuoteId c
-            _ <- insert $ DbQuote channel quoteText qid
-            pure $ Quote c quoteText qid
+            _ <- insert $ DbQuote channel quoteText user qid
+            pure $ Quote c quoteText user qid
     getQuote (ChannelName channel) qid = do
         $(logDebug) "getQuote" ["channel" .= channel, "qid" .= qid]
         -- select * from quote where channel = channel and qid = qid
@@ -161,10 +161,10 @@ dbQuestionToQuestion :: Entity DbQuestion -> Question
 dbQuestionToQuestion (Entity _ (DbQuestion chan name qid)) = Question (ChannelName chan) name qid
 
 dbQuoteToQuote :: Entity DbQuote -> Quote
-dbQuoteToQuote (Entity _ (DbQuote chan name qid)) = Quote (ChannelName chan) name qid
+dbQuoteToQuote (Entity _ (DbQuote chan name user qid)) = Quote (ChannelName chan) name user qid
 
 dbQuestionToChannel :: Entity DbQuestion -> ChannelName
 dbQuestionToChannel (Entity _ (DbQuestion chan _ _)) = ChannelName chan
 
 dbQuoteToChannel :: Entity DbQuote -> ChannelName
-dbQuoteToChannel (Entity _ (DbQuote chan _ _)) = ChannelName chan
+dbQuoteToChannel (Entity _ (DbQuote chan _ _ _)) = ChannelName chan

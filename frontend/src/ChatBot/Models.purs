@@ -38,6 +38,26 @@ _ChannelName = _Newtype
 unChannelName :: Lens' ChannelName String
 unChannelName = _Newtype <<< prop (SProxy :: SProxy "_unChannelName")
 --------------------------------------------------------------------------------
+newtype ChatUserName
+  = ChatUserName
+      { cunName :: String
+      }
+
+
+derive instance eqChatUserName :: Eq ChatUserName
+derive instance ordChatUserName :: Ord ChatUserName
+derive instance genericChatUserName :: Generic ChatUserName _
+derive instance newtypeChatUserName :: Newtype ChatUserName _
+
+instance decodeChatUserName :: DecodeJson ChatUserName where
+    decodeJson = genericDecodeJson
+instance encodeChatUserName :: EncodeJson ChatUserName where
+    encodeJson = genericEncodeJson
+
+--------------------------------------------------------------------------------
+_ChatUserName :: Iso' ChatUserName { cunName :: String }
+_ChatUserName = _Newtype
+--------------------------------------------------------------------------------
 newtype Command
   = Command
       { commandChannel :: ChannelName
@@ -90,6 +110,7 @@ newtype Quote
   = Quote
       { quoteChannel :: ChannelName
       , quoteBody :: String
+      , quoteUser :: ChatUserName
       , quoteQid :: Int
       }
 
@@ -107,6 +128,7 @@ instance encodeQuote :: EncodeJson Quote where
 --------------------------------------------------------------------------------
 _Quote :: Iso' Quote { quoteChannel :: ChannelName
                      , quoteBody :: String
+                     , quoteUser :: ChatUserName
                      , quoteQid :: Int }
 _Quote = _Newtype
 --------------------------------------------------------------------------------

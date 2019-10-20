@@ -4,14 +4,14 @@ module Quotes
     ) where
 
 import Prelude
-import ChatBot.Models (ChannelName(..), Quote(..))
+import ChatBot.Models (ChannelName(..), ChatUserName(..), Quote(..))
 import Elmish (ComponentDef, DispatchMsg, DispatchMsgFn, JsCallback, ReactComponent, ReactElement, Transition(..), createElement', handle, pureUpdate)
 import Network.Endpoints (getQuotes)
 import Types (OpM)
 
 data Message = GetQuotes String | GotQuotes ChannelName (Array Quote)
 
-type UXQuote = { channel :: String, qid :: Int, body :: String }
+type UXQuote = { channel :: String, qid :: Int, body :: String, addedBy :: String }
 
 type State = { streams :: Array ChannelName, stream :: ChannelName, quotes :: Array Quote }
 
@@ -42,6 +42,12 @@ view s dispatch = createElement' view_
   , quotes: f <$> s.quotes
   }
   where
-  f (Quote r) = { channel: channelName r.quoteChannel, qid: r.quoteQid, body: r.quoteBody }
+  f (Quote r) =
+    { channel: channelName r.quoteChannel
+    , qid: r.quoteQid
+    , body: r.quoteBody
+    , addedBy: h $ r.quoteUser
+    }
   channelName (ChannelName r) = r._unChannelName
   g (ChannelName r) = r._unChannelName
+  h (ChatUserName r) = r.cunName

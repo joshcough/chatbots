@@ -1,0 +1,14 @@
+Description: (Describe migration here.)
+Created: 2019-10-20 12:21:00.836215 UTC
+Depends: 2019-07-06_23-32-00_initial-schema
+Apply: |
+    ALTER table quotes
+        add column user_id character varying;
+
+    update quotes set user_id = 'trollabot';
+
+    ALTER table quotes ALTER column user_id SET NOT NULL;
+
+Revert: |
+    ALTER table quotes drop column if exists user_id;
+

@@ -4,7 +4,7 @@ import Protolude
 import Test.Hspec
 
 import ChatBot.Config (ChannelName(..))
-import ChatBot.Models (Question(..), Quote(..))
+import ChatBot.Models (Question(..), Quote(..), trollabotUser)
 import ChatBot.Storage (QuestionsDb(..), QuotesDb(..))
 import Helpers
 import Types (runAppToIO)
@@ -61,7 +61,7 @@ spec = withDB $ do
                 deleteQuote art q2
                 _ <- insertQuote' art "bam again!"
                 getQuotes art
-            qs `shouldBe` [Quote art "bam again" 3, Quote art "bam again!" 4]
+            qs `shouldBe` [Quote art "bam again" trollabotUser 3, Quote art "bam again!" trollabotUser 4]
 
         it "can insert many quotes in different channels" $ \(_, config) -> do
             (q1, q2, q3, q4) <- runAppToIO config $ do
@@ -76,4 +76,4 @@ insertQuestion' :: QuestionsDb f => ChannelName -> Text -> f Int
 insertQuestion' c = fmap questionQid . insertQuestion c
 
 insertQuote' :: QuotesDb f => ChannelName -> Text -> f Int
-insertQuote' c = fmap quoteQid . insertQuote c
+insertQuote' c = fmap quoteQid . insertQuote c trollabotUser

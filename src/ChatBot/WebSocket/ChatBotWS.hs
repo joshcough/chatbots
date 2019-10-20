@@ -10,6 +10,7 @@ import Protolude
 import Prelude (error)
 
 import ChatBot.Config (ChannelName(..))
+import ChatBot.Models (trollabotUser)
 import ChatBot.Storage (QuotesDb(..))
 import ChatBot.WebSocket.MessageProcessor
   ( MessageImporter(..)
@@ -79,4 +80,4 @@ runInserter :: ChannelName -> Config -> IO ()
 runInserter cn conf =
     runAppToIO (ConfigAndConnection conf $ error "ununsed") $ do
         f <- liftIO $ readFile "./data/quotes_no_ids.txt"
-        forM_ (lines f) $ insertQuote cn
+        forM_ (lines f) $ insertQuote cn trollabotUser

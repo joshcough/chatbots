@@ -13,6 +13,7 @@ main = writePSTypes "frontend/src" (buildBridge defaultBridge) myTypes
 myTypes :: [SumType 'Haskell]
 myTypes = [
     go (Proxy :: Proxy ChannelName)
+  , go (Proxy :: Proxy ChatUserName)
   , go (Proxy :: Proxy Command)
   , go (Proxy :: Proxy Question)
   , go (Proxy :: Proxy Quote)

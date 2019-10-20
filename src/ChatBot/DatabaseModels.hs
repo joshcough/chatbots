@@ -5,6 +5,7 @@ module ChatBot.DatabaseModels where
 import Prelude (error)
 import Protolude
 
+import ChatBot.Models (ChatUserName)
 import Data.Text (Text)
 import Database.Persist
 import Database.Persist.Postgresql.JSON ()
@@ -20,6 +21,7 @@ DbCommand json sql=commands
 DbQuote json sql=quotes
     channel             Text
     text                Text
+    user_id             ChatUserName
     qid                 Int
     deriving Show Eq Ord Generic
 

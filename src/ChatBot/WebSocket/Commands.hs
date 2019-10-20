@@ -8,7 +8,7 @@ module ChatBot.WebSocket.Commands
 
 import Protolude
 
-import ChatBot.Models (ChannelName(..), Question(..), Quote(..))
+import ChatBot.Models (ChannelName(..), Question(..), Quote(..), ChatUser(..))
 import ChatBot.Storage (CommandsDb(..), QuestionsDb(..), QuotesDb(..))
 import ChatBot.WebSocket.Parsers (anything, number, slurp)
 import Config (Config(..), Environment(Development), HasConfig(..))
@@ -29,7 +29,7 @@ data View = Questions | Quotes
 data BotCommand m = forall a. BotCommand {
    bcPermission :: Permission
  , bcParser :: Parser a
- , bcExecute :: ChannelName -> a -> m Response
+ , bcExecute :: ChannelName -> ChatUser -> a -> m Response
  }
 
 data Response = RespondWith Text | Nada
@@ -53,17 +53,17 @@ builtinCommands =
     ]
 
 addQuoteCommand :: QuotesDb m => BotCommand m
-addQuoteCommand = BotCommand ModOnly slurp $ \c t -> do
-    q <- insertQuote c t
+addQuoteCommand = BotCommand ModOnly slurp $ \c cu t -> do
+    q <- insertQuote c (cuUserName cu) t
     pure $ RespondWith $ cs $ "Added " <> displayQuote q
 
 delQuoteCommand :: QuotesDb m => BotCommand m
-delQuoteCommand = BotCommand ModOnly number $ \c n -> do
+delQuoteCommand = BotCommand ModOnly number $ \c _ n -> do
     deleteQuote c n
     pure $ RespondWith $ cs $ "Deleted Quote #" ++ show n
 
 getQuoteCommand :: QuotesDb m => BotCommand m
-getQuoteCommand = BotCommand Anyone (optional number) $ \c mn -> case mn of
+getQuoteCommand = BotCommand Anyone (optional number) $ \c _ mn -> case mn of
     Nothing -> f "I couldn't find any quotes, man." <$> getRandomQuote c
     Just n -> f ("I couldn't find quote #" <> show n <> ", man.") <$> getQuote c n
   where
@@ -73,21 +73,21 @@ displayQuote :: Quote -> Text
 displayQuote Quote {..} = "Quote #" <> show quoteQid <> ": " <> quoteBody
 
 getQuotesUrlCommand :: (CommandsDb m, MonadReader c m, HasConfig c) => BotCommand m
-getQuotesUrlCommand = BotCommand Anyone anything $ \c _ -> RespondWith <$> mkUrl c Quotes
+getQuotesUrlCommand = BotCommand Anyone anything $ \c _ _ -> RespondWith <$> mkUrl c Quotes
 
 addQuestionCommand :: QuestionsDb m => BotCommand m
-addQuestionCommand = BotCommand Anyone slurp $ \c t -> do
+addQuestionCommand = BotCommand Anyone slurp $ \c _ t -> do
     q <- insertQuestion c t
     pure $ RespondWith $ cs $ "added question #" ++ show (questionQid q) ++ ": " ++ cs t
 
 getQuestionCommand :: QuestionsDb m => BotCommand m
-getQuestionCommand = BotCommand Anyone number $ \c n -> f n <$> getQuestion c n
+getQuestionCommand = BotCommand Anyone number $ \c _ n -> f n <$> getQuestion c n
   where
     f n Nothing = RespondWith $ "I couldn't find question: #" <> show n
     f _ (Just q) = RespondWith $ questionBody q
 
 getQuestionsUrlCommand :: (QuestionsDb m, MonadReader c m, HasConfig c) => BotCommand m
-getQuestionsUrlCommand = BotCommand Anyone anything $ \c _ -> RespondWith <$> mkUrl c Questions
+getQuestionsUrlCommand = BotCommand Anyone anything $ \c _ _ -> RespondWith <$> mkUrl c Questions
 
 mkUrl :: (MonadReader c m, HasConfig c) => ChannelName -> View -> m Text
 mkUrl (ChannelName c) viewtype = do
