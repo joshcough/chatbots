@@ -2,10 +2,11 @@
 
 module ChatBot.Models
   (
-    ChatMessage(..)
+    ChatMessage'(..)
+  , ChatMessage
   , ChatUser(..)
   , ChatUserName(..)
-  , ChannelName(..)
+  , ChannelName, mkChannelName, getChannelName, getChannelNameHashed
   , Command(..)
   , Question(..)
   , Quote(..)
@@ -18,6 +19,7 @@ import Control.Lens.TH (makeClassy)
 import Control.Monad (mzero)
 import Data.Aeson (FromJSON(..), ToJSON(..), Value(..))
 import Data.Text (Text)
+import qualified Data.Text as T
 import Database.Persist.Class (PersistField(..))
 import Database.Persist.Sql (PersistFieldSql(..), SqlType(..))
 import Database.Persist.Types (PersistValue(..))
@@ -32,6 +34,15 @@ newtype ChannelName = ChannelName { _unChannelName :: Text }
     deriving anyclass (FromJSON, ToJSON)
 
 makeClassy ''ChannelName
+
+mkChannelName :: Text -> ChannelName
+mkChannelName t = ChannelName $ if T.head t == '#' then T.drop 1 t else t
+
+getChannelName :: ChannelName -> Text
+getChannelName = _unChannelName
+
+getChannelNameHashed :: ChannelName -> Text
+getChannelNameHashed c = "#" <> getChannelName c
 
 instance FromHttpApiData ChannelName where
     parseUrlPiece = pure . ChannelName
@@ -59,13 +70,15 @@ instance PersistField ChatUserName where
     fromPersistValue (PersistText t) = pure $ ChatUserName t
     fromPersistValue v = Left $ "wrong type for ChatUserName: " <> show v
 
-data ChatMessage = ChatMessage {
+data ChatMessage' a = ChatMessage {
     cmUser :: ChatUser
   , cmChannel :: ChannelName
   , cmBody :: Text
-  , cmRawMessage :: RawIrcMsg
-} deriving stock (Eq, Show, Generic)
+  , cmRawMessage :: a
+} deriving stock (Eq, Show, Generic, Functor)
   deriving anyclass (FromJSON, ToJSON)
+
+type ChatMessage = ChatMessage' RawIrcMsg
 
 instance FromJSON Identifier where
     parseJSON (String s) = pure $ mkId s

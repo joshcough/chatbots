@@ -17,9 +17,8 @@ import Logging ((.=), logDebug)
 import System.Random (randomRIO)
 import Types (AppT', runDb)
 
-import ChatBot.Config (ChannelName(..))
 import ChatBot.DatabaseModels (DbCommand(..), DbQuestion(..), DbQuote(..), EntityField(..))
-import ChatBot.Models (ChatUserName(..), Command(..), Question(..), Quote(..))
+import ChatBot.Models (ChannelName, mkChannelName, getChannelName, ChatUserName(..), Command(..), Question(..), Quote(..))
 import Config (HasConfig)
 
 type ChatBotDB m = (CommandsDb m, QuotesDb m)
@@ -46,15 +45,18 @@ class Monad m => QuestionsDb m where
     getQuestions :: ChannelName -> m [Question]
 
 instance (HasConfig c, MonadIO m) => CommandsDb (AppT' e m c) where
-    insertCommand (ChannelName channel) commandName commandText = do
+    insertCommand c commandName commandText = do
+        let channel = getChannelName c
         $(logDebug) "insertCommand" ["channel" .= channel, "name" .= commandName, "text" .= commandText]
         runDb $ insert $ DbCommand channel commandName commandText
         return ()
-    getCommand (ChannelName channel) commandName = do
+    getCommand c commandName = do
+        let channel = getChannelName c
         $(logDebug) "getCommand" ["channel" .= channel, "name" .= commandName]
         fmap (fmap dbCommandToCommand) . runDb $
             selectFirst [DbCommandChannel P.==. channel, DbCommandName P.==. commandName] []
-    deleteCommand (ChannelName channel) commandName = do
+    deleteCommand c commandName = do
+        let channel = getChannelName c
         $(logDebug) "deleteCommand" ["channel" .= channel, "name" .= commandName]
         runDb $ delete $ from $ \command ->
             where_ (
@@ -62,27 +64,31 @@ instance (HasConfig c, MonadIO m) => CommandsDb (AppT' e m c) where
                 &&.
                 (command ^. DbCommandName) ==. val commandName
              )
-    getCommands (ChannelName channel) = do
-        $(logDebug) "getCommands" ["channel" .= channel]
-        fmap (fmap dbCommandToCommand) . runDb $ select $ from $ \command -> do
-            where_ $ (command ^. DbCommandChannel) ==. val channel
-            pure command
+    getCommands c = do
+       let channel = getChannelName c
+       $(logDebug) "getCommands" ["channel" .= channel]
+       fmap (fmap dbCommandToCommand) . runDb $ select $ from $ \command -> do
+         where_ $ (command ^. DbCommandChannel) ==. val channel
+         pure command
 
 instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
     getQuoteStreams = do
         $(logDebug) "getStreams" []
         fmap (sort . nub . fmap dbQuoteToChannel) . runDb $ select $ from pure
-    insertQuote c@(ChannelName channel) user quoteText = do
+    insertQuote c user quoteText = do
+        let channel = getChannelName c
         $(logDebug) "insertQuote" ["channel" .= channel, "user" .= user, "quoteText" .= quoteText]
         runDb $ do
             qid <- nextQuoteId c
             _ <- insert $ DbQuote channel quoteText user qid
             pure $ Quote c quoteText user qid
-    getQuote (ChannelName channel) qid = do
+    getQuote c qid = do
+        let channel = getChannelName c
         $(logDebug) "getQuote" ["channel" .= channel, "qid" .= qid]
         -- select * from quote where channel = channel and qid = qid
         fmap (fmap dbQuoteToQuote) . runDb $ selectFirst [DbQuoteChannel P.==. channel, DbQuoteQid P.==. qid] []
-    deleteQuote (ChannelName channel) qid = do
+    deleteQuote c qid = do
+        let channel = getChannelName c
         $(logDebug) "deleteQuote" ["channel" .= channel, "qid" .= qid]
         -- delete from quote where channel = channel and qid = qid
         runDb $ delete $ from $ \quote ->
@@ -91,20 +97,23 @@ instance (HasConfig c, MonadIO m) => QuotesDb (AppT' e m c) where
                 &&.
                 (quote ^. DbQuoteQid) ==. val qid
              )
-    getQuotes (ChannelName channel) = do
+    getQuotes c = do
+        let channel = getChannelName c
         $(logDebug) "getQuotes" ["channel" .= channel]
         fmap (fmap dbQuoteToQuote) . runDb $ select $ from $ \quote -> do
             where_ $ (quote ^. DbQuoteChannel) ==. val channel
             pure quote
 
-    getRandomQuote c@(ChannelName channel) = do
+    getRandomQuote c = do
+        let channel = getChannelName c
         $(logDebug) "getRandomQuote" ["channel" .= channel]
         runDb (quoteIds c) >>= pick >>= \case
           Nothing -> return Nothing
           Just qid -> getQuote c qid
 
 nextQuoteId :: (MonadFail m, MonadIO m) => ChannelName -> SqlPersistT m Int
-nextQuoteId (ChannelName channel) = do
+nextQuoteId c = do
+    let channel = getChannelName c
     [Value mn] <- select $ from $ \quote -> do
         where_ $ (quote ^. DbQuoteChannel) ==. val channel
         return (max_ $ quote ^. DbQuoteQid)
@@ -115,7 +124,8 @@ pick [] = return Nothing
 pick xs = liftIO $ Just . (xs !!) <$> randomRIO (0, length xs - 1)
 
 quoteIds :: (MonadIO m) => ChannelName -> SqlPersistT m [Int]
-quoteIds (ChannelName channel) =
+quoteIds c = do
+    let channel = getChannelName c
     fmap (fmap unValue) $ select $ from $ \quote -> do
         where_ $ (quote ^. DbQuoteChannel) ==. val channel
         return (quote ^. DbQuoteQid)
@@ -124,7 +134,8 @@ instance (HasConfig c, MonadIO m) => QuestionsDb (AppT' e m c) where
     getQuestionsStreams = do
          $(logDebug) "getQuestionsStreams" []
          fmap (sort . nub . fmap dbQuestionToChannel) . runDb $ select $ from pure
-    insertQuestion c@(ChannelName channel) questionText = do
+    insertQuestion c questionText = do
+        let channel = getChannelName c
         $(logDebug) "insertQuestion" ["channel" .= channel, "questionText" .= questionText]
         -- insert into questions values (
         --   channel, question, select count(*) + 1 from questions where channel = channel
@@ -135,11 +146,13 @@ instance (HasConfig c, MonadIO m) => QuestionsDb (AppT' e m c) where
                      return question
             _ <- insert $ DbQuestion channel questionText qid
             pure $ Question c questionText qid
-    getQuestion (ChannelName channel) qid = do
+    getQuestion c qid = do
+        let channel = getChannelName c
         $(logDebug) "getQuestion" ["channel" .= channel, "qid" .= qid]
         -- select * from question where channel = channel and qid = qid
         fmap (fmap dbQuestionToQuestion) . runDb $ selectFirst [DbQuestionChannel P.==. channel, DbQuestionQid P.==. qid] []
-    deleteQuestion (ChannelName channel) qid = do
+    deleteQuestion c qid = do
+        let channel = getChannelName c
         $(logDebug) "deleteQuestion" ["channel" .= channel, "qid" .= qid]
         -- delete from question where channel = channel and qid = qid
         runDb $ delete $ from $ \question ->
@@ -148,23 +161,24 @@ instance (HasConfig c, MonadIO m) => QuestionsDb (AppT' e m c) where
                 &&.
                 (question ^. DbQuestionQid) ==. val qid
              )
-    getQuestions (ChannelName channel) = do
+    getQuestions c = do
+        let channel = getChannelName c
         $(logDebug) "getQuestions" ["channel" .= channel]
         fmap (fmap dbQuestionToQuestion) . runDb $ select $ from $ \question -> do
             where_ $ (question ^. DbQuestionChannel) ==. val channel
             pure question
 
 dbCommandToCommand :: Entity DbCommand -> Command
-dbCommandToCommand (Entity _ (DbCommand chan name body)) = Command (ChannelName chan) name body
+dbCommandToCommand (Entity _ (DbCommand chan name body)) = Command (mkChannelName chan) name body
 
 dbQuestionToQuestion :: Entity DbQuestion -> Question
-dbQuestionToQuestion (Entity _ (DbQuestion chan name qid)) = Question (ChannelName chan) name qid
+dbQuestionToQuestion (Entity _ (DbQuestion chan name qid)) = Question (mkChannelName chan) name qid
 
 dbQuoteToQuote :: Entity DbQuote -> Quote
-dbQuoteToQuote (Entity _ (DbQuote chan name user qid)) = Quote (ChannelName chan) name user qid
+dbQuoteToQuote (Entity _ (DbQuote chan name user qid)) = Quote (mkChannelName chan) name user qid
 
 dbQuestionToChannel :: Entity DbQuestion -> ChannelName
-dbQuestionToChannel (Entity _ (DbQuestion chan _ _)) = ChannelName chan
+dbQuestionToChannel (Entity _ (DbQuestion chan _ _)) = mkChannelName chan
 
 dbQuoteToChannel :: Entity DbQuote -> ChannelName
-dbQuoteToChannel (Entity _ (DbQuote chan _ _ _)) = ChannelName chan
+dbQuoteToChannel (Entity _ (DbQuote chan _ _ _)) = mkChannelName chan

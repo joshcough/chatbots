@@ -9,7 +9,7 @@ module ChatBot.WebSocket.ChatBotWS
 import Protolude
 import Prelude (error)
 
-import ChatBot.Config (ChannelName(..))
+import ChatBot.Config (ChannelName, mkChannelName)
 import ChatBot.Models (trollabotUser)
 import ChatBot.Storage (QuotesDb(..))
 import ChatBot.WebSocket.MessageProcessor
@@ -63,7 +63,7 @@ runImporter :: ChannelName -> Config -> IO ()
 runImporter chan conf =
   withSocketsDo $ WS.runClient (cs twitchIrcUrl) 80 "/" $ \conn ->
     runAppToIO (ConfigAndConnection conf conn) $ do
-        let daut = ChannelName "#daut"
+        let daut = mkChannelName "daut"
         authorize
         connectTo daut
         liftIO $ threadDelay 5000000

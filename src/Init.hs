@@ -11,7 +11,7 @@ import Network.Wai.Handler.Warp (run)
 import Network.Wai.Middleware.Cors (simpleCors)
 
 import Api (app)
-import ChatBot.Config (ChannelName(..))
+import ChatBot.Config (mkChannelName)
 import ChatBot.WebSocket.ChatBotWS (runBot, runImporter, runInserter)
 import Config (Config(..), acquireConfig)
 
@@ -30,10 +30,10 @@ botOnly :: IO ()
 botOnly = bracket acquireConfig shutdownApp runBot
 
 importer :: Text -> IO ()
-importer cn = bracket acquireConfig shutdownApp (runImporter $ ChannelName cn)
+importer cn = bracket acquireConfig shutdownApp (runImporter $ mkChannelName cn)
 
 inserter :: Text -> IO ()
-inserter cn = bracket acquireConfig shutdownApp (runInserter $ ChannelName cn)
+inserter cn = bracket acquireConfig shutdownApp (runInserter $ mkChannelName cn)
 
 appOnly :: IO ()
 appOnly = bracket acquireConfig shutdownApp runApp'

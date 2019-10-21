@@ -3,17 +3,17 @@ module ChatBotDbSpec (spec) where
 import Protolude
 import Test.Hspec
 
-import ChatBot.Config (ChannelName(..))
+import ChatBot.Config (ChannelName, mkChannelName)
 import ChatBot.Models (Question(..), Quote(..), trollabotUser)
 import ChatBot.Storage (QuestionsDb(..), QuotesDb(..))
 import Helpers
 import Types (runAppToIO)
 
 art :: ChannelName
-art = ChannelName "artoftroll"
+art = mkChannelName "artoftroll"
 
 daut :: ChannelName
-daut = ChannelName "daut"
+daut = mkChannelName "daut"
 
 spec :: Spec
 spec = withDB $ do

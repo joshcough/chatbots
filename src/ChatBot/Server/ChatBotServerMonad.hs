@@ -3,7 +3,7 @@ module ChatBot.Server.ChatBotServerMonad (
   ) where
 
 import ChatBot.Config (ChatBotExecutionConfig(..), ChatBotFrontendMessage(..))
-import ChatBot.Models (ChannelName(..), Command(..), Quote(..), Question(..))
+import ChatBot.Models (ChannelName, Command(..), Quote(..), Question(..))
 import qualified ChatBot.Storage as Storage
 import Config (HasConfig, configChatBotExecution)
 import Control.Lens (view)

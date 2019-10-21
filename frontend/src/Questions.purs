@@ -16,8 +16,10 @@ type UXQuestion = { channel :: String, qid :: Int, body :: String }
 type State = { streams :: Array ChannelName, stream :: ChannelName, questions :: Array Question }
 
 def :: Array ChannelName -> ChannelName -> ComponentDef OpM Message State
-def streams stream =
-  { init: Transition { streams, stream, questions: [] } [ GotQuestions stream <$> getQuestions stream ]
+def streams initialStream =
+  { init: Transition
+            { streams, stream: initialStream, questions: [] }
+            [ GotQuestions initialStream <$> getQuestions initialStream ]
   , update
   , view: view
   }

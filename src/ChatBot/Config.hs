@@ -4,7 +4,7 @@
 
 module ChatBot.Config
   (
-    ChannelName(..)
+    ChannelName, mkChannelName, getChannelName
   , ChatBotConfig(..)
   , ChatBotExecutionConfig(..)
   , ChatBotFrontendMessage(..)
@@ -19,13 +19,13 @@ import Protolude
 import Control.Concurrent.Chan (Chan)
 import Control.Concurrent.STM.TChan (TChan, newBroadcastTChanIO)
 import Control.Lens.TH (makeClassy)
-import Data.Aeson (FromJSON, ToJSON, eitherDecode)
+import Data.Aeson (FromJSON, ToJSON, Value, eitherDecode)
 import qualified Data.ByteString.Lazy as B
 import Data.Text (Text)
 import GHC.Generics (Generic)
 import qualified Settings as S
 
-import ChatBot.Models (ChannelName(..), ChatMessage(..))
+import ChatBot.Models (ChannelName, ChatMessage', mkChannelName, getChannelName)
 
 data ChatBotConfig = ChatBotConfig
   { _cbConfigNick :: Text
@@ -39,7 +39,7 @@ data ChatBotFrontendMessage = ConnectTo ChannelName | DisconnectFrom ChannelName
     deriving (Eq, Generic, Ord, Show, ToJSON, FromJSON)
 
 data ChatBotExecutionConfig = ChatBotExecutionConfig {
-    _cbecOutputChan :: TChan ChatMessage
+    _cbecOutputChan :: TChan (ChatMessage' Value)
   , _cbecInputChan :: Chan ChatBotFrontendMessage
 }
 

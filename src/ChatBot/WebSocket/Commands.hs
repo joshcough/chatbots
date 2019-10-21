@@ -8,7 +8,7 @@ module ChatBot.WebSocket.Commands
 
 import Protolude
 
-import ChatBot.Models (ChannelName(..), Question(..), Quote(..), ChatUser(..))
+import ChatBot.Models (ChannelName, getChannelName, Question(..), Quote(..), ChatUser(..))
 import ChatBot.Storage (CommandsDb(..), QuestionsDb(..), QuotesDb(..))
 import ChatBot.WebSocket.Parsers (anything, number, slurp)
 import Config (Config(..), Environment(Development), HasConfig(..))
@@ -90,10 +90,11 @@ getQuestionsUrlCommand :: (QuestionsDb m, MonadReader c m, HasConfig c) => BotCo
 getQuestionsUrlCommand = BotCommand Anyone anything $ \c _ _ -> RespondWith <$> mkUrl c Questions
 
 mkUrl :: (MonadReader c m, HasConfig c) => ChannelName -> View -> m Text
-mkUrl (ChannelName c) viewtype = do
+mkUrl chan viewtype = do
+  let c = getChannelName chan
   Config{..} <- view config
   let ending = T.toLower . show $ viewtype
-  let f p = "https://" <> _configHost <> p <> "/" <> "?stream=" <> T.drop 1 c <> "&view=" <> ending
+  let f p = "https://" <> _configHost <> p <> "/" <> "?stream=" <> c <> "&view=" <> ending
   pure $ if _configEnv == Development
            then f (":" <> show _configPort)
            else f ""

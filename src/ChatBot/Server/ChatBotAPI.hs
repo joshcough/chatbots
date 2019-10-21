@@ -6,15 +6,15 @@ module ChatBot.Server.ChatBotAPI (
   ) where
 
 import ChatBot.Config (ChatBotExecutionConfig(..))
-import ChatBot.Models (ChannelName(..), ChatMessage(..), Command(..), Question(..), Quote(..))
+import ChatBot.Models (ChannelName, ChatMessage'(..), Command(..), Question(..), Quote(..))
 import ChatBot.Server.ChatBotServerMonad (ChatBotServerMonad(..))
 import Config (Config(..))
 import Control.Concurrent.STM.TChan (TChan, dupTChan, readTChan)
 import Control.Monad.Except (MonadIO)
-import Data.Aeson (FromJSON, ToJSON, Value)
+import Data.Aeson (Value)
 import Data.Aeson.Encode.Pretty (encodePretty)
-import Data.Int (Int64)
 import Network.WebSockets (Connection, forkPingThread, sendTextData)
+import Logging ((.=), logDebug)
 import Protolude
 import Servant.API.WebSocket (WebSocket)
 import ServantHelpers hiding (Stream)
@@ -52,6 +52,7 @@ chatBotServerUnprotected = toServant $ ChatBotUnprotected {
   --
   , chatBotConnectConnect = channelConnect
   , chatBotConnectDisconnect = channelDisconnect
+  --
   , chatBotChatWebSocket = \stream conn -> do
       chanStm <- dupTChan . _cbecOutputChan . _configChatBotExecution <$> ask
       chan <- liftIO . atomically $ chanStm
@@ -65,17 +66,12 @@ chatBotServerUnprotected = toServant $ ChatBotUnprotected {
 --  , chatBotConnectDisconnect = adminOr401 user . channelDisconnect
 --  }
 
-data WebsocketMessage = WebsocketMessage {
-    wsmEvent   :: Text
-  , wsmUserId  :: Int64
-  , wsmTeamId  :: Int64
-  , wsmMessage :: Value
-} deriving (Eq, Generic, Show, ToJSON, FromJSON)
-
-webSocket :: (MonadIO m) => ChannelName -> TChan ChatMessage -> Connection -> AppT m ()
-webSocket stream chan conn = liftIO $ forkPingThread conn 10 >> loop
+webSocket :: (MonadIO m) => ChannelName -> TChan (ChatMessage' Value) -> Connection -> AppT m ()
+webSocket stream chan conn = liftIO (forkPingThread conn 10) >> loop
   where
     loop = do
-      wsm <- atomically $ readTChan chan
-      when (cmChannel wsm == stream) $ sendTextData conn (encodePretty wsm)
+      $(logDebug) "reading from tchan" ["stream" .= stream]
+      chatMessage <- liftIO . atomically $ readTChan chan
+      $(logDebug) "writing to websocket" ["chatMessage" .= chatMessage]
+      when (cmChannel chatMessage == stream) $ liftIO $ sendTextData conn (encodePretty chatMessage)
       loop

@@ -8,6 +8,35 @@ let additions =
       , elmish-html =
           https://raw.githubusercontent.com/collegevine/purescript-elmish-html/master/elmish-html.dhall sha256:30e58781aa349b39d388d4570ad31a830a4160dc0b2d6d619a4eb8dd0d4cf040
           "v0.0.3"
+      , var =
+          { dependencies =
+              [ "effect"
+              , "contravariant"
+              , "invariant"
+              ]
+          , repo = "https://github.com/zudov/purescript-var.git"
+          , version = "master"
+          }
+      , websocket-simple =
+          { dependencies =
+              [ "web-socket"
+              , "web-events"
+              , "effect"
+              , "exceptions"
+              , "generics-rep"
+              , "var"
+              ]
+          , repo = "https://github.com/zudov/purescript-websocket-simple.git"
+          , version = "master"  -- branch, tag, or commit hash
+          }
+      , concurrent-queues =
+          { dependencies =
+              [ "aff"
+              , "avar"
+              ]
+          , repo = "https://github.com/slamdata/purescript-concurrent-queues.git"
+          , version = "master"
+          }
       }
 
 in  upstream // additions

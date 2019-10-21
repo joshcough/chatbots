@@ -1,5 +1,5 @@
 { name =
-    "purescript-elmish-examples-html-hello-world: PureScript Elmish HTML Hello World"
+    "Chatbots: Chatbots UI in Purescript"
 , dependencies =
     [ "elmish"
     , "elmish-html"
@@ -15,6 +15,8 @@
     , "web-html"
     , "numbers"
     , "node-process"
+    , "websocket-simple"
+    , "concurrent-queues"
     ]
 , packages =
     ./packages.dhall

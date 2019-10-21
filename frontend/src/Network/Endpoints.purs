@@ -11,10 +11,8 @@ module Network.Endpoints
 import Prelude
 import Auth.Models (CreateUser, Login)
 import ChatBot.Models (ChannelName, Command, Question, Quote)
-import Control.Monad.Error.Class (class MonadError)
-import Effect.Aff.Class (class MonadAff)
-import Network.HTTP (HttpException, Method(..), buildReq, httpJSON, jsonData, noData)
-import Types ( OpM, Config )
+import Network.HTTP (Method(..), buildReq, httpJSON, jsonData, noData)
+import Types (OpM)
 import Control.Monad.Reader.Trans (ask)
 import Data.Maybe (Maybe, fromMaybe)
 import Affjax.RequestBody as Request
