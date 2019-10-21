@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0f51d74290dc14511a68628daaceab55866dbb4be8801f89ea6727b2e55cf4dc
+-- hash: 29e354892a2748b71dae3bdcc3a13df067b41e60f86783148d8c93b3ccae9117
 
 name:           chatbots
 version:        0.1.0.0
@@ -99,6 +99,8 @@ library
     , servant-auth >=0.3.1.0
     , servant-auth-server
     , servant-server >=0.13 && <=0.14.1
+    , servant-websockets
+    , stm
     , string-conversions
     , template-haskell
     , text

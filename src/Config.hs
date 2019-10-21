@@ -14,7 +14,6 @@ module Config (
 import Prelude (userError)
 import Protolude
 
-import Control.Concurrent.Chan (newChan)
 import Control.Lens.TH (makeClassy)
 import Control.Monad.Logger (runNoLoggingT)
 import Data.Text (Text, unpack)
@@ -28,7 +27,7 @@ import Servant.Auth.Server (CookieSettings, JWTSettings, defaultCookieSettings, 
 import Web.Rollbar (HasRollbarCfg(..), RollbarCfg(..))
 import qualified Web.Rollbar as RB
 
-import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..), configFromEnv)
+import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..), acquireChatBotExecutionConfig, configFromEnv)
 import qualified KeyGen as KG
 import Logging (HasLoggingCfg(..), LoggingCfg)
 import qualified Logging
@@ -114,10 +113,6 @@ acquireJWT env = defaultJWTSettings <$> mkJWT' env
     mkJWT' Production = KG.readProdKey
     mkJWT' Development = KG.readDevKey
     mkJWT' Test = KG.readTestKey
-
--- |
-acquireChatBotExecutionConfig :: IO ChatBotExecutionConfig
-acquireChatBotExecutionConfig = ChatBotExecutionConfig <$> newChan <*> newChan
 
 -- | rollbar
 mkRollbar :: IO RollbarCfg

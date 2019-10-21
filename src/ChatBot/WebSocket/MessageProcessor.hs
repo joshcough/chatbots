@@ -18,7 +18,7 @@ import ChatBot.Models (ChannelName(..), ChatMessage(..), ChatUser(..), ChatUserN
 import ChatBot.Storage (CommandsDb, QuestionsDb, QuotesDb(..))
 import ChatBot.WebSocket.Commands (BotCommand(..), Permission(..), Permission(..), Response(..), builtinCommands) --, getCommandFromDb)
 import Config (Config(..), HasConfig(..))
---import Control.Concurrent.Chan (writeChan)
+import Control.Concurrent.STM.TChan (writeTChan)
 import Control.Lens (view)
 import qualified Data.Map as Map
 import Data.String.Conversions (cs)
@@ -86,9 +86,9 @@ processUserMessage rawIrcMsg userInfo channelName msgBody =
       let chatMessage = createChatMessage rawIrcMsg userInfo channelName msgBody
       findAndRunCommand chatMessage >>= \case
         RespondWith t -> say (cmChannel chatMessage) t
-        Nada -> return () -- T.putStrLn . cs $ encodePretty rawIrcMsg
---      outputChan <- _cbecOutputChan . _configChatBotExecution <$> view config
---      liftIO $ writeChan outputChan rawIrcMsg
+        Nada -> return () -- not a command that we know about, so do nothing. we could log though...
+      outputChan <- _cbecOutputChan . _configChatBotExecution <$> view config
+      liftIO $ atomically $ writeTChan outputChan chatMessage
     params -> $(logDebug) "Unhandled params" ["msg" .= params]
 
 createChatMessage :: RawIrcMsg -> Irc.UserInfo -> Irc.Identifier -> Text -> ChatMessage

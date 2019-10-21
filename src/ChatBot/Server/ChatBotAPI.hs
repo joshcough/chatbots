@@ -5,10 +5,18 @@ module ChatBot.Server.ChatBotAPI (
 --  , chatBotServerProtected
   ) where
 
-import ChatBot.Models (ChannelName(..), Command(..), Question(..), Quote(..))
+import ChatBot.Config (ChatBotExecutionConfig(..))
+import ChatBot.Models (ChannelName(..), ChatMessage(..), Command(..), Question(..), Quote(..))
 import ChatBot.Server.ChatBotServerMonad (ChatBotServerMonad(..))
+import Config (Config(..))
+import Control.Concurrent.STM.TChan (TChan, dupTChan, readTChan)
 import Control.Monad.Except (MonadIO)
+import Data.Aeson (FromJSON, ToJSON, Value)
+import Data.Aeson.Encode.Pretty (encodePretty)
+import Data.Int (Int64)
+import Network.WebSockets (Connection, forkPingThread, sendTextData)
 import Protolude
+import Servant.API.WebSocket (WebSocket)
 import ServantHelpers hiding (Stream)
 import Types (AppT)
 --import Auth.Models (User)
@@ -25,6 +33,7 @@ data ChatBotUnprotected r = ChatBotUnprotected {
   --
   , chatBotConnectConnect :: r :- "connect" :> Capture "channel" ChannelName :> Get '[JSON] ()
   , chatBotConnectDisconnect :: r :- "disconnect" :> Capture "channel" ChannelName :> Get '[JSON] ()
+  , chatBotChatWebSocket :: r :- "stream" :> Capture "channel" ChannelName :> WebSocket
   } deriving Generic
 
 --data ChatBotProtected r = ChatBotProtected {
@@ -43,6 +52,10 @@ chatBotServerUnprotected = toServant $ ChatBotUnprotected {
   --
   , chatBotConnectConnect = channelConnect
   , chatBotConnectDisconnect = channelDisconnect
+  , chatBotChatWebSocket = \stream conn -> do
+      chanStm <- dupTChan . _cbecOutputChan . _configChatBotExecution <$> ask
+      chan <- liftIO . atomically $ chanStm
+      webSocket stream chan conn
   }
 
 ---- | The server that runs the ChatBotAPI
@@ -51,3 +64,18 @@ chatBotServerUnprotected = toServant $ ChatBotUnprotected {
 --    chatBotConnectConnect = adminOr401 user . channelConnect
 --  , chatBotConnectDisconnect = adminOr401 user . channelDisconnect
 --  }
+
+data WebsocketMessage = WebsocketMessage {
+    wsmEvent   :: Text
+  , wsmUserId  :: Int64
+  , wsmTeamId  :: Int64
+  , wsmMessage :: Value
+} deriving (Eq, Generic, Show, ToJSON, FromJSON)
+
+webSocket :: (MonadIO m) => ChannelName -> TChan ChatMessage -> Connection -> AppT m ()
+webSocket stream chan conn = liftIO $ forkPingThread conn 10 >> loop
+  where
+    loop = do
+      wsm <- atomically $ readTChan chan
+      when (cmChannel wsm == stream) $ sendTextData conn (encodePretty wsm)
+      loop
