@@ -6,6 +6,7 @@ module Error(
     TitledError(..),
     ToServant(..),
     ClassifiedError(..),
+    FromException(..),
     AppError(..),
     ThrowAll(..),
     ChatBotError,
@@ -67,6 +68,9 @@ class ClassifiedError e where
     isUnexpected :: e -> Bool
     isUnexpected  _ = True
 
+class FromException e where
+    fromException :: SomeException -> e
+
 data AppError e
     = AppHttpError HttpError
     | AppBadRequestError Text
@@ -74,6 +78,7 @@ data AppError e
     | AppNotFoundError Text
     | AppConflictError Text
     | AppUnexpectedError Text
+    | AppUnexpectedException SomeException
     | AppAppError e
     deriving (Show, Functor, Foldable, Traversable)
 
@@ -90,6 +95,9 @@ miscError = AppAppError . ChatBotMiscError
 
 instance ClassifiedError ChatBotError' where
     isUnexpected (ChatBotMiscError _) = True
+
+instance FromException (AppError e) where
+    fromException = AppUnexpectedException
 
 instance TitledError ChatBotError' where
     getErrorTitle (ChatBotMiscError _) = "Unknown Error"
@@ -128,6 +136,7 @@ instance TitledError e => TitledError (AppError e) where
     getErrorTitle (AppNotFoundError _) = "Not Found"
     getErrorTitle (AppConflictError _) = "Conflict"
     getErrorTitle (AppUnexpectedError _) = "Unexpected"
+    getErrorTitle (AppUnexpectedException _) = "Unexpected Exception"
     getErrorTitle (AppAppError e) = "App Error: " <> getErrorTitle e
 
 instance ToServant e => ToServant (AppError e) where
@@ -138,6 +147,7 @@ instance ToServant e => ToServant (AppError e) where
     toServantErr (AppNotFoundError e) = err404 { errBody = BL.pack $ unpack e }
     toServantErr (AppConflictError e) = err409 { errBody = BL.pack $ unpack e }
     toServantErr (AppUnexpectedError _) = err500 -- TODO: use string or?
+    toServantErr (AppUnexpectedException _) = err500 -- TODO: use exception or?
     toServantErr (AppAppError e) = toServantErr e
 
 instance (TitledError e, Show e) => ToRollbarEvent (AppError e) where

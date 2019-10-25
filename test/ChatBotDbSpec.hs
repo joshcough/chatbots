@@ -7,7 +7,7 @@ import ChatBot.Config (ChannelName, mkChannelName)
 import ChatBot.Models (Question(..), Quote(..), trollabotUser)
 import ChatBot.Storage (QuestionsDb(..), QuotesDb(..))
 import Helpers
-import Types (runAppToIO)
+import Types (runAppTInTestAndThrow)
 
 art :: ChannelName
 art = mkChannelName "artoftroll"
@@ -19,19 +19,19 @@ spec :: Spec
 spec = withDB $ do
     describe "Questions" $ do
         it "can insert question" $ \(_, config) -> do
-            qid <- runAppToIO config $
+            qid <- runAppTInTestAndThrow config $
                 insertQuestion' art "i am so good at this game?"
             qid `shouldBe` 1
 
         it "can insert many questions in same channel" $ \(_, config) -> do
-            (q1, q2) <- runAppToIO config $ do
+            (q1, q2) <- runAppTInTestAndThrow config $ do
                 q1 <- insertQuestion' art "look what i can do?"
                 q2 <- insertQuestion' art "bam?"
                 pure (q1, q2)
             (q1, q2) `shouldBe` (1, 2)
 
         it "can insert many questions in different channels" $ \(_, config) -> do
-            (q1, q2, q3, q4) <- runAppToIO config $ do
+            (q1, q2, q3, q4) <- runAppTInTestAndThrow config $ do
                 q1 <- insertQuestion' art "look what i can do - art?"
                 q2 <- insertQuestion' art "bam - art?"
                 q3 <- insertQuestion' daut "look what i can do - daut?"
@@ -41,19 +41,19 @@ spec = withDB $ do
 
     describe "Quotes" $ do
         it "can insert quote" $ \(_, config) -> do
-            qid <- runAppToIO config $
+            qid <- runAppTInTestAndThrow config $
                 insertQuote' art "i am so good at this game"
             qid `shouldBe` 1
 
         it "can insert many quotes in same channel" $ \(_, config) -> do
-            (q1, q2) <- runAppToIO config $ do
+            (q1, q2) <- runAppTInTestAndThrow config $ do
                 q1 <- insertQuote' art "look what i can do"
                 q2 <- insertQuote' art "bam"
                 pure (q1, q2)
             (q1, q2) `shouldBe` (1, 2)
 
         it "can delete quotes from a channel (and still insert after)" $ \(_, config) -> do
-            qs <- runAppToIO config $ do
+            qs <- runAppTInTestAndThrow config $ do
                 q1 <- insertQuote' art "look what i can do"
                 q2 <- insertQuote' art "bam"
                 _ <- insertQuote' art "bam again"
@@ -64,7 +64,7 @@ spec = withDB $ do
             qs `shouldBe` [Quote art "bam again" trollabotUser 3, Quote art "bam again!" trollabotUser 4]
 
         it "can insert many quotes in different channels" $ \(_, config) -> do
-            (q1, q2, q3, q4) <- runAppToIO config $ do
+            (q1, q2, q3, q4) <- runAppTInTestAndThrow config $ do
                 q1 <- insertQuote' art "look what i can do - art"
                 q2 <- insertQuote' art "bam - art"
                 q3 <- insertQuote' daut "look what i can do - daut"

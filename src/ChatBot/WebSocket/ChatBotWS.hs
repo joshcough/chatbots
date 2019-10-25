@@ -32,7 +32,7 @@ import Error (ChatBotError, miscError)
 import Irc.RawIrcMsg (parseRawIrcMsg, renderRawIrcMsg)
 import Network.Socket (withSocketsDo)
 import qualified Network.WebSockets as WS
-import Types (AppTEnv', runAppToIO)
+import Types (AppTEnv', runAppTAndThrow)
 
 twitchIrcUrl :: Text
 twitchIrcUrl = "irc-ws.chat.twitch.tv"
@@ -47,9 +47,15 @@ instance Sender App where
 runBot :: Config -> IO ()
 runBot conf =
   withSocketsDo $ WS.runClient (cs twitchIrcUrl) 80 "/" $ \conn -> do
-    let f = runAppToIO (ConfigAndConnection conf conn)
-    _ <- forkIO $ f frontendListener
-    f $ authorize >> twitchListener
+    let c = ConfigAndConnection conf conn
+    _ <- forkIO $ runAppTAndThrow c frontendListener
+    runAppTAndThrow c $ authorize >> twitchListener
+  -- if there is some blip, wait a second and try again.
+  `catch` (\(e :: SomeException) -> loop e)
+  `catch` (\(e :: SomeAsyncException) -> loop e)
+  where
+  loop :: Show e => e -> IO ()
+  loop e = print e >> threadDelay 1000000 >> runBot conf
 
 twitchListener :: App ()
 twitchListener = forever $ do
@@ -62,7 +68,7 @@ twitchListener = forever $ do
 runImporter :: ChannelName -> Config -> IO ()
 runImporter chan conf =
   withSocketsDo $ WS.runClient (cs twitchIrcUrl) 80 "/" $ \conn ->
-    runAppToIO (ConfigAndConnection conf conn) $ do
+    runAppTAndThrow (ConfigAndConnection conf conn) $ do
         let daut = mkChannelName "daut"
         authorize
         connectTo daut
@@ -78,6 +84,6 @@ runImporter chan conf =
 
 runInserter :: ChannelName -> Config -> IO ()
 runInserter cn conf =
-    runAppToIO (ConfigAndConnection conf $ error "ununsed") $ do
+    runAppTAndThrow (ConfigAndConnection conf $ error "ununsed") $ do
         f <- liftIO $ readFile "./data/quotes_no_ids.txt"
         forM_ (lines f) $ insertQuote cn trollabotUser
