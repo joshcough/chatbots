@@ -8,8 +8,8 @@ module ChatBot.Models
   , ChatUserName(..)
   , ChannelName, mkChannelName, getChannelName, getChannelNameHashed
   , Command(..)
-  , Question(..)
   , Quote(..)
+  , Stream(..)
   , trollabotUser
   ) where
 
@@ -43,6 +43,14 @@ getChannelName = _unChannelName
 
 getChannelNameHashed :: ChannelName -> Text
 getChannelNameHashed c = "#" <> getChannelName c
+
+data Stream = Stream {
+   _streamId :: Int64
+ , _streamChannelName :: ChannelName
+ } deriving stock (Eq, Ord, Read, Show, Generic)
+   deriving anyclass (FromJSON, ToJSON)
+
+makeClassy ''Stream
 
 instance FromHttpApiData ChannelName where
     parseUrlPiece = pure . ChannelName
@@ -111,11 +119,4 @@ data Quote = Quote {
   , quoteUser :: ChatUserName
   , quoteQid :: Int
 } deriving stock (Eq, Ord, Show, Generic)
-  deriving anyclass (FromJSON, ToJSON)
-
-data Question = Question {
-    questionChannel :: ChannelName
-  , questionBody :: Text
-  , questionQid :: Int
-} deriving stock (Eq, Ord, Read, Show, Generic)
   deriving anyclass (FromJSON, ToJSON)

@@ -1,0 +1,20 @@
+Description: (Describe migration here.)
+Created: 2019-10-20 12:21:00.836215 UTC
+Depends: 2019-07-06_23-32-00_initial-schema
+Apply: |
+
+    CREATE TABLE streams (
+        id SERIAL PRIMARY KEY,
+        name character varying NOT NULL,
+        Unique (name)
+    );
+
+    insert into streams values (0, 'daut');
+
+    ALTER table quotes
+        drop column channel;
+
+    ALTER table quotes
+        add column channel bigint REFERENCES streams (id);
+
+    update quotes set channel = 0;

@@ -9,11 +9,11 @@ import Database.Persist.Sql (rawExecute)
 import Database.PostgreSQL.Simple.Options (Options(..))
 import Database.Postgres.Temp (DB(..), defaultOptions)
 import qualified Database.Postgres.Temp as PG
+import qualified MooPostgreSQL as Moo
 import Settings (lookupReadableSetting)
 import System.IO (IOMode(WriteMode), openFile)
 import Test.Hspec
 import Types (runAppTInTestAndThrow, runDb)
-import qualified MooPostgreSQL as Moo
 
 --
 -- NOTE: if having trouble with db, do this: DBLOGGING=VERBOSE stack test
@@ -49,7 +49,7 @@ withDB = beforeAll getDatabase . afterAll fst . after (truncateDb . snd)
     truncateDb :: Config -> IO ()
     truncateDb config = runAppTInTestAndThrow config . runDb $ truncateTables
       where
-      tables = ["users", "commands", "questions", "quotes"]
+      tables = ["users", "commands", "quotes", "streams"]
       truncateStatement = "TRUNCATE TABLE " <> intercalate ", " tables <> " RESTART IDENTITY CASCADE"
       truncateTables = rawExecute (pack truncateStatement) []
 

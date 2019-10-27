@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.31.1.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 29e354892a2748b71dae3bdcc3a13df067b41e60f86783148d8c93b3ccae9117
+-- hash: 1c9d509e6ae51a4c8a42dc3010fbb39df86c21abaecc22473c79f1c3ae7611ac
 
 name:           chatbots
 version:        0.1.0.0
@@ -110,7 +110,6 @@ library
     , trifecta
     , unliftio-core
     , unordered-containers
-    , uuid
     , vector
     , wai
     , wai-cors
@@ -147,18 +146,15 @@ test-suite spec
   default-extensions: ApplicativeDo BangPatterns ConstraintKinds DataKinds DefaultSignatures DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DerivingStrategies DeriveTraversable EmptyCase ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedLabels OverloadedStrings PatternSynonyms RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TemplateHaskell TupleSections TypeApplications TypeFamilies TypeFamilyDependencies TypeOperators UndecidableInstances
   ghc-options: -Wall -Werror -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Wimplicit-prelude -Wall -Werror -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Wimplicit-prelude -threaded
   build-depends:
-      HDBC >=2.2.1
-    , HDBC-postgresql ==2.3.2.7
+      HDBC-postgresql ==2.3.2.7
     , base
     , chatbots
     , dbmigrations >=2
     , hspec
     , persistent
     , postgres-options
-    , process >=1.1
     , protolude
     , string-conversions
     , text
     , tmp-postgres
-    , turtle
   default-language: Haskell2010

@@ -13,7 +13,11 @@ module ChatBot.WebSocket.MessageProcessor
 
 import Protolude
 
-import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..), ChatBotFrontendMessage(..))
+import ChatBot.Config
+  ( ChatBotConfig(..)
+  , ChatBotExecutionConfig(..)
+  , ChatBotFrontendMessage(..)
+  )
 import ChatBot.Models
   ( ChannelName
   , ChatMessage
@@ -25,8 +29,13 @@ import ChatBot.Models
   , mkChannelName
   , trollabotUser
   )
-import ChatBot.Storage (CommandsDb, QuestionsDb, QuotesDb(..))
-import ChatBot.WebSocket.Commands (BotCommand(..), Permission(..), Permission(..), Response(..), builtinCommands) --, getCommandFromDb)
+import ChatBot.Storage (QuotesDb(..))
+import ChatBot.WebSocket.Commands
+  ( BotCommand(..)
+  , Permission(..)
+  , Response(..)
+  , builtinCommands
+  ) --, getCommandFromDb)
 import Config (Config(..), HasConfig(..))
 import Control.Concurrent.STM.TChan (writeTChan)
 import Control.Lens (view)
@@ -35,7 +44,7 @@ import qualified Data.Map as Map
 import Data.String.Conversions (cs)
 import Data.Text (Text)
 import qualified Data.Text as T
-import Irc.Commands (ircCapReq, ircJoin, ircNick, ircPart, ircPass, ircPing, ircPong, ircPrivmsg)
+import qualified Irc.Commands as Irc
 import qualified Irc.Identifier as Irc
 import Irc.Identifier (mkId)
 import Irc.Message (IrcMsg(..), cookIrcMsg)
@@ -53,13 +62,13 @@ class Monad m => MessageProcessor m where
 class Monad m => MessageImporter m where
     processImportMessage :: ChannelName -> RawIrcMsg -> m ()
 
-type Db m = (QuestionsDb m, QuotesDb m, CommandsDb m)
+type Db m = (QuotesDb m)
 
 instance (Monad m, MonadLoggerJSON m, MonadIO m, Db m, MonadReader c m, HasConfig c, Sender m) => MessageProcessor m
     where
     processMessage rawIrcMsg = processMessage' (cookIrcMsg rawIrcMsg)
       where
-        processMessage' (Ping xs) = send (ircPong xs)
+        processMessage' (Ping xs) = send (Irc.ircPong xs)
         processMessage' (Pong _) = return ()
         processMessage' (Privmsg userInfo channelName msgBody) =
           processPrivMessage rawIrcMsg userInfo channelName msgBody
@@ -145,9 +154,9 @@ isStreamer (ChatUser (ChatUserName name) _ _) (ChatMessage _ cn _ _) = getChanne
 say :: (MonadIO m,  MonadReader c m, HasConfig c, MonadLoggerJSON m, Sender m) => ChannelName -> Text -> m ()
 say twitchChannel msg = do
   $(logDebug) "sending message" ["chan" .= twitchChannel, "msg" .= msg]
-  let rawIrcMsg = ircPrivmsg (getChannelNameHashed twitchChannel) msg
+  let rawIrcMsg = Irc.ircPrivmsg (getChannelNameHashed twitchChannel) msg
   -- send message to twitch
-  send $ ircPrivmsg (getChannelNameHashed twitchChannel) msg
+  send $ Irc.ircPrivmsg (getChannelNameHashed twitchChannel) msg
   -- write it to websocket too
   nick <- _cbConfigNick . _configChatBot <$> view config
   let botInfo = Irc.UserInfo (Irc.mkId nick) nick ""
@@ -156,12 +165,12 @@ say twitchChannel msg = do
 authorize :: (MonadIO m, MonadReader c m, HasConfig c, Sender m) => m ()
 authorize = do
   chatBotConf <- view configChatBot
-  send (ircPass $ _cbConfigPass chatBotConf)
-  send (ircNick $ _cbConfigNick chatBotConf)
-  send (ircCapReq ["twitch.tv/membership"])
-  send (ircCapReq ["twitch.tv/commands"])
-  send (ircCapReq ["twitch.tv/tags"])
-  send (ircPing ["ping"])
+  send (Irc.ircPass $ _cbConfigPass chatBotConf)
+  send (Irc.ircNick $ _cbConfigNick chatBotConf)
+  send (Irc.ircCapReq ["twitch.tv/membership"])
+  send (Irc.ircCapReq ["twitch.tv/commands"])
+  send (Irc.ircCapReq ["twitch.tv/tags"])
+  send (Irc.ircPing ["ping"])
 
 frontendListener :: (MonadIO m, MonadLoggerJSON m, MonadReader c m, HasConfig c, Sender m) => m ()
 frontendListener = do
@@ -173,17 +182,26 @@ frontendListener = do
   processChatBotFrontendMessage (ConnectTo c) = connectTo c
   processChatBotFrontendMessage (DisconnectFrom c) = disconnectFrom c
 
-connectTo :: (MonadIO m,  MonadReader c m, HasConfig c, MonadLoggerJSON m, Sender m) => ChannelName -> m ()
-connectTo cn = send (ircJoin (getChannelNameHashed cn) Nothing) >> say cn "Hello!"
+connectTo ::
+     (MonadIO m, MonadReader c m, HasConfig c, MonadLoggerJSON m, Sender m)
+  => ChannelName
+  -> m ()
+connectTo cn = do
+  send (Irc.ircJoin (getChannelNameHashed cn) Nothing)
+  say cn "Hello!"
 
-disconnectFrom :: (MonadIO m,  MonadReader c m, HasConfig c, MonadLoggerJSON m, Sender m) => ChannelName -> m ()
-disconnectFrom cn = say cn "Goodbye!" >> send (ircPart (mkId $ getChannelNameHashed cn) "")
+disconnectFrom ::
+     (MonadIO m, MonadReader c m, HasConfig c, MonadLoggerJSON m, Sender m)
+  => ChannelName
+  -> m ()
+disconnectFrom cn =
+  say cn "Goodbye!" >> send (Irc.ircPart (mkId $ getChannelNameHashed cn) "")
 
 instance (Monad m, MonadLoggerJSON m, Db m, MonadReader c m, Sender m) => MessageImporter m
   where
   processImportMessage chan rawIrcMsg = processImportMessage' (cookIrcMsg rawIrcMsg)
     where
-    processImportMessage' (Ping xs) = send (ircPong xs)
+    processImportMessage' (Ping xs) = send (Irc.ircPong xs)
     processImportMessage' (Privmsg userInfo channelName msgBody) = do
       $(logDebug) "got message from user" ["userInfo" .= userInfo
                                           ,"channelName" .= channelName

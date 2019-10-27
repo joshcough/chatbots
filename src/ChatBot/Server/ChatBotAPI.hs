@@ -6,7 +6,7 @@ module ChatBot.Server.ChatBotAPI (
   ) where
 
 import ChatBot.Config (ChatBotExecutionConfig(..))
-import ChatBot.Models (ChannelName, ChatMessage'(..), Command(..), Question(..), Quote(..))
+import ChatBot.Models (ChannelName, ChatMessage'(..), Command(..), Quote(..))
 import ChatBot.Server.ChatBotServerMonad (ChatBotServerMonad(..))
 import Config (Config(..))
 import Control.Concurrent.STM.TChan (TChan, dupTChan, readTChan)
@@ -25,11 +25,9 @@ type UnprotectedChatBotAPI = "chatbot" :> Compose ChatBotUnprotected
 --type ProtectedChatBotAPI= "chatbot" :> Compose ChatBotProtected
 
 data ChatBotUnprotected r = ChatBotUnprotected {
-    chatBotGetCommands :: r :- "commands" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Command]
-  , chatBotGetQuestions :: r :- "questions" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Question]
-  , chatBotGetQuestionStreams :: r :- "questions" :> "streams" :> Post '[JSON] [ChannelName]
+    chatBotGetStreams :: r :- "streams" :> Post '[JSON] [ChannelName]
+  , chatBotGetCommands :: r :- "commands" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Command]
   , chatBotGetQuotes :: r :- "quotes" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Quote]
-  , chatBotGetQuoteStreams :: r :- "quotes" :> "streams" :> Post '[JSON] [ChannelName]
   --
   , chatBotConnectConnect :: r :- "connect" :> Capture "channel" ChannelName :> Get '[JSON] ()
   , chatBotConnectDisconnect :: r :- "disconnect" :> Capture "channel" ChannelName :> Get '[JSON] ()
@@ -44,10 +42,8 @@ data ChatBotUnprotected r = ChatBotUnprotected {
 -- | The server that runs the ChatBotAPI
 chatBotServerUnprotected :: (MonadIO m) => ServerT UnprotectedChatBotAPI (AppT m)
 chatBotServerUnprotected = toServant $ ChatBotUnprotected {
-    chatBotGetQuoteStreams = getQuoteStreams
-  , chatBotGetQuestionStreams = getQuestionStreams
+    chatBotGetStreams = getStreams
   , chatBotGetCommands = getCommands
-  , chatBotGetQuestions = getQuestions
   , chatBotGetQuotes = getQuotes
   --
   , chatBotConnectConnect = channelConnect

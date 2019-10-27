@@ -16,7 +16,6 @@ myTypes = [
   , e (Proxy :: Proxy ChatUser)
   , o (Proxy :: Proxy ChatUserName)
   , o (Proxy :: Proxy Command)
-  , o (Proxy :: Proxy Question)
   , o (Proxy :: Proxy Quote)
   ]
   where

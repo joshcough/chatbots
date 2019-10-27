@@ -115,7 +115,7 @@ library:
     - trifecta
     - unliftio-core
     - unordered-containers
-    - uuid
+#    - uuid
     - vector
     - wai
     - wai-cors
@@ -141,12 +141,9 @@ tests:
       - postgres-options
       - text
       - tmp-postgres
-      - turtle
       # moo postgres stuff
       - dbmigrations >= 2
-      - HDBC >= 2.2.1
       - HDBC-postgresql == 2.3.2.7
-      - process >= 1.1
     ghc-options:
       - -Wall
       - -Werror

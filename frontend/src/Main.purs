@@ -16,21 +16,19 @@ import Elmish (Transition(..), pureUpdate)
 import Elmish as Elmish
 import Elmish.Component (ComponentDef)
 import Elmish.React.DOM (empty)
-import Network.Endpoints (getQuoteStreams, getQuestionStreams) --, loginToken)
+import Network.Endpoints (getStreams) --, loginToken)
 import Chat as Chat
-import Questions as Questions
 import Quotes as Quotes
 import Types (Config, OpM, runOpM)
 import URI.Extra.QueryPairs as QP
 import WsMain as WsMain
 
-data View = Questions | Quotes | Chat
+data View = Quotes | Chat
 
 main :: Effect Unit
 main = launchAff_ $ do
   let config = {hostname:Nothing}
-  questionStreams <- runOpM config getQuestionStreams
-  quoteStreams    <- runOpM config getQuoteStreams
+  streams <- runOpM config getStreams
   q <- BQ.new 100
   liftEffect $ do
     WsMain.main q
@@ -40,8 +38,7 @@ main = launchAff_ $ do
         emptyDef = { init: Transition {} [], update: \_ _ -> pureUpdate {}, view: \_ _ -> empty }
     case mView of
       Just Chat      -> runComponent config $ Chat.def q chan
-      Just Questions -> runComponent config $ Questions.def questionStreams chan
-      Just Quotes    -> runComponent config $ Quotes.def    quoteStreams chan
+      Just Quotes    -> runComponent config $ Quotes.def streams chan
       _              -> runDef emptyDef
 
 runComponent :: forall m s . Config -> ComponentDef OpM m s -> Effect Unit
@@ -55,8 +52,7 @@ getStreamFromUrlParams = getArgFromParams "stream"
 
 getViewFromUrlParams :: Effect (Maybe View)
 getViewFromUrlParams = f <$> getArgFromParams "view"
-  where f (Just "questions") = Just Questions
-        f (Just "quotes") = Just Quotes
+  where f (Just "quotes") = Just Quotes
         f (Just "chat") = Just Chat
         f _ = Nothing
 
