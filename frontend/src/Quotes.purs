@@ -16,8 +16,10 @@ type UXQuote = { channel :: String, qid :: Int, body :: String, addedBy :: Strin
 type State = { streams :: Array ChannelName, stream :: ChannelName, quotes :: Array Quote }
 
 def :: Array ChannelName -> ChannelName -> ComponentDef OpM Message State
-def streams stream =
-  { init: Transition { streams, stream, quotes: [] } [ GotQuotes stream <$> getQuotes stream ]
+def streams initialStream =
+  { init: Transition
+            { streams, stream: initialStream, quotes: [] }
+            [ GotQuotes initialStream <$> getQuotes initialStream ]
   , update
   , view: view
   }

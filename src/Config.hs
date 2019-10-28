@@ -14,7 +14,6 @@ module Config (
 import Prelude (userError)
 import Protolude
 
-import Control.Concurrent.Chan (newChan)
 import Control.Lens.TH (makeClassy)
 import Control.Monad.Logger (runNoLoggingT)
 import Data.Text (Text, unpack)
@@ -28,7 +27,7 @@ import Servant.Auth.Server (CookieSettings, JWTSettings, defaultCookieSettings, 
 import Web.Rollbar (HasRollbarCfg(..), RollbarCfg(..))
 import qualified Web.Rollbar as RB
 
-import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..), configFromEnv)
+import ChatBot.Config (ChatBotConfig(..), ChatBotExecutionConfig(..), acquireChatBotExecutionConfig, configFromEnv)
 import qualified KeyGen as KG
 import Logging (HasLoggingCfg(..), LoggingCfg)
 import qualified Logging
@@ -77,6 +76,12 @@ data ConfigAndConnection =
 
 makeClassy ''ConfigAndConnection
 
+instance HasRollbarCfg ConfigAndConnection where
+    rollbarCfg = configAndConnectionConfig . configRollbar
+
+instance HasHttpCfg ConfigAndConnection where
+  httpCfg = configAndConnectionConfig . configHttp
+
 instance HasLoggingCfg ConfigAndConnection where
   loggingCfg = configAndConnectionConfig . loggingCfg
 
@@ -115,14 +120,10 @@ acquireJWT env = defaultJWTSettings <$> mkJWT' env
     mkJWT' Development = KG.readDevKey
     mkJWT' Test = KG.readTestKey
 
--- |
-acquireChatBotExecutionConfig :: IO ChatBotExecutionConfig
-acquireChatBotExecutionConfig = ChatBotExecutionConfig <$> newChan <*> newChan
-
 -- | rollbar
 mkRollbar :: IO RollbarCfg
-mkRollbar = RollbarCfg  <$> (RB.AccessToken <$> S.lookupTextSetting "<ROLLBAR_TOKEN>" "ROLLBAR_TOKEN")
-                        <*> (RB.Environment <$> S.lookupTextSetting "<ROLLBAR_ENVIRONMENT>" "ROLLBAR_ENVIRONMENT")
+mkRollbar = RollbarCfg  <$> (RB.AccessToken <$> S.lookupRequiredSetting "ROLLBAR_TOKEN")
+                        <*> (RB.Environment <$> S.lookupRequiredSetting "ROLLBAR_ENVIRONMENT")
                         <*> (fmap . fmap) RB.Host (S.lookupOptionalSetting "ROLLBAR_HOST")
                         <*> (fmap . fmap) RB.CodeVersion (S.lookupOptionalSetting "SOURCE_VERSION")
                         <*> S.lookupReadableSetting "ROLLBAR_MUTE" False

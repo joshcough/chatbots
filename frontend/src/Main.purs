@@ -4,6 +4,7 @@ import Prelude
 
 import ChatBot.Models (ChannelName(..))
 import Components.Window as Window
+import Concurrent.BoundedQueue as BQ
 import Data.Array (mapMaybe, head)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -15,27 +16,32 @@ import Elmish (Transition(..), pureUpdate)
 import Elmish as Elmish
 import Elmish.Component (ComponentDef)
 import Elmish.React.DOM (empty)
-import Network.Endpoints (getQuoteStreams, getQuestionStreams) --, loginToken)
-import Questions as Questions
+import Network.Endpoints (getStreams) --, loginToken)
+import Chat as Chat
 import Quotes as Quotes
 import Types (Config, OpM, runOpM)
 import URI.Extra.QueryPairs as QP
+import WsMain as WsMain
+import Effect.Console (log)
 
-data View = Questions | Quotes
+data View = Quotes | Chat
 
 main :: Effect Unit
 main = launchAff_ $ do
   let config = {hostname:Nothing}
-  questionStreams <- runOpM config getQuestionStreams
-  quoteStreams    <- runOpM config getQuoteStreams
+  streams <- runOpM config getStreams
+  q <- BQ.new 100
   liftEffect $ do
+    p <- Window.path_
+    log p
+    WsMain.main q
     mStream <- getStreamFromUrlParams
     mView <- getViewFromUrlParams
-    let chan = ChannelName { _unChannelName : fromMaybe "#daut" mStream }
+    let chan = ChannelName { _unChannelName : fromMaybe "daut" mStream }
         emptyDef = { init: Transition {} [], update: \_ _ -> pureUpdate {}, view: \_ _ -> empty }
     case mView of
-      Just Questions -> runComponent config $ Questions.def questionStreams chan
-      Just Quotes    -> runComponent config $ Quotes.def    quoteStreams    chan
+      Just Chat      -> runComponent config $ Chat.def q chan
+      Just Quotes    -> runComponent config $ Quotes.def streams chan
       _              -> runDef emptyDef
 
 runComponent :: forall m s . Config -> ComponentDef OpM m s -> Effect Unit
@@ -45,12 +51,12 @@ runDef :: forall m s . ComponentDef Aff m s -> Effect Unit
 runDef d = Elmish.boot { domElementId: "app", def: d }
 
 getStreamFromUrlParams :: Effect (Maybe String)
-getStreamFromUrlParams = map (\c -> "#" <> c) <$> getArgFromParams "stream"
+getStreamFromUrlParams = getArgFromParams "stream"
 
 getViewFromUrlParams :: Effect (Maybe View)
 getViewFromUrlParams = f <$> getArgFromParams "view"
-  where f (Just "questions") = Just Questions
-        f (Just "quotes") = Just Quotes
+  where f (Just "quotes") = Just Quotes
+        f (Just "chat") = Just Chat
         f _ = Nothing
 
 -- TODO: this _could_ be an (Array String) if i feel like it. not sure yet.

@@ -9,6 +9,7 @@ import URI.Query as Query
 import URI.Extra.QueryPairs as QP
 
 foreign import href_ :: Effect String
+foreign import path_ :: Effect String
 foreign import search_ :: Effect String
 
 getSearchParams ::  Effect (Either URIPartParseError (QP.QueryPairs String String))

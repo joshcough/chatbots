@@ -1,21 +1,19 @@
 module Helpers (withDB) where
 
---import Prelude (IO, String)
 import Protolude
 
 import Config (Config(..), acquireConfigWithConnStr)
 import Data.String.Conversions (cs)
-import Data.Text (pack) --, unpack)
---import Database.Persist (Entity(..))
-import Database.Persist.Sql (rawExecute) --, rawSql)
+import Data.Text (pack)
+import Database.Persist.Sql (rawExecute)
 import Database.PostgreSQL.Simple.Options (Options(..))
 import Database.Postgres.Temp (DB(..), defaultOptions)
 import qualified Database.Postgres.Temp as PG
+import qualified MooPostgreSQL as Moo
 import Settings (lookupReadableSetting)
 import System.IO (IOMode(WriteMode), openFile)
 import Test.Hspec
-import Types (runAppToIO, runDb)
-import qualified MooPostgreSQL as Moo
+import Types (runAppTInTestAndThrow, runDb)
 
 --
 -- NOTE: if having trouble with db, do this: DBLOGGING=VERBOSE stack test
@@ -49,9 +47,9 @@ withDB = beforeAll getDatabase . afterAll fst . after (truncateDb . snd)
 
     -- https://stackoverflow.com/questions/5342440/reset-auto-increment-counter-in-postgres
     truncateDb :: Config -> IO ()
-    truncateDb config = runAppToIO config . runDb $ truncateTables
+    truncateDb config = runAppTInTestAndThrow config . runDb $ truncateTables
       where
-      tables = ["users", "commands", "questions", "quotes"]
+      tables = ["users", "commands", "quotes", "streams"]
       truncateStatement = "TRUNCATE TABLE " <> intercalate ", " tables <> " RESTART IDENTITY CASCADE"
       truncateTables = rawExecute (pack truncateStatement) []
 

@@ -1,33 +1,23 @@
 module Network.Endpoints
     ( getCommands
-    , getQuestions
     , getQuotes
-    , getQuestionStreams
-    , getQuoteStreams
+    , getStreams
     , loginToken
     , createUser
     ) where
 
 import Prelude
 import Auth.Models (CreateUser, Login)
-import ChatBot.Models (ChannelName, Command, Question, Quote)
-import Control.Monad.Error.Class (class MonadError)
-import Effect.Aff.Class (class MonadAff)
-import Network.HTTP (HttpException, Method(..), buildReq, httpJSON, jsonData, noData)
-import Types ( OpM, Config )
+import ChatBot.Models (ChannelName, Command, Quote)
+import Network.HTTP (Method(..), buildReq, httpJSON, jsonData, noData)
+import Types (OpM)
 import Control.Monad.Reader.Trans (ask)
 import Data.Maybe (Maybe, fromMaybe)
 import Affjax.RequestBody as Request
 import Data.Argonaut.Decode (class DecodeJson)
 
-getQuestionStreams :: OpM (Array ChannelName)
-getQuestionStreams = doPost "/chatbot/questions/streams" noData
-
-getQuoteStreams :: OpM (Array ChannelName)
-getQuoteStreams = doPost "/chatbot/quotes/streams" noData
-
-getQuestions :: ChannelName -> OpM (Array Question)
-getQuestions c = doPost "/chatbot/questions" (jsonData c)
+getStreams :: OpM (Array ChannelName)
+getStreams = doPost "/chatbot/streams" noData
 
 getQuotes :: ChannelName -> OpM (Array Quote)
 getQuotes c = doPost "/chatbot/quotes" (jsonData c)

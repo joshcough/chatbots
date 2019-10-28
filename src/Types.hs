@@ -9,12 +9,13 @@ module Types (
   , App
   , ChatBotM
   , runAppT
-  , runAppToIO
+  , runAppTAndThrow
+  , runAppTInTestAndThrow
   , runAppTInTest
   , runDb
   ) where
 
-import Protolude
+import Protolude hiding (fromException)
 
 import Control.Lens ((^.), view)
 import Control.Monad (when)
@@ -48,30 +49,44 @@ type App = AppT IO
 
 -- | Executes the given computation in AppT, logging to stdout with log level configured in the
 --   context (via `HasLoggingCfg`), and sending errors to Rollbar (using `HasRollbarCfg`).
-runAppT :: forall err r a. (ClassifiedError err, ToRollbarEvent err, Show err, HasHttpCfg r, HasRollbarCfg r, HasLoggingCfg r) => AppT' err IO r a -> r -> IO (Either err a)
+runAppT :: forall err r a.
+     (FromException err, ClassifiedError err, ToRollbarEvent err, Show err, HasHttpCfg r, HasRollbarCfg r, HasLoggingCfg r)
+  => AppT' err IO r a
+  -> r
+  -> IO (Either err a)
 runAppT = runAppT' $ \err -> do
     $(logError) "Uncaught app error" ["error" .= tShow err]
     when (isUnexpected err) (rollbar $ toRollbarEvent err)
 
-runAppToIO :: HasLoggingCfg r => r -> AppTEnv IO r a -> IO a
-runAppToIO config app' = do
-    result <- runAppTInTest app' config
-    either (throwIO . fmap (const (ErrorCall "error"))) return result
+runAppTAndThrow :: (HasHttpCfg r, HasRollbarCfg r, HasLoggingCfg r) => r -> AppTEnv IO r a -> IO a
+runAppTAndThrow r app = runAppT app r >>= either throwChatBotError return
+
+runAppTInTestAndThrow :: HasLoggingCfg r => r -> AppTEnv IO r a -> IO a
+runAppTInTestAndThrow config app' = runAppTInTest app' config >>= either throwChatBotError return
+
+throwChatBotError :: Show b => AppError b -> IO a
+throwChatBotError (AppUnexpectedException e) = throwIO e
+throwChatBotError ae = throwIO . fmap (ErrorCall . show) $ ae
 
 -- | Runs without rollbar
-runAppTInTest :: (HasLoggingCfg r, Show err) => AppT' err IO r a -> r -> IO (Either err a)
+runAppTInTest ::
+     (HasLoggingCfg r, FromException err, Show err)
+  => AppT' err IO r a
+  -> r
+  -> IO (Either err a)
 runAppTInTest = runAppT' $ \err -> $(logError) "Uncaught app error" ["error" .= tShow err]
 
 -- |
-runAppT' :: HasLoggingCfg r =>
-       (err -> AppT' HttpError IO r ())
-    -> AppT' err IO r a
-    -> r
-    -> IO (Either err a)
+runAppT' ::
+     (FromException err, HasLoggingCfg r)
+  => (err -> AppT' HttpError IO r ())
+  -> AppT' err IO r a
+  -> r
+  -> IO (Either err a)
 runAppT' onError action context = do
     let handleErrorCallingRollbar :: Either HttpError () -> IO ()
         handleErrorCallingRollbar = either print (const $ return ())
-    res <- run level sourceVersion context action
+    res <- run level sourceVersion context action `catch` (pure . Left . fromException)
     either (\e -> run level sourceVersion context (onError e) >>= handleErrorCallingRollbar) (const $ pure ()) res
     pure res
     where
