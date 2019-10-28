@@ -1,5 +1,5 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric  #-}
+{-# LANGUAGE DeriveAnyClass  #-}
+{-# LANGUAGE DeriveGeneric   #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module ChatBot.Config
@@ -13,19 +13,21 @@ module ChatBot.Config
   , configFromFile
   ) where
 
-import Prelude (userError)
-import Protolude
+import           Prelude                      (userError)
+import           Protolude
 
-import Control.Concurrent.Chan (Chan)
-import Control.Concurrent.STM.TChan (TChan, newBroadcastTChanIO)
-import Control.Lens.TH (makeClassy)
-import Data.Aeson (FromJSON, ToJSON, Value, eitherDecode)
-import qualified Data.ByteString.Lazy as B
-import Data.Text (Text)
-import GHC.Generics (Generic)
-import qualified Settings as S
+import           Control.Concurrent.Chan      (Chan)
+import           Control.Concurrent.STM.TChan (TChan, newBroadcastTChanIO)
+import           Control.Lens.TH              (makeClassy)
+import           Data.Aeson                   (FromJSON, ToJSON, Value,
+                                               eitherDecode)
+import qualified Data.ByteString.Lazy         as B
+import           Data.Text                    (Text)
+import           GHC.Generics                 (Generic)
+import qualified Settings                     as S
 
-import ChatBot.Models (ChannelName, ChatMessage', mkChannelName, getChannelName)
+import           ChatBot.Models               (ChannelName, ChatMessage',
+                                               getChannelName, mkChannelName)
 
 data ChatBotConfig = ChatBotConfig
   { _cbConfigNick :: Text
@@ -42,22 +44,22 @@ data ChatBotFrontendMessage
 
 data ChatBotExecutionConfig = ChatBotExecutionConfig {
     _cbecOutputChan :: TChan (ChatMessage' Value)
-  , _cbecInputChan :: Chan ChatBotFrontendMessage
+  , _cbecInputChan  :: Chan ChatBotFrontendMessage
 }
 
 makeClassy ''ChatBotExecutionConfig
 
 configFromFile :: FilePath -> IO ChatBotConfig
 configFromFile filePath = do
-    configFileContents <- B.readFile filePath
-    either (ioError . userError) return (eitherDecode configFileContents)
+  configFileContents <- B.readFile filePath
+  either (ioError . userError) return (eitherDecode configFileContents)
 
 -- |
 configFromEnv :: IO ChatBotConfig
 configFromEnv = do
-    _cbConfigNick <- S.lookupRequiredSetting "CHATBOT_NICK"
-    _cbConfigPass <- S.lookupRequiredSetting "CHATBOT_PASS"
-    return ChatBotConfig{..}
+  _cbConfigNick <- S.lookupRequiredSetting "CHATBOT_NICK"
+  _cbConfigPass <- S.lookupRequiredSetting "CHATBOT_PASS"
+  return ChatBotConfig { .. }
 
 -- |
 acquireChatBotExecutionConfig :: IO ChatBotExecutionConfig

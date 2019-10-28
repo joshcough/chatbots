@@ -9,14 +9,14 @@ module Auth.Models (
   , UserToken(..)
   ) where
 
-import Protolude
+import           Protolude
 
-import Data.Aeson (FromJSON, ToJSON)
-import Data.Int (Int64)
-import Data.Text (Text)
-import GHC.Generics (Generic)
-import Servant.Auth.Server
-import Web.HttpApiData (FromHttpApiData(..))
+import           Data.Aeson          (FromJSON, ToJSON)
+import           Data.Int            (Int64)
+import           Data.Text           (Text)
+import           GHC.Generics        (Generic)
+import           Servant.Auth.Server
+import           Web.HttpApiData     (FromHttpApiData (..))
 
 data Login = Login {
     loginEmail    :: Text
@@ -24,10 +24,10 @@ data Login = Login {
 } deriving (Eq, Show, Generic, ToJSON, FromJSON)
 
 data User = User {
-    userId       :: Int64
-  , userName     :: Text
-  , userEmail    :: Text
-  , userAdmin    :: Bool
+    userId    :: Int64
+  , userName  :: Text
+  , userEmail :: Text
+  , userAdmin :: Bool
 } deriving stock (Eq, Read, Show, Generic)
   deriving anyclass (FromJSON, ToJSON, ToJWT, FromJWT)
 
@@ -46,4 +46,4 @@ newtype UserToken = UserToken { userTokenToken :: Token }
    deriving anyclass (FromJSON, ToJSON)
 
 instance FromHttpApiData UserToken where
-    parseUrlPiece = pure . UserToken . Token
+  parseUrlPiece = pure . UserToken . Token

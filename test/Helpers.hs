@@ -1,19 +1,22 @@
 module Helpers (withDB) where
 
-import Protolude
+import           Protolude
 
-import Config (Config(..), acquireConfigWithConnStr)
-import Data.String.Conversions (cs)
-import Data.Text (pack)
-import Database.Persist.Sql (rawExecute)
-import Database.PostgreSQL.Simple.Options (Options(..))
-import Database.Postgres.Temp (DB(..), defaultOptions)
-import qualified Database.Postgres.Temp as PG
-import qualified MooPostgreSQL as Moo
-import Settings (lookupReadableSetting)
-import System.IO (IOMode(WriteMode), openFile)
-import Test.Hspec
-import Types (runAppTInTestAndThrow, runDb)
+import           Config                             (Config (..),
+                                                     acquireConfigWithConnStr)
+import           Data.String.Conversions            (cs)
+import           Data.Text                          (pack)
+import           Database.Persist.Sql               (rawExecute)
+import           Database.Postgres.Temp             (DB (..), defaultOptions)
+import qualified Database.Postgres.Temp             as PG
+import           Database.PostgreSQL.Simple.Options (Options (..))
+import qualified MooPostgreSQL                      as Moo
+import           Settings                           (lookupReadableSetting)
+import           System.IO                          (IOMode (WriteMode),
+                                                     openFile)
+import           Test.Hspec
+import           Types                              (runAppTInTestAndThrow,
+                                                     runDb)
 
 --
 -- NOTE: if having trouble with db, do this: DBLOGGING=VERBOSE stack test
@@ -28,48 +31,51 @@ data TestType = Local | Travis deriving Read
 
 withDB :: SpecWith (IO (), Config) -> Spec
 withDB = beforeAll getDatabase . afterAll fst . after (truncateDb . snd)
-  where
-    getDatabase :: IO (IO (), Config)
-    getDatabase = lookupReadableSetting "TEST_TYPE" Local >>= \case
-        Local -> createTmpDatabase
-        Travis -> do
-          let connStr = "postgresql://postgres@localhost/travis_ci_test"
-          config <- acquireConfigWithConnStr connStr
-          Moo.runUpgrade connStr
-          pure (pure (), config)
+ where
+  getDatabase :: IO (IO (), Config)
+  getDatabase = lookupReadableSetting "TEST_TYPE" Local >>= \case
+    Local -> createTmpDatabase
+    Travis -> do
+      let connStr = "postgresql://postgres@localhost/travis_ci_test"
+      config <- acquireConfigWithConnStr connStr
+      Moo.runUpgrade connStr
+      pure (pure (), config)
 
-    createTmpDatabase :: IO (IO (), Config)
-    createTmpDatabase = do
-      verbosity <- lookupReadableSetting "DBLOGGING" SILENT
-      (db, cleanup) <- startDb verbosity
-      config <- acquireConfigWithConnStr $ toConnectionString db
-      return (cleanup, config)
+  createTmpDatabase :: IO (IO (), Config)
+  createTmpDatabase = do
+    verbosity <- lookupReadableSetting "DBLOGGING" SILENT
+    (db, cleanup) <- startDb verbosity
+    config <- acquireConfigWithConnStr $ toConnectionString db
+    return (cleanup, config)
 
-    -- https://stackoverflow.com/questions/5342440/reset-auto-increment-counter-in-postgres
-    truncateDb :: Config -> IO ()
-    truncateDb config = runAppTInTestAndThrow config . runDb $ truncateTables
-      where
-      tables = ["users", "commands", "quotes", "streams"]
-      truncateStatement = "TRUNCATE TABLE " <> intercalate ", " tables <> " RESTART IDENTITY CASCADE"
-      truncateTables = rawExecute (pack truncateStatement) []
+  -- https://stackoverflow.com/questions/5342440/reset-auto-increment-counter-in-postgres
+  truncateDb :: Config -> IO ()
+  truncateDb config = runAppTInTestAndThrow config . runDb $ truncateTables
+   where
+    tables = ["users", "commands", "quotes", "streams"]
+    truncateStatement = "TRUNCATE TABLE " <> intercalate ", " tables <> " RESTART IDENTITY CASCADE"
+    truncateTables = rawExecute (pack truncateStatement) []
 
-    toConnectionString :: DB -> Text
-    toConnectionString DB {..} = "postgresql://" <> user <> "@" <> host <> ":" <> show port <> "/" <> cs oDbname
-      where
-        Options {..} = options
-        host = cs $ fromMaybe "localhost" oHost
-        user = cs $ fromMaybe "josh" oUser
+  toConnectionString :: DB -> Text
+  toConnectionString DB {..} =
+    "postgresql://" <> user <> "@" <> host <> ":" <> show port <> "/" <> cs oDbname
+   where
+    Options {..} = options
+    host = cs $ fromMaybe "localhost" oHost
+    user = cs $ fromMaybe "josh" oUser
 
-    startDb :: DBLogging -> IO (DB, IO ())
-    startDb verbosity = mask $ \restore -> do
-      (outHandle, errHandle) <- case verbosity of
-        VERBOSE -> pure (stdout, stderr)
-        SILENT -> (,) <$> devNull <*> devNull
-      db <- PG.startWithHandles PG.Localhost defaultOptions outHandle errHandle >>= either throwIO pure
-      restore (Moo.runUpgrade (toConnectionString db) >> pure (db, cleanup db)) `onException` cleanup db
-      where
-        devNull = openFile "/dev/null" WriteMode
-        cleanup = void . PG.stop
+  startDb :: DBLogging -> IO (DB, IO ())
+  startDb verbosity = mask $ \restore -> do
+    (outHandle, errHandle) <- case verbosity of
+      VERBOSE -> pure (stdout, stderr)
+      SILENT -> (,) <$> devNull <*> devNull
+    db <-
+      PG.startWithHandles PG.Localhost defaultOptions outHandle errHandle >>= either throwIO pure
+    restore (Moo.runUpgrade (toConnectionString db) >> pure (db, cleanup db))
+      `onException` cleanup db
+   where
+    devNull = openFile "/dev/null" WriteMode
+    cleanup = void . PG.stop
 
 {-
     -- https://stackoverflow.com/questions/5342440/reset-auto-increment-counter-in-postgres

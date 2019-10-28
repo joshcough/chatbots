@@ -1,14 +1,14 @@
 
 module Auth.UserAPI where
 
-import Auth.DatabaseModels (DbUserId)
-import Auth.Models (CreateUser(..), User(..))
-import qualified Auth.UserStorage as Db
-import Control.Monad.Except (MonadIO)
-import Logging ((.=), logDebug)
-import Protolude
-import ServantHelpers
-import Types (AppT, ChatBotM)
+import           Auth.DatabaseModels  (DbUserId)
+import           Auth.Models          (CreateUser (..), User (..))
+import qualified Auth.UserStorage     as Db
+import           Control.Monad.Except (MonadIO)
+import           Logging              (logDebug, (.=))
+import           Protolude
+import           ServantHelpers
+import           Types                (AppT, ChatBotM)
 
 ---
 --- User API/Server
@@ -28,35 +28,35 @@ data UserServer r = UserServer {
 -- | The server that runs the UserAPI
 userServer :: (MonadIO m) => User -> ServerT UserAPI (AppT m)
 userServer caller = toServant $ UserServer { .. }
-    where
-    userServerGetUserById = getUserById caller
-    userServerDeleteUser = deleteUser caller
-    userServerCreateUser = createUser caller
-    userServerUpdateUser = updateUser caller
+ where
+  userServerGetUserById = getUserById caller
+  userServerDeleteUser = deleteUser caller
+  userServerCreateUser = createUser caller
+  userServerUpdateUser = updateUser caller
 
 -- | Returns a user by name or throws a 404 error.
 getUserById :: UserM m => User -> DbUserId -> m User
 getUserById caller uid = do
-    $(logDebug) "getUserById" ["uid" .= uid]
-    callerIsUserOrIsAdminElse401 caller uid $ withUserOr404 uid return
+  $(logDebug) "getUserById" ["uid" .= uid]
+  callerIsUserOrIsAdminElse401 caller uid $ withUserOr404 uid return
 
 -- | Creates a user in the database.
 deleteUser :: UserM m => User -> DbUserId -> m ()
 deleteUser caller uid = do
-    $(logDebug) "deleteUser" ["uid" .= uid]
-    adminOr401 caller $ withUserOr404 uid (const $ Db.deleteUserById uid)
+  $(logDebug) "deleteUser" ["uid" .= uid]
+  adminOr401 caller $ withUserOr404 uid (const $ Db.deleteUserById uid)
 
 -- | Creates a user in the database.
 createUser :: UserM m => User -> CreateUser -> m DbUserId
 createUser caller c = do
-    $(logDebug) "createUser" []
-    adminOr401 caller $ Db.createUser c >>= flip (maybeOr500 "Couldn't create user.") return
+  $(logDebug) "createUser" []
+  adminOr401 caller $ Db.createUser c >>= flip (maybeOr500 "Couldn't create user.") return
 
 -- | Update a user in the database.
 updateUser :: UserM m => User -> DbUserId -> User -> m ()
 updateUser caller uid u = do
-    $(logDebug) "updateUser" ["uid" .= uid, "user" .= u]
-    callerIsUserOrIsAdminElse401 caller uid $ withUserOr404 uid . const $ Db.updateUserIfExists uid u
+  $(logDebug) "updateUser" ["uid" .= uid, "user" .= u]
+  callerIsUserOrIsAdminElse401 caller uid $ withUserOr404 uid . const $ Db.updateUserIfExists uid u
 
 -- | Look up a user by id. If it exist, run an operation on it. If not, throw a 404.
 withUserOr404 :: UserM m => DbUserId -> (User -> m b) -> m b

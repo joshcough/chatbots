@@ -1,15 +1,17 @@
-{-# LANGUAGE NoDeriveAnyClass, GeneralizedNewtypeDeriving, QuasiQuotes #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE NoDeriveAnyClass           #-}
+{-# LANGUAGE QuasiQuotes                #-}
 
 module ChatBot.DatabaseModels where
 
-import Prelude (error)
-import Protolude
+import           Prelude                          (error)
+import           Protolude
 
-import ChatBot.Models (ChatUserName)
-import Data.Text (Text)
-import Database.Persist
-import Database.Persist.Postgresql.JSON ()
-import Database.Persist.TH
+import           ChatBot.Models                   (ChatUserName)
+import           Data.Text                        (Text)
+import           Database.Persist
+import           Database.Persist.Postgresql.JSON ()
+import           Database.Persist.TH
 
 share [mkPersist sqlSettings, mkDeleteCascade sqlSettings] [persistLowerCase|
 DbStream json sql=streams

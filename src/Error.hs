@@ -19,20 +19,23 @@ module Error(
     miscError
 ) where
 
-import Protolude
+import           Protolude
 
-import Control.Exception (Exception)
-import Control.Lens (prism, makeClassyPrisms)
-import Control.Monad.Except (MonadError, catchError, throwError)
-import Control.Monad.Trans (MonadIO, liftIO)
+import           Control.Exception          (Exception)
+import           Control.Lens               (makeClassyPrisms, prism)
+import           Control.Monad.Except       (MonadError, catchError, throwError)
+import           Control.Monad.Trans        (MonadIO, liftIO)
 import qualified Data.ByteString.Lazy.Char8 as BL
-import Data.Maybe (Maybe(..))
-import Data.Monoid ((<>))
-import Data.Text (Text, unpack)
-import Network.HTTP.Nano (AsHttpError(..), HttpError)
-import Servant ((:<|>) (..), ServantErr(..), err400, err401, err403, err404, err409, err500)
-import Web.Rollbar (Event(..), EventLevel(..), ToRollbarEvent(..))
-import Util.Utils (tShow)
+import           Data.Maybe                 (Maybe (..))
+import           Data.Monoid                ((<>))
+import           Data.Text                  (Text, unpack)
+import           Network.HTTP.Nano          (AsHttpError (..), HttpError)
+import           Servant                    ((:<|>) (..), ServantErr (..),
+                                             err400, err401, err403, err404,
+                                             err409, err500)
+import           Util.Utils                 (tShow)
+import           Web.Rollbar                (Event (..), EventLevel (..),
+                                             ToRollbarEvent (..))
 
 ---
 ---
@@ -56,7 +59,7 @@ class ToServant e where
     toServantErr :: e -> ServantErr
 
 instance ToServant () where
-    toServantErr _ = err500
+  toServantErr _ = err500
 
 class ClassifiedError e where
     -- An exception is either expected (thrown intentionally
@@ -94,75 +97,74 @@ miscError :: Text -> ChatBotError
 miscError = AppAppError . ChatBotMiscError
 
 instance ClassifiedError ChatBotError' where
-    isUnexpected (ChatBotMiscError _) = True
+  isUnexpected (ChatBotMiscError _) = True
 
 instance FromException (AppError e) where
-    fromException = AppUnexpectedException
+  fromException = AppUnexpectedException
 
 instance TitledError ChatBotError' where
-    getErrorTitle (ChatBotMiscError _) = "Unknown Error"
+  getErrorTitle (ChatBotMiscError _) = "Unknown Error"
 
 instance ToServant ChatBotError' where
-    toServantErr (ChatBotMiscError _) = err500
+  toServantErr (ChatBotMiscError _) = err500
 
 instance Exception e => Exception (AppError e)
 
 instance ClassifiedError e => ClassifiedError (AppError e) where
-    isUnexpected (AppAuthError _) = False
-    isUnexpected (AppBadRequestError _) = False
-    isUnexpected (AppNotFoundError _) = False
-    isUnexpected (AppConflictError _) = False
-    isUnexpected (AppAppError e) = isUnexpected e
-    isUnexpected _ = True
+  isUnexpected (AppAuthError _) = False
+  isUnexpected (AppBadRequestError _) = False
+  isUnexpected (AppNotFoundError _) = False
+  isUnexpected (AppConflictError _) = False
+  isUnexpected (AppAppError e) = isUnexpected e
+  isUnexpected _ = True
 
 instance AsHttpError (AppError e) where
-    _HttpError = prism AppHttpError asHttpError
+  _HttpError = prism AppHttpError asHttpError
 
 asHttpError :: AppError e -> Either (AppError e) HttpError
 asHttpError (AppHttpError e) = Right e
 asHttpError e = Left e
 
 instance TitledError () where
-    getErrorTitle = const "()"
+  getErrorTitle = const "()"
 
 instance ClassifiedError () where
-    isUnexpected _ = True
+  isUnexpected _ = True
 
 instance TitledError e => TitledError (AppError e) where
-    getErrorTitle (AppHttpError _) = "HTTP Error"
-    getErrorTitle (AppBadRequestError _) = "Bad Request"
-    getErrorTitle (AppAuthError NoAuthError) = "No Auth"
-    getErrorTitle (AppAuthError BadAuthError) = "Bad Auth"
-    getErrorTitle (AppNotFoundError _) = "Not Found"
-    getErrorTitle (AppConflictError _) = "Conflict"
-    getErrorTitle (AppUnexpectedError _) = "Unexpected"
-    getErrorTitle (AppUnexpectedException _) = "Unexpected Exception"
-    getErrorTitle (AppAppError e) = "App Error: " <> getErrorTitle e
+  getErrorTitle (AppHttpError _) = "HTTP Error"
+  getErrorTitle (AppBadRequestError _) = "Bad Request"
+  getErrorTitle (AppAuthError NoAuthError) = "No Auth"
+  getErrorTitle (AppAuthError BadAuthError) = "Bad Auth"
+  getErrorTitle (AppNotFoundError _) = "Not Found"
+  getErrorTitle (AppConflictError _) = "Conflict"
+  getErrorTitle (AppUnexpectedError _) = "Unexpected"
+  getErrorTitle (AppUnexpectedException _) = "Unexpected Exception"
+  getErrorTitle (AppAppError e) = "App Error: " <> getErrorTitle e
 
 instance ToServant e => ToServant (AppError e) where
-    toServantErr (AppHttpError _) = err500
-    toServantErr (AppBadRequestError e) = err400 { errBody = BL.pack $ unpack e }
-    toServantErr (AppAuthError NoAuthError) = err401
-    toServantErr (AppAuthError BadAuthError) = err403
-    toServantErr (AppNotFoundError e) = err404 { errBody = BL.pack $ unpack e }
-    toServantErr (AppConflictError e) = err409 { errBody = BL.pack $ unpack e }
-    toServantErr (AppUnexpectedError _) = err500 -- TODO: use string or?
-    toServantErr (AppUnexpectedException _) = err500 -- TODO: use exception or?
-    toServantErr (AppAppError e) = toServantErr e
+  toServantErr (AppHttpError _) = err500
+  toServantErr (AppBadRequestError e) = err400 { errBody = BL.pack $ unpack e }
+  toServantErr (AppAuthError NoAuthError) = err401
+  toServantErr (AppAuthError BadAuthError) = err403
+  toServantErr (AppNotFoundError e) = err404 { errBody = BL.pack $ unpack e }
+  toServantErr (AppConflictError e) = err409 { errBody = BL.pack $ unpack e }
+  toServantErr (AppUnexpectedError _) = err500 -- TODO: use string or?
+  toServantErr (AppUnexpectedException _) = err500 -- TODO: use exception or?
+  toServantErr (AppAppError e) = toServantErr e
 
 instance (TitledError e, Show e) => ToRollbarEvent (AppError e) where
-    toRollbarEvent = defaultToRollbarEvent
+  toRollbarEvent = defaultToRollbarEvent
 
 defaultToRollbarEvent :: (TitledError e, Show e) => e -> Event
-defaultToRollbarEvent e =
-    Event {
-        _eventLevel = Error,
-        _eventUUID = Nothing,
-        _eventTitle = getErrorTitle e,
-        _eventMessage = tShow e,
-        _eventData = Nothing,
-        _eventContext = Nothing
-    }
+defaultToRollbarEvent e = Event
+  { _eventLevel = Error
+  , _eventUUID = Nothing
+  , _eventTitle = getErrorTitle e
+  , _eventMessage = tShow e
+  , _eventData = Nothing
+  , _eventContext = Nothing
+  }
 
 --
 --
@@ -170,9 +172,9 @@ defaultToRollbarEvent e =
 
 catchAuth :: MonadError (AppError e) m => m a -> (AuthError -> m a) -> m a
 catchAuth f ef = catchError f handleAuth
-    where
-    handleAuth (AppAuthError e) = ef e
-    handleAuth e = throwError e
+ where
+  handleAuth (AppAuthError e) = ef e
+  handleAuth e = throwError e
 
 throwToIO :: (Exception e, MonadIO m) => e -> m a
 throwToIO = liftIO . throwIO
