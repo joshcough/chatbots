@@ -1,7 +1,7 @@
 module ChatBotMessageProcessorSpec (spec) where
 
-import Protolude
-import Test.Hspec
+import           Protolude
+import           Test.Hspec
 
 --import ChatBot.Config (ChannelName(..))
 --import ChatBot.Models (Quote(..))

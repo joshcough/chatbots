@@ -5,14 +5,14 @@ module KeyGen (
   , genTestKey, readTestKey
   ) where
 
-import Prelude (error)
-import Protolude
+import           Prelude                  (error)
+import           Protolude
 
-import Crypto.JOSE.JWK (JWK)
-import Data.Aeson (eitherDecode)
-import Data.Aeson.Encode.Pretty (encodePretty)
-import qualified Data.ByteString.Lazy as BS (readFile, writeFile)
-import Servant.Auth.Server
+import           Crypto.JOSE.JWK          (JWK)
+import           Data.Aeson               (eitherDecode)
+import           Data.Aeson.Encode.Pretty (encodePretty)
+import qualified Data.ByteString.Lazy     as BS (readFile, writeFile)
+import           Servant.Auth.Server
 
 ---
 

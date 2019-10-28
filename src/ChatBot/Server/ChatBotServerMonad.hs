@@ -2,15 +2,17 @@ module ChatBot.Server.ChatBotServerMonad (
     ChatBotServerMonad(..)
   ) where
 
-import ChatBot.Config (ChatBotExecutionConfig(..), ChatBotFrontendMessage(..))
-import ChatBot.Models (ChannelName, Command(..), Quote(..), Stream(..))
-import qualified ChatBot.Storage as Storage
-import Config (HasConfig, configChatBotExecution)
-import Control.Lens (view)
-import Control.Monad.Except (MonadIO)
-import Protolude
-import Types (AppT')
-import Error (ChatBotError)
+import           ChatBot.Config       (ChatBotExecutionConfig (..),
+                                       ChatBotFrontendMessage (..))
+import           ChatBot.Models       (ChannelName, Command (..), Quote (..),
+                                       Stream (..))
+import qualified ChatBot.Storage      as Storage
+import           Config               (HasConfig, configChatBotExecution)
+import           Control.Lens         (view)
+import           Control.Monad.Except (MonadIO)
+import           Error                (ChatBotError)
+import           Protolude
+import           Types                (AppT')
 
 class Monad m => ChatBotServerMonad m where
   getStreams :: m [ChannelName]
@@ -28,5 +30,5 @@ instance (HasConfig c, MonadIO m) => ChatBotServerMonad (AppT' ChatBotError m c)
 
 writeToInputChan :: (MonadReader c m, HasConfig c, MonadIO m) => ChatBotFrontendMessage -> m ()
 writeToInputChan c = do
-    chan <- _cbecInputChan <$> view configChatBotExecution
-    liftIO $ writeChan chan c
+  chan <- _cbecInputChan <$> view configChatBotExecution
+  liftIO $ writeChan chan c

@@ -219,6 +219,45 @@ newline: native
 # needs to be aware of these, so it can parse the file correctly.
 #
 # No language extensions are enabled by default.
-# language_extensions:
-  # - TemplateHaskell
-  # - QuasiQuotes
+language_extensions:
+   # - QuasiQuotes
+   - ApplicativeDo
+   - BangPatterns
+   - ConstraintKinds
+   - DataKinds
+   - DefaultSignatures
+   - DeriveAnyClass
+   - DeriveFoldable
+   - DeriveFunctor
+   - DeriveGeneric
+   - DeriveLift
+   - DerivingStrategies
+   - DeriveTraversable
+   - EmptyCase
+   - ExistentialQuantification
+   - FlexibleContexts
+   - FlexibleInstances
+   - FunctionalDependencies
+   - GADTs
+   - GeneralizedNewtypeDeriving
+   - InstanceSigs
+   - KindSignatures
+   - LambdaCase
+   - MultiParamTypeClasses
+   - MultiWayIf
+   - NamedFieldPuns
+   - NoImplicitPrelude
+   - OverloadedLabels
+   - OverloadedStrings
+   - PatternSynonyms
+   - RankNTypes
+   - RecordWildCards
+   - ScopedTypeVariables
+   - StandaloneDeriving
+   - TemplateHaskell
+   - TupleSections
+   - TypeApplications
+   - TypeFamilies
+   - TypeFamilyDependencies
+   - TypeOperators
+   - UndecidableInstances

@@ -16,17 +16,18 @@ module ServantHelpers (
   , unexpected
   ) where
 
-import Auth.Models (User(..))
-import Auth.DatabaseModels (DbUserId)
-import Control.Monad.Except (MonadError)
-import Data.Text (Text)
-import Database.Esqueleto (fromSqlKey)
-import Error (AppError(..), AuthError(..), ChatBotError, ChatBotError'(..))
-import Protolude
-import Servant
-import Servant.API.Generic hiding (toServant)
-import qualified Servant.API.Generic as S
-import Servant.Server.Generic (AsServerT, genericServerT)
+import           Auth.DatabaseModels    (DbUserId)
+import           Auth.Models            (User (..))
+import           Control.Monad.Except   (MonadError)
+import           Data.Text              (Text)
+import           Database.Esqueleto     (fromSqlKey)
+import           Error                  (AppError (..), AuthError (..),
+                                         ChatBotError, ChatBotError' (..))
+import           Protolude
+import           Servant
+import           Servant.API.Generic    hiding (toServant)
+import qualified Servant.API.Generic    as S
+import           Servant.Server.Generic (AsServerT, genericServerT)
 
 ---
 --- servant generic helpers
@@ -41,10 +42,11 @@ type Compose api = S.ToServant api S.AsApi
 -- Currently it's no longer necessary - both its type and its implementation are
 -- identical to the library-provided `genericServerT`, but it was left here
 -- anyway in order to avoid modifying all use sites. We will do that later.
-toServant :: forall m api
-     . GenericServant api (AsServerT m)
-    => api (AsServerT m)
-    -> S.ToServant api (AsServerT m)
+toServant
+  :: forall m api
+   . GenericServant api (AsServerT m)
+  => api (AsServerT m)
+  -> S.ToServant api (AsServerT m)
 toServant = genericServerT
 
 -- |
@@ -89,7 +91,8 @@ callerIsUserOr401 caller uid m = orNoAuth m $ userId caller == fromSqlKey uid
 --
 -- |
 callerIsUserOrIsAdminElse401 :: MonadError (AppError e) m => User -> DbUserId -> m a -> m a
-callerIsUserOrIsAdminElse401 caller uid m = orNoAuth m $ userAdmin caller || userId caller == fromSqlKey uid
+callerIsUserOrIsAdminElse401 caller uid m =
+  orNoAuth m $ userAdmin caller || userId caller == fromSqlKey uid
 
 -- |
 orNoAuth :: MonadError (AppError e) m => m a -> Bool -> m a

@@ -1,2 +1,4 @@
-stack exec hlint .
-weeder . --build
+./.hlint.sh
+./.stylish.sh
+./.brittany.sh
+~/.local/bin/weeder . --build

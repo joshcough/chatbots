@@ -1,10 +1,10 @@
 module ChatBot.WebSocket.Parsers where
 
-import Protolude
+import           Protolude
 
-import Data.String.Conversions (cs)
-import Data.Text (Text, pack)
-import Text.Trifecta
+import           Data.String.Conversions (cs)
+import           Data.Text               (Text, pack)
+import           Text.Trifecta
 
 (~~) :: Parser a -> Parser b -> Parser (a, b)
 a ~~ b = (,) <$> a <*> b
