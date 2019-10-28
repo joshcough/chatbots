@@ -9,14 +9,12 @@ import qualified Auth.DatabaseModels         as Db
 import           Auth.Models                 (CreateUser (..), User (..))
 import           Config                      (HasConfig)
 import           Control.Monad.Except        (MonadIO, liftIO)
-import           Crypto.BCrypt               (hashPasswordUsingPolicy,
-                                              slowerBcryptHashingPolicy)
+import           Crypto.BCrypt               (hashPasswordUsingPolicy, slowerBcryptHashingPolicy)
 import           Data.ByteString             (ByteString)
 import           Data.Text                   (Text)
 import           Data.Text.Encoding          (decodeUtf8, encodeUtf8)
-import           Database.Esqueleto          (Entity (..), SqlPersistT,
-                                              fromSqlKey, getEntity, insert,
-                                              replace, selectFirst)
+import           Database.Esqueleto          (Entity (..), SqlPersistT, fromSqlKey, getEntity,
+                                              insert, replace, selectFirst)
 import qualified Database.Persist.Postgresql as P
 import           Protolude                   hiding (replace)
 import           Types                       (AppT', runDb)

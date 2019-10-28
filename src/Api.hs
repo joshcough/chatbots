@@ -5,21 +5,18 @@ import           Protolude
 import           Auth.LoginAPI                  (LoginAPI, loginServer)
 import           Auth.Models                    (User)
 import           Auth.UserAPI                   (UserAPI, userServer)
-import           ChatBot.Server.ChatBotAPI      (ProtectedChatBotAPI,
-                                                 UnprotectedChatBotAPI,
-                                                 chatBotServerProtected,
-                                                 chatBotServerUnprotected)
+import           ChatBot.Server.ChatBotAPI      (ProtectedChatBotAPI, UnprotectedChatBotAPI,
+                                                 chatBotServerProtected, chatBotServerUnprotected)
 import           Control.Monad.Except           (MonadIO, liftIO, throwError)
-import           Error                          (AppError (..), AuthError (..),
-                                                 throwAll, toServantErr)
+import           Error                          (AppError (..), AuthError (..), throwAll,
+                                                 toServantErr)
 import           Network.HTTP.Types
 import           Network.Wai
 import           Network.Wai.Application.Static (defaultFileServerSettings)
 import           Servant.Auth.Server            hiding (throwAll)
 import           ServantHelpers
 import           System.FilePath                (addTrailingPathSeparator)
-import           Types                          (App, AppT, Config (..),
-                                                 runAppT)
+import           Types                          (App, AppT, Config (..), runAppT)
 import           WaiAppStatic.Types             (StaticSettings (..))
 
 type TopLevelAPI' auths = (Auth auths User :> Protected) :<|> Unprotected

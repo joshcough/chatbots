@@ -21,8 +21,8 @@ import           Auth.Models            (User (..))
 import           Control.Monad.Except   (MonadError)
 import           Data.Text              (Text)
 import           Database.Esqueleto     (fromSqlKey)
-import           Error                  (AppError (..), AuthError (..),
-                                         ChatBotError, ChatBotError' (..))
+import           Error                  (AppError (..), AuthError (..), ChatBotError,
+                                         ChatBotError' (..))
 import           Protolude
 import           Servant
 import           Servant.API.Generic    hiding (toServant)

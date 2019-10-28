@@ -2,3 +2,4 @@
 ./.stylish.sh
 ./.brittany.sh
 ~/.local/bin/weeder . --build
+./test.sh

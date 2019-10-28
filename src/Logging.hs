@@ -38,21 +38,16 @@ import           Protolude                         hiding (catch, lift)
 import           Control.Lens                      (makeClassy)
 import           Control.Monad                     (when)
 import           Control.Monad.Base                (MonadBase (liftBase))
-import           Control.Monad.Catch               (MonadCatch (..),
-                                                    MonadThrow (..))
+import           Control.Monad.Catch               (MonadCatch (..), MonadThrow (..))
 import           Control.Monad.IO.Class            (MonadIO, liftIO)
-import           Control.Monad.IO.Unlift           (MonadUnliftIO (..),
-                                                    UnliftIO (..), withUnliftIO)
-import           Control.Monad.Logger              (Loc (..), LogLevel (..),
-                                                    LogStr, liftLoc,
+import           Control.Monad.IO.Unlift           (MonadUnliftIO (..), UnliftIO (..), withUnliftIO)
+import           Control.Monad.Logger              (Loc (..), LogLevel (..), LogStr, liftLoc,
                                                     runNoLoggingT, toLogStr)
 import qualified Control.Monad.Trans.Class         as Trans
 import           Control.Monad.Trans.Control       (MonadBaseControl (..))
-import           Data.Aeson                        (ToJSON, Value, object,
-                                                    toJSON, (.=))
-import           Data.Aeson.Encode.Pretty          (Config (..), Indent (..),
-                                                    defConfig, encodePretty',
-                                                    keyOrder)
+import           Data.Aeson                        (ToJSON, Value, object, toJSON, (.=))
+import           Data.Aeson.Encode.Pretty          (Config (..), Indent (..), defConfig,
+                                                    encodePretty', keyOrder)
 import           Data.Aeson.Types                  (Pair)
 import           Data.ByteString                   (ByteString)
 import qualified Data.ByteString.Lazy              as BL

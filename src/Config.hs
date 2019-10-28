@@ -17,28 +17,22 @@ import           Protolude
 import           Control.Lens.TH                     (makeClassy)
 import           Control.Monad.Logger                (runNoLoggingT)
 import           Data.Text                           (Text, unpack)
-import           Database.Persist.Postgresql         (ConnectionPool,
-                                                      createPostgresqlPool)
+import           Database.Persist.Postgresql         (ConnectionPool, createPostgresqlPool)
 import           Database.PostgreSQL.Simple.Internal (postgreSQLConnectionString)
 import           Database.PostgreSQL.Simple.URL      (parseDatabaseUrl)
-import           Network.HTTP.Nano                   (HasHttpCfg (..),
-                                                      HttpCfg (..), tlsManager)
+import           Network.HTTP.Nano                   (HasHttpCfg (..), HttpCfg (..), tlsManager)
 import           Network.Wai.Handler.Warp            (Port)
 import qualified Network.WebSockets                  as WS
-import           Servant.Auth.Server                 (CookieSettings,
-                                                      JWTSettings,
-                                                      defaultCookieSettings,
-                                                      defaultJWTSettings)
-import           Web.Rollbar                         (HasRollbarCfg (..),
-                                                      RollbarCfg (..))
+import           Servant.Auth.Server                 (CookieSettings, JWTSettings,
+                                                      defaultCookieSettings, defaultJWTSettings)
+import           Web.Rollbar                         (HasRollbarCfg (..), RollbarCfg (..))
 import qualified Web.Rollbar                         as RB
 
-import           ChatBot.Config                      (ChatBotConfig (..), ChatBotExecutionConfig (..),
-                                                      acquireChatBotExecutionConfig,
-                                                      configFromEnv)
+import           ChatBot.Config                      (ChatBotConfig (..),
+                                                      ChatBotExecutionConfig (..),
+                                                      acquireChatBotExecutionConfig, configFromEnv)
 import qualified KeyGen                              as KG
-import           Logging                             (HasLoggingCfg (..),
-                                                      LoggingCfg)
+import           Logging                             (HasLoggingCfg (..), LoggingCfg)
 import qualified Logging
 import qualified Settings                            as S
 

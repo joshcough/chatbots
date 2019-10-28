@@ -5,11 +5,9 @@ module MooPostgreSQL
 import           Data.Text                               (Text, unpack)
 import           Database.HDBC.PostgreSQL                (connectPostgreSQL)
 import           Database.Schema.Migrations.Backend.HDBC (hdbcBackend)
-import           Moo.Core                                (CommandOptions (..),
-                                                          loadConfiguration,
+import           Moo.Core                                (CommandOptions (..), loadConfiguration,
                                                           makeParameters)
-import           Moo.Main                                (mainWithParameters,
-                                                          procArgs)
+import           Moo.Main                                (mainWithParameters, procArgs)
 import           Protolude
 import           System.Exit                             (exitFailure)
 

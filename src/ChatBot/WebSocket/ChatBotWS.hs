@@ -12,21 +12,17 @@ import           Protolude
 import           ChatBot.Config                     (ChannelName, mkChannelName)
 import           ChatBot.Models                     (trollabotUser)
 import           ChatBot.Storage                    (QuotesDb (..))
-import           ChatBot.WebSocket.MessageProcessor (MessageImporter (..),
-                                                     MessageProcessor (..),
-                                                     Sender (..), authorize,
-                                                     connectTo, disconnectFrom,
-                                                     frontendListener, say)
-import           Config                             (Config,
-                                                     ConfigAndConnection (..))
+import           ChatBot.WebSocket.MessageProcessor (MessageImporter (..), MessageProcessor (..),
+                                                     Sender (..), authorize, connectTo,
+                                                     disconnectFrom, frontendListener, say)
+import           Config                             (Config, ConfigAndConnection (..))
 import           Control.Concurrent                 (threadDelay)
 import           Control.Monad                      (forever)
 import           Data.String.Conversions            (cs)
 import           Data.Text                          (Text, lines)
 import qualified Data.Text                          as T
 import           Error                              (ChatBotError, miscError)
-import           Irc.RawIrcMsg                      (parseRawIrcMsg,
-                                                     renderRawIrcMsg)
+import           Irc.RawIrcMsg                      (parseRawIrcMsg, renderRawIrcMsg)
 import           Network.Socket                     (withSocketsDo)
 import qualified Network.WebSockets                 as WS
 import           Types                              (AppTEnv', runAppTAndThrow)

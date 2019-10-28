@@ -19,8 +19,7 @@ import           Protolude               hiding (fromException)
 
 import           Control.Lens            (view, (^.))
 import           Control.Monad           (when)
-import           Control.Monad.Except    (ExceptT (..), MonadError (..), liftIO,
-                                          runExceptT)
+import           Control.Monad.Except    (ExceptT (..), MonadError (..), liftIO, runExceptT)
 import           Control.Monad.Reader    (MonadIO, MonadReader, ReaderT (..))
 import           Data.Aeson              ((.=))
 import           Database.Persist.Sql    (SqlPersistT, runSqlPool)

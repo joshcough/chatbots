@@ -16,11 +16,10 @@ import           Logging                     (logDebug, (.=))
 import           System.Random               (randomRIO)
 import           Types                       (AppT', runDb)
 
-import           ChatBot.DatabaseModels      (DbCommand (..), DbQuote (..),
-                                              DbStream (..), EntityField (..))
-import           ChatBot.Models              (ChannelName, ChatUserName (..),
-                                              Command (..), Quote (..),
-                                              Stream (..), getChannelName,
+import           ChatBot.DatabaseModels      (DbCommand (..), DbQuote (..), DbStream (..),
+                                              EntityField (..))
+import           ChatBot.Models              (ChannelName, ChatUserName (..), Command (..),
+                                              Quote (..), Stream (..), getChannelName,
                                               mkChannelName)
 import           Config                      (HasConfig)
 import           Error                       (ChatBotError, miscError)

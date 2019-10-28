@@ -2,8 +2,7 @@ module Helpers (withDB) where
 
 import           Protolude
 
-import           Config                             (Config (..),
-                                                     acquireConfigWithConnStr)
+import           Config                             (Config (..), acquireConfigWithConnStr)
 import           Data.String.Conversions            (cs)
 import           Data.Text                          (pack)
 import           Database.Persist.Sql               (rawExecute)
@@ -12,11 +11,9 @@ import qualified Database.Postgres.Temp             as PG
 import           Database.PostgreSQL.Simple.Options (Options (..))
 import qualified MooPostgreSQL                      as Moo
 import           Settings                           (lookupReadableSetting)
-import           System.IO                          (IOMode (WriteMode),
-                                                     openFile)
+import           System.IO                          (IOMode (WriteMode), openFile)
 import           Test.Hspec
-import           Types                              (runAppTInTestAndThrow,
-                                                     runDb)
+import           Types                              (runAppTInTestAndThrow, runDb)
 
 --
 -- NOTE: if having trouble with db, do this: DBLOGGING=VERBOSE stack test
