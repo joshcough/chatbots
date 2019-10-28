@@ -9,6 +9,7 @@ import qualified Data.Pool as Pool
 import Network.Wai (Application)
 import Network.Wai.Handler.Warp (run)
 import Network.Wai.Middleware.Cors (simpleCors)
+import Network.Wai.Middleware.Servant.Errors (errorMwDefJson)
 
 import Api (app)
 import ChatBot.Config (mkChannelName)
@@ -24,7 +25,7 @@ runAppAndBot = bracket acquireConfig shutdownApp runApp'
         -- run the chat bot
         _ <- forkIO $ runBot config
         -- run the servant app
-        run (_configPort config) =<< initialize config
+        run (_configPort config) . errorMwDefJson =<< initialize config
 
 botOnly :: IO ()
 botOnly = bracket acquireConfig shutdownApp runBot

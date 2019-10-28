@@ -82,6 +82,7 @@ library:
     - fast-logger
     - filepath
     - http-api-data
+    - http-types
     - irc-core
     - jose
     - lens
@@ -104,6 +105,7 @@ library:
     - servant >= 0.13 && <= 0.14.1
     - servant-auth >=0.3.1.0
     - servant-auth-server
+    - servant-errors >= 0.1.3.1
     - servant-server >= 0.13 && <= 0.14.1
     - servant-websockets
     - stm
@@ -118,6 +120,7 @@ library:
 #    - uuid
     - vector
     - wai
+    - wai-app-static
     - wai-cors
     - warp
     - websockets

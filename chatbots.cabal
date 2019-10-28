@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1c9d509e6ae51a4c8a42dc3010fbb39df86c21abaecc22473c79f1c3ae7611ac
+-- hash: 2692e736fd4eb5add919bc7c202e8672ff96e70d04623b6009a3af4360460f0a
 
 name:           chatbots
 version:        0.1.0.0
@@ -75,6 +75,7 @@ library
     , fast-logger
     , filepath
     , http-api-data
+    , http-types
     , irc-core
     , jose
     , lens
@@ -98,6 +99,7 @@ library
     , servant >=0.13 && <=0.14.1
     , servant-auth >=0.3.1.0
     , servant-auth-server
+    , servant-errors >=0.1.3.1
     , servant-server >=0.13 && <=0.14.1
     , servant-websockets
     , stm
@@ -112,6 +114,7 @@ library
     , unordered-containers
     , vector
     , wai
+    , wai-app-static
     , wai-cors
     , warp
     , websockets

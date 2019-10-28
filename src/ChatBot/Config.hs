@@ -35,8 +35,10 @@ data ChatBotConfig = ChatBotConfig
 
 makeClassy ''ChatBotConfig
 
-data ChatBotFrontendMessage = ConnectTo ChannelName | DisconnectFrom ChannelName
-    deriving (Eq, Generic, Ord, Show, ToJSON, FromJSON)
+data ChatBotFrontendMessage
+  = ConnectTo ChannelName
+  | DisconnectFrom ChannelName
+  deriving (Eq, Generic, Ord, Show, ToJSON, FromJSON)
 
 data ChatBotExecutionConfig = ChatBotExecutionConfig {
     _cbecOutputChan :: TChan (ChatMessage' Value)

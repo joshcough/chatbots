@@ -25,6 +25,7 @@ extra-deps:
 - process-1.6.5.1@sha256:77a9afeb676357f67fe5cf1ad79aca0745fb6f7fb96b786d510af08f622643f6,2468
 - unix-2.7.2.2@sha256:e69269a17b9fa26cb77f3f55e86c39d0a4940ccfa0c4bc20826919d2572076ad,3496
 - servant-websockets-1.1.0@sha256:3e384b0565a081f83da8935cccc0817fda120af9119befe55a0515efc4a44bfc,2188
+- servant-errors-0.1.3.1@sha256:775cf28693fa957b87ca68bf0445659941cde3158ec56cef4458008a559e00e9
 - git: https://github.com/bitemyapp/esqueleto.git
   commit: 3db6361d2c42b37e782ff05830c07d88a1afdf91
 - git: https://github.com/ralphmorton/nano-http.git

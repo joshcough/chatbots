@@ -1,8 +1,8 @@
 module ChatBot.Server.ChatBotAPI (
     UnprotectedChatBotAPI
---  , ProtectedChatBotAPI
+  , ProtectedChatBotAPI
   , chatBotServerUnprotected
---  , chatBotServerProtected
+  , chatBotServerProtected
   ) where
 
 import ChatBot.Config (ChatBotExecutionConfig(..))
@@ -19,10 +19,10 @@ import Protolude
 import Servant.API.WebSocket (WebSocket)
 import ServantHelpers hiding (Stream)
 import Types (AppT)
---import Auth.Models (User)
+import Auth.Models (User)
 
 type UnprotectedChatBotAPI = "chatbot" :> Compose ChatBotUnprotected
---type ProtectedChatBotAPI= "chatbot" :> Compose ChatBotProtected
+type ProtectedChatBotAPI= "chatbot2" :> Compose ChatBotProtected
 
 data ChatBotUnprotected r = ChatBotUnprotected {
     chatBotGetStreams :: r :- "streams" :> Post '[JSON] [ChannelName]
@@ -34,10 +34,10 @@ data ChatBotUnprotected r = ChatBotUnprotected {
   , chatBotChatWebSocket :: r :- "stream" :> Capture "channel" ChannelName :> WebSocket
   } deriving Generic
 
---data ChatBotProtected r = ChatBotProtected {
---    chatBotConnectConnect :: r :- "connect" :> Capture "channel" ChannelName :> Get '[JSON] ()
---  , chatBotConnectDisconnect :: r :- "disconnect" :> Capture "channel" ChannelName :> Get '[JSON] ()
---  } deriving Generic
+data ChatBotProtected r = ChatBotProtected {
+    chatBotProtectedConnect :: r :- "connect" :> Capture "channel" ChannelName :> Get '[JSON] ()
+  , chatBotProtectedDisconnect :: r :- "disconnect" :> Capture "channel" ChannelName :> Get '[JSON] ()
+  } deriving Generic
 
 -- | The server that runs the ChatBotAPI
 chatBotServerUnprotected :: (MonadIO m) => ServerT UnprotectedChatBotAPI (AppT m)
@@ -55,12 +55,12 @@ chatBotServerUnprotected = toServant $ ChatBotUnprotected {
       webSocket stream chan conn
   }
 
----- | The server that runs the ChatBotAPI
---chatBotServerProtected :: (MonadIO m) => User -> ServerT ProtectedChatBotAPI (AppT m)
---chatBotServerProtected user = toServant $ ChatBotProtected {
---    chatBotConnectConnect = adminOr401 user . channelConnect
---  , chatBotConnectDisconnect = adminOr401 user . channelDisconnect
---  }
+-- | The server that runs the ChatBotAPI
+chatBotServerProtected :: (MonadIO m) => User -> ServerT ProtectedChatBotAPI (AppT m)
+chatBotServerProtected user = toServant $ ChatBotProtected {
+    chatBotProtectedConnect = adminOr401 user . channelConnect
+  , chatBotProtectedDisconnect = adminOr401 user . channelDisconnect
+  }
 
 webSocket :: (MonadIO m) => ChannelName -> TChan (ChatMessage' Value) -> Connection -> AppT m ()
 webSocket stream chan conn = liftIO (forkPingThread conn 10) >> loop

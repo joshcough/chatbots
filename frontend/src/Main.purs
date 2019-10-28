@@ -22,6 +22,7 @@ import Quotes as Quotes
 import Types (Config, OpM, runOpM)
 import URI.Extra.QueryPairs as QP
 import WsMain as WsMain
+import Effect.Console (log)
 
 data View = Quotes | Chat
 
@@ -31,6 +32,8 @@ main = launchAff_ $ do
   streams <- runOpM config getStreams
   q <- BQ.new 100
   liftEffect $ do
+    p <- Window.path_
+    log p
     WsMain.main q
     mStream <- getStreamFromUrlParams
     mView <- getViewFromUrlParams

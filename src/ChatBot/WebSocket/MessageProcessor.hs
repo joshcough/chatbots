@@ -172,15 +172,25 @@ authorize = do
   send (Irc.ircCapReq ["twitch.tv/tags"])
   send (Irc.ircPing ["ping"])
 
-frontendListener :: (MonadIO m, MonadLoggerJSON m, MonadReader c m, HasConfig c, Sender m) => m ()
+frontendListener ::
+     ( MonadIO m
+     , MonadLoggerJSON m
+     , MonadReader c m
+     , HasConfig c
+     , Sender m
+     )
+  => m ()
 frontendListener = do
   conf <- view config
   let inputChan = _cbecInputChan $ _configChatBotExecution conf
+  -- TODO: we should have some notion of what streams we are connected to
+  -- probably in the database, get all those, and connect to them.
+  connectTo (mkChannelName "daut")
   forever $ liftIO (readChan inputChan) >>= processChatBotFrontendMessage
-  where
   -- TODO: these probably should be lifted to top level for testing.
-  processChatBotFrontendMessage (ConnectTo c) = connectTo c
-  processChatBotFrontendMessage (DisconnectFrom c) = disconnectFrom c
+  where
+    processChatBotFrontendMessage (ConnectTo c) = connectTo c
+    processChatBotFrontendMessage (DisconnectFrom c) = disconnectFrom c
 
 connectTo ::
      (MonadIO m, MonadReader c m, HasConfig c, MonadLoggerJSON m, Sender m)
