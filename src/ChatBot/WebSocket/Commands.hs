@@ -8,13 +8,10 @@ module ChatBot.WebSocket.Commands
 
 import           Protolude
 
-import           ChatBot.Models            (ChannelName, ChatUser (..),
-                                            Quote (..), getChannelName)
+import           ChatBot.Models            (ChannelName, ChatUser (..), Quote (..), getChannelName)
 import           ChatBot.Storage           (QuotesDb (..))
 import           ChatBot.WebSocket.Parsers (anything, number, slurp)
-import           Config                    (Config (..),
-                                            Environment (Development),
-                                            HasConfig (..))
+import           Config                    (Config (..), Environment (Development), HasConfig (..))
 import           Control.Lens              (view)
 import           Data.Aeson                (FromJSON, ToJSON)
 import qualified Data.Map                  as Map

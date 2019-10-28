@@ -20,9 +20,9 @@ type UserAPI = "users" :> Compose UserServer
 
 data UserServer r = UserServer {
     userServerGetUserById :: r :- Capture "id" DbUserId :> Get '[JSON] User
-  , userServerDeleteUser :: r :- Capture "id" DbUserId :> Delete '[JSON] ()
-  , userServerCreateUser :: r :- ReqBody '[JSON] CreateUser :> Post '[JSON] DbUserId
-  , userServerUpdateUser :: r :- Capture "id" DbUserId :> ReqBody '[JSON] User :> Put '[JSON] ()
+  , userServerDeleteUser  :: r :- Capture "id" DbUserId :> Delete '[JSON] ()
+  , userServerCreateUser  :: r :- ReqBody '[JSON] CreateUser :> Post '[JSON] DbUserId
+  , userServerUpdateUser  :: r :- Capture "id" DbUserId :> ReqBody '[JSON] User :> Put '[JSON] ()
   } deriving Generic
 
 -- | The server that runs the UserAPI

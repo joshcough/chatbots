@@ -7,9 +7,8 @@ module ChatBot.Server.ChatBotAPI (
 
 import           Auth.Models                       (User)
 import           ChatBot.Config                    (ChatBotExecutionConfig (..))
-import           ChatBot.Models                    (ChannelName,
-                                                    ChatMessage' (..),
-                                                    Command (..), Quote (..))
+import           ChatBot.Models                    (ChannelName, ChatMessage' (..), Command (..),
+                                                    Quote (..))
 import           ChatBot.Server.ChatBotServerMonad (ChatBotServerMonad (..))
 import           Config                            (Config (..))
 import           Control.Concurrent.STM.TChan      (TChan, dupTChan, readTChan)
@@ -17,8 +16,7 @@ import           Control.Monad.Except              (MonadIO)
 import           Data.Aeson                        (Value)
 import           Data.Aeson.Encode.Pretty          (encodePretty)
 import           Logging                           (logDebug, (.=))
-import           Network.WebSockets                (Connection, forkPingThread,
-                                                    sendTextData)
+import           Network.WebSockets                (Connection, forkPingThread, sendTextData)
 import           Protolude
 import           Servant.API.WebSocket             (WebSocket)
 import           ServantHelpers                    hiding (Stream)

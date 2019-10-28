@@ -13,18 +13,14 @@ module ChatBot.WebSocket.MessageProcessor
 
 import           Protolude
 
-import           ChatBot.Config               (ChatBotConfig (..),
-                                               ChatBotExecutionConfig (..),
+import           ChatBot.Config               (ChatBotConfig (..), ChatBotExecutionConfig (..),
                                                ChatBotFrontendMessage (..))
-import           ChatBot.Models               (ChannelName, ChatMessage,
-                                               ChatMessage' (..), ChatUser (..),
-                                               ChatUserName (..),
-                                               getChannelName,
-                                               getChannelNameHashed,
-                                               mkChannelName, trollabotUser)
+import           ChatBot.Models               (ChannelName, ChatMessage, ChatMessage' (..),
+                                               ChatUser (..), ChatUserName (..), getChannelName,
+                                               getChannelNameHashed, mkChannelName, trollabotUser)
 import           ChatBot.Storage              (QuotesDb (..))
-import           ChatBot.WebSocket.Commands   (BotCommand (..), Permission (..),
-                                               Response (..), builtinCommands)
+import           ChatBot.WebSocket.Commands   (BotCommand (..), Permission (..), Response (..),
+                                               builtinCommands)
 import           Config                       (Config (..), HasConfig (..))
 import           Control.Concurrent.STM.TChan (writeTChan)
 import           Control.Lens                 (view)
@@ -39,10 +35,8 @@ import qualified Irc.Identifier               as Irc
 import           Irc.Message                  (IrcMsg (..), cookIrcMsg)
 import           Irc.RawIrcMsg                (RawIrcMsg (..), TagEntry (..))
 import qualified Irc.UserInfo                 as Irc
-import           Logging                      (MonadLoggerJSON, logDebug,
-                                               logError, (.=))
-import           Text.Trifecta                (Result (..), parseString,
-                                               whiteSpace)
+import           Logging                      (MonadLoggerJSON, logDebug, logError, (.=))
+import           Text.Trifecta                (Result (..), parseString, whiteSpace)
 
 class Sender m where
   send :: RawIrcMsg -> m ()

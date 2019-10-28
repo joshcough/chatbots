@@ -13,10 +13,8 @@ import           Network.Wai.Middleware.Servant.Errors (errorMwDefJson)
 
 import           Api                                   (app)
 import           ChatBot.Config                        (mkChannelName)
-import           ChatBot.WebSocket.ChatBotWS           (runBot, runImporter,
-                                                        runInserter)
-import           Config                                (Config (..),
-                                                        acquireConfig)
+import           ChatBot.WebSocket.ChatBotWS           (runBot, runImporter, runInserter)
+import           Config                                (Config (..), acquireConfig)
 
 -- | An action that creates a WAI 'Application' together with its resources,
 --   runs it, and tears it down on exit

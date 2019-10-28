@@ -41,8 +41,7 @@ import           Data.Maybe                 (fromMaybe)
 import           Data.Text                  (Text, pack, split)
 import           Data.Text.Encoding         (decodeUtf8)
 import qualified Data.Vector                as V
-import           System.Directory           (doesDirectoryExist,
-                                             getDirectoryContents)
+import           System.Directory           (doesDirectoryExist, getDirectoryContents)
 import           System.FilePath            ((</>))
 
 -- |

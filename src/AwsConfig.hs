@@ -9,9 +9,8 @@ module AwsConfig (
 
 import           Control.Lens            (set, (<&>))
 import           Control.Lens.TH         (makeClassy)
-import           Control.Monad.Trans.AWS (Credentials (Discover),
-                                          LogLevel (Debug), envLogger, newEnv,
-                                          newLogger)
+import           Control.Monad.Trans.AWS (Credentials (Discover), LogLevel (Debug), envLogger,
+                                          newEnv, newLogger)
 import qualified Control.Monad.Trans.AWS as AWS
 import           Data.Monoid             ((<>))
 import           Protolude

@@ -2,10 +2,8 @@ module ChatBot.Server.ChatBotServerMonad (
     ChatBotServerMonad(..)
   ) where
 
-import           ChatBot.Config       (ChatBotExecutionConfig (..),
-                                       ChatBotFrontendMessage (..))
-import           ChatBot.Models       (ChannelName, Command (..), Quote (..),
-                                       Stream (..))
+import           ChatBot.Config       (ChatBotExecutionConfig (..), ChatBotFrontendMessage (..))
+import           ChatBot.Models       (ChannelName, Command (..), Quote (..), Stream (..))
 import qualified ChatBot.Storage      as Storage
 import           Config               (HasConfig, configChatBotExecution)
 import           Control.Lens         (view)
