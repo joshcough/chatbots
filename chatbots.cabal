@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2692e736fd4eb5add919bc7c202e8672ff96e70d04623b6009a3af4360460f0a
+-- hash: 8664f63fa5f5d85ac7133b28fe0deff79bcdf2d1461ffeb056ecd7789f11a807
 
 name:           chatbots
 version:        0.1.0.0
@@ -125,7 +125,7 @@ executable chatbots-server
   other-modules:
       Paths_chatbots
   hs-source-dirs:
-      app
+      app/server
   default-extensions: ApplicativeDo BangPatterns ConstraintKinds DataKinds DefaultSignatures DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DerivingStrategies DeriveTraversable EmptyCase ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedLabels OverloadedStrings PatternSynonyms RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TemplateHaskell TupleSections TypeApplications TypeFamilies TypeFamilyDependencies TypeOperators UndecidableInstances
   ghc-options: -Wall -Werror -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Wimplicit-prelude
   build-depends:
@@ -133,6 +133,22 @@ executable chatbots-server
     , chatbots
     , protolude
     , string-conversions
+  default-language: Haskell2010
+
+executable formatter
+  main-is: Main.hs
+  other-modules:
+      Paths_chatbots
+  hs-source-dirs:
+      app/formatter
+  default-extensions: ApplicativeDo BangPatterns ConstraintKinds DataKinds DefaultSignatures DeriveAnyClass DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DerivingStrategies DeriveTraversable EmptyCase ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedLabels OverloadedStrings PatternSynonyms RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TemplateHaskell TupleSections TypeApplications TypeFamilies TypeFamilyDependencies TypeOperators UndecidableInstances
+  ghc-options: -Wall -Werror -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Wimplicit-prelude
+  build-depends:
+      base
+    , foldl
+    , protolude
+    , string-conversions
+    , turtle
   default-language: Haskell2010
 
 test-suite spec

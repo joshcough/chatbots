@@ -128,9 +128,16 @@ library:
 executables:
   chatbots-server:
     main: Main.hs
-    source-dirs: app
+    source-dirs: app/server
     dependencies:
       - chatbots
+
+  formatter:
+    main: Main.hs
+    source-dirs: app/formatter
+    dependencies:
+      - foldl
+      - turtle
 
 tests:
   spec:
