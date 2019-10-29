@@ -4,9 +4,9 @@
 # Usage: ./hlint.sh [service ...]
 #
 # Examples:
-#   ./hlint.sh                 # all services
-#   ./hlint.sh apiary          # one service
-#   ./hlint.sh trellis apiary  # multiple services
+#   ./hlint.sh                    # all services
+#   ./hlint.sh service1           # one service
+#   ./hlint.sh service1 service2  # multiple services
 #
 
 set -eu
@@ -26,7 +26,6 @@ function download () {
     if [[ ! -d "$ROOT" ]]; then
         echo "=======> Download hlint-$HLINT_VERSION..."
         mkdir -p "$ROOT"
-
         local hlint_release
         local hlint_url
         hlint_release="v$HLINT_VERSION/hlint-$HLINT_VERSION-x86_64-$(get_os).tar.gz"
@@ -37,8 +36,7 @@ function download () {
     fi
 }
 
-# Returns list of all of our Haskell services, e.g.
-# apiary bean ...
+# Returns list of all Haskell services
 function get_all_services () {
     find * \( -name '*.cabal' -o -name 'package.yaml' \) \
       ! -path '*.stack-work/*' -exec dirname {} ';' | sort | uniq
@@ -64,6 +62,7 @@ download
 echo "=======> $($HLINT --version)"
 
 SERVICES=${*:-$(get_all_services)}
+echo $SERVICES
 
 trap error_handler ERR
 for service in $SERVICES; do
