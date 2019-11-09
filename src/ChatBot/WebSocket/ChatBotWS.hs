@@ -41,14 +41,13 @@ runBot :: Config -> IO ()
 runBot conf = withSocketsDo $ WS.runClient (cs twitchIrcUrl) 80 "/" $ \conn ->
   do
       let c = ConfigAndConnection conf conn
-      _ <- forkIO $ runAppTAndThrow c frontendListener
-      runAppTAndThrow c $ authorize >> twitchListener
-  -- if there is some blip, wait a second and try again.
-    `catch` (\(e :: SomeException) -> loop e)
-    `catch` (\(e :: SomeAsyncException) -> loop e)
+      _ <- forkIO $ f $ runAppTAndThrow c frontendListener
+      f $ runAppTAndThrow c $ authorize >> twitchListener
  where
-  loop :: Show e => e -> IO ()
-  loop e = print e >> threadDelay 1000000 >> runBot conf
+  -- if there is some blip, wait a second and try again.
+  f m = m `catch` (\(e :: SomeException) -> loop e m)
+          `catch` (\(e :: SomeAsyncException) -> loop e m)
+  loop e m = print e >> threadDelay 1000000 >> m
 
 twitchListener :: App ()
 twitchListener = forever $ do
