@@ -168,9 +168,6 @@ frontendListener :: (MonadIO m, MonadLoggerJSON m, MonadReader c m, HasConfig c,
 frontendListener = do
   conf <- view config
   let inputChan = _cbecInputChan $ _configChatBotExecution conf
-  -- TODO: we should have some notion of what streams we are connected to
-  -- probably in the database, get all those, and connect to them.
-  connectTo (mkChannelName "daut")
   forever $ liftIO (readChan inputChan) >>= processChatBotFrontendMessage
 
 processChatBotFrontendMessage

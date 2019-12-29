@@ -42,12 +42,17 @@ runBot conf = withSocketsDo $ WS.runClient (cs twitchIrcUrl) 80 "/" $ \conn ->
   do
       let c = ConfigAndConnection conf conn
       _ <- forkIO $ f $ runAppTAndThrow c frontendListener
-      f $ runAppTAndThrow c $ authorize >> twitchListener
+      f $ runAppTAndThrow c $ authorize >> connectDaut >> twitchListener
  where
   -- if there is some blip, wait a second and try again.
   f m = m `catch` (\(e :: SomeException) -> loop e m)
           `catch` (\(e :: SomeAsyncException) -> loop e m)
   loop e m = print e >> threadDelay 1000000 >> m
+
+  -- TODO: we should have some notion of what streams we are connected to
+  -- probably in the database, get all those, and connect to them.
+  connectDaut = connectTo (mkChannelName "daut")
+
 
 twitchListener :: App ()
 twitchListener = forever $ do

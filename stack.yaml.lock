@@ -166,6 +166,13 @@ packages:
   original:
     hackage: servant-websockets-1.1.0@sha256:3e384b0565a081f83da8935cccc0817fda120af9119befe55a0515efc4a44bfc,2188
 - completed:
+    hackage: servant-errors-0.1.3.1@sha256:775cf28693fa957b87ca68bf0445659941cde3158ec56cef4458008a559e00e9,2540
+    pantry-tree:
+      size: 349
+      sha256: aa09a6586b8075ce1774068761dd6a88b0ea0d985cc9cf15e1c31192156ff4e2
+  original:
+    hackage: servant-errors-0.1.3.1@sha256:775cf28693fa957b87ca68bf0445659941cde3158ec56cef4458008a559e00e9
+- completed:
     cabal-file:
       size: 5291
       sha256: fed89ff1425edffe0774f8c5bc8fa193e877a3e94083629f872aa0a0018da753
