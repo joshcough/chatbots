@@ -2,24 +2,19 @@
 
 module ChatBot.WebSocket.ChatBotWS
   ( runBot
-  , runImporter
-  , runInserter
   ) where
 
-import           Prelude                            (error)
 import           Protolude
 
-import           ChatBot.Config                     (ChannelName, mkChannelName)
-import           ChatBot.Models                     (trollabotUser)
-import           ChatBot.Storage                    (QuotesDb (..))
-import           ChatBot.WebSocket.MessageProcessor (MessageImporter (..), MessageProcessor (..),
+import           ChatBot.Config                     (mkChannelName)
+import           ChatBot.WebSocket.MessageProcessor (MessageProcessor (..),
                                                      Sender (..), authorize, connectTo,
-                                                     disconnectFrom, frontendListener, say)
+                                                     frontendListener)
 import           Config                             (Config, ConfigAndConnection (..))
 import           Control.Concurrent                 (threadDelay)
 import           Control.Monad                      (forever)
 import           Data.String.Conversions            (cs)
-import           Data.Text                          (Text, lines)
+import           Data.Text                          (Text)
 import qualified Data.Text                          as T
 import           Error                              (ChatBotError, miscError)
 import           Irc.RawIrcMsg                      (parseRawIrcMsg, renderRawIrcMsg)
@@ -60,6 +55,7 @@ twitchListener = forever $ do
   msg <- liftIO $ T.strip <$> WS.receiveData conn
   maybe (throwError $ miscError "Server sent invalid message!") processMessage (parseRawIrcMsg msg)
 
+{-
 runImporter :: ChannelName -> Config -> IO ()
 runImporter chan conf = withSocketsDo $ WS.runClient (cs twitchIrcUrl) 80 "/" $ \conn ->
   runAppTAndThrow (ConfigAndConnection conf conn) $ do
@@ -81,3 +77,4 @@ runInserter :: ChannelName -> Config -> IO ()
 runInserter cn conf = runAppTAndThrow (ConfigAndConnection conf $ error "ununsed") $ do
   f <- liftIO $ readFile "./data/quotes_no_ids.txt"
   forM_ (lines f) $ insertQuote cn trollabotUser
+-}
