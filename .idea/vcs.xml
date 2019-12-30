@@ -30,6 +30,7 @@
     <mapping directory="$PROJECT_DIR$/frontend/.spago/exceptions/v4.0.0" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/frontend/.spago/exists/v4.0.0" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/frontend/.spago/foldable-traversable/v4.1.1" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/frontend/.spago/folds/v5.2.0" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/frontend/.spago/foreign-object/v2.0.3" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/frontend/.spago/foreign/v5.0.0" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/frontend/.spago/fork/v4.0.0" vcs="Git" />

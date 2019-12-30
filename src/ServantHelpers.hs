@@ -4,7 +4,6 @@ module ServantHelpers (
   , module Servant.API.Generic
   , module Servant.Server.Generic
   , Compose
-  , toServant
   , guard401
   , maybeOr401
   , maybeOr404
@@ -25,7 +24,7 @@ import           Error                  (AppError (..), AuthError (..), ChatBotE
                                          ChatBotError' (..))
 import           Protolude
 import           Servant
-import           Servant.API.Generic    hiding (toServant)
+import           Servant.API.Generic
 import qualified Servant.API.Generic    as S
 import           Servant.Server.Generic (AsServerT, genericServerT)
 
@@ -36,18 +35,6 @@ import           Servant.Server.Generic (AsServerT, genericServerT)
 -- This alias encapsulates this frequently repeated pattern that is used for
 -- nesting Servant.API.Generic-powered APIs.
 type Compose api = S.ToServant api S.AsApi
-
--- This function used to be necessary before servant-generic was merged into the
--- main servant package, it provided some better type inference for use sites.
--- Currently it's no longer necessary - both its type and its implementation are
--- identical to the library-provided `genericServerT`, but it was left here
--- anyway in order to avoid modifying all use sites. We will do that later.
-toServant
-  :: forall m api
-   . GenericServant api (AsServerT m)
-  => api (AsServerT m)
-  -> S.ToServant api (AsServerT m)
-toServant = genericServerT
 
 -- |
 unexpected :: MonadError ChatBotError m => Text -> m a

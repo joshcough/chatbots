@@ -32,7 +32,7 @@ data LoginServer r = LoginServer {
   } deriving Generic
 
 loginServer :: MonadIO m => ServerT LoginAPI (AppT m)
-loginServer = toServant $ LoginServer login loginToken
+loginServer = genericServerT $ LoginServer login loginToken
 
 {-
  - Here is the login handler. We do the following:

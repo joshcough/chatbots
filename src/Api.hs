@@ -31,7 +31,7 @@ data ProtectedServer route = ProtectedServer {
   } deriving Generic
 
 protectedServer :: MonadIO m => User -> ServerT Protected (AppT m)
-protectedServer u = toServant $ ProtectedServer
+protectedServer u = genericServerT $ ProtectedServer
   { protectedChatBotApi = chatBotServerProtected u
   , protectedUserApi = userServer u
   }
@@ -46,7 +46,7 @@ data UnprotectedServer route = UnprotectedServer {
 
 -- |
 unprotectedServer :: (MonadIO m) => ServerT Unprotected (AppT m)
-unprotectedServer = toServant $ UnprotectedServer { .. }
+unprotectedServer = genericServerT $ UnprotectedServer { .. }
  where
   unprotectedLoginApi = loginServer
   unprotectedChatBotApi = chatBotServerUnprotected

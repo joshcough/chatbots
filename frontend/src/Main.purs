@@ -30,11 +30,13 @@ main :: Effect Unit
 main = launchAff_ $ do
   let config = {hostname:Nothing}
   streams <- runOpM config getStreams
+  q2 <- BQ.new 100
   q <- BQ.new 100
   liftEffect $ do
     p <- Window.path_
     log p
-    WsMain.main q
+    WsMain.main2 q2
+    -- WsMain.main q
     mStream <- getStreamFromUrlParams
     mView <- getViewFromUrlParams
     let chan = ChannelName { _unChannelName : fromMaybe "daut" mStream }

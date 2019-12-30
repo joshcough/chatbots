@@ -42,7 +42,7 @@ data ChatBotProtected r = ChatBotProtected {
 
 -- | The server that runs the ChatBotAPI
 chatBotServerUnprotected :: (MonadIO m) => ServerT UnprotectedChatBotAPI (AppT m)
-chatBotServerUnprotected = toServant $ ChatBotUnprotected
+chatBotServerUnprotected = genericServerT $ ChatBotUnprotected
   { chatBotGetStreams = getStreams
   , chatBotGetCommands = getCommands
   , chatBotGetQuotes = getQuotes
@@ -58,7 +58,7 @@ chatBotServerUnprotected = toServant $ ChatBotUnprotected
 
 -- | The server that runs the ChatBotAPI
 chatBotServerProtected :: (MonadIO m) => User -> ServerT ProtectedChatBotAPI (AppT m)
-chatBotServerProtected user = toServant $ ChatBotProtected
+chatBotServerProtected user = genericServerT $ ChatBotProtected
   { chatBotProtectedConnect = adminOr401 user . channelConnect
   , chatBotProtectedDisconnect = adminOr401 user . channelDisconnect
   }

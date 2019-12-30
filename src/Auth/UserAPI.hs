@@ -27,7 +27,7 @@ data UserServer r = UserServer {
 
 -- | The server that runs the UserAPI
 userServer :: (MonadIO m) => User -> ServerT UserAPI (AppT m)
-userServer caller = toServant $ UserServer { .. }
+userServer caller = genericServerT $ UserServer { .. }
  where
   userServerGetUserById = getUserById caller
   userServerDeleteUser = deleteUser caller
