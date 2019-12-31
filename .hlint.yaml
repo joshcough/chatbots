@@ -13,9 +13,9 @@
 
 # Control which extensions/flags/modules/functions can be used
 #
-# - extensions:
-#   - default: false # all extension are banned by default
-#   - name: [PatternGuards, ViewPatterns] # only these listed extensions can be used
+- extensions:
+  - default: false # all extension are banned by default
+  - name: [TypeApplications, PatternGuards, ViewPatterns] # only these listed extensions can be used
 #   - {name: CPP, within: CrossPlatform} # CPP can only be used in a given module
 #
 # - flags:

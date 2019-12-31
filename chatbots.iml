@@ -251,5 +251,14 @@
     <orderEntry type="library" name="x509-system-1.6.6" level="project" />
     <orderEntry type="library" name="x509-validation-1.6.11" level="project" />
     <orderEntry type="library" name="cereal-0.5.8.1" level="project" />
+    <orderEntry type="library" name="aeson-typescript-0.2.0.0" level="project" />
+    <orderEntry type="library" name="interpolate-0.2.0" level="project" />
+    <orderEntry type="library" name="haskell-src-meta-0.8.3" level="project" />
+    <orderEntry type="library" name="haskell-src-exts-1.21.1" level="project" />
+    <orderEntry type="library" name="th-orphans-0.13.8" level="project" />
+    <orderEntry type="library" name="th-lift-0.8.0.1" level="project" />
+    <orderEntry type="library" name="th-lift-instances-0.1.14" level="project" />
+    <orderEntry type="library" name="th-reify-many-0.1.9" level="project" />
+    <orderEntry type="library" name="th-expand-syns-0.4.5.0" level="project" />
   </component>
 </module>

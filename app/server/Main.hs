@@ -1,8 +1,8 @@
 module Main where
 
-import GHC.IO.Encoding
-import Init (runAppAndBot)
-import Prelude (IO)
+import           GHC.IO.Encoding
+import           Init            (runAppAndBot)
+import           Prelude         (IO)
 
 -- | The 'main' function gathers the required environment information and
 -- initializes the application.

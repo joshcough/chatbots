@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.1.
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8664f63fa5f5d85ac7133b28fe0deff79bcdf2d1461ffeb056ecd7789f11a807
+-- hash: c0b3542307715e88ec623812dfd317160d9c0862e4101cb39823f233a5950d9a
 
 name:           chatbots
 version:        0.1.0.0
@@ -30,14 +30,12 @@ library
       Auth.DatabaseModels
       Auth.LoginAPI
       Auth.Models
-      Auth.PSBridge
       Auth.UserAPI
       Auth.UserStorage
       AwsConfig
       ChatBot.Config
       ChatBot.DatabaseModels
       ChatBot.Models
-      ChatBot.PSBridge
       ChatBot.Server.ChatBotAPI
       ChatBot.Server.ChatBotServerMonad
       ChatBot.Storage
@@ -45,12 +43,13 @@ library
       ChatBot.WebSocket.Commands
       ChatBot.WebSocket.MessageProcessor
       ChatBot.WebSocket.Parsers
+      CodeGen
       Config
       Error
+      Formatter
       Init
       KeyGen
       Logging
-      PSBridge
       ServantHelpers
       Settings
       Types
@@ -64,6 +63,7 @@ library
   build-depends:
       aeson
     , aeson-pretty
+    , aeson-typescript
     , amazonka
     , base
     , bcrypt
@@ -74,6 +74,7 @@ library
     , exceptions
     , fast-logger
     , filepath
+    , foldl
     , http-api-data
     , http-types
     , irc-core
@@ -110,6 +111,7 @@ library
     , transformers
     , transformers-base
     , trifecta
+    , turtle
     , unliftio-core
     , unordered-containers
     , vector
@@ -145,10 +147,9 @@ executable formatter
   ghc-options: -Wall -Werror -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Wimplicit-prelude
   build-depends:
       base
-    , foldl
+    , chatbots
     , protolude
     , string-conversions
-    , turtle
   default-language: Haskell2010
 
 test-suite spec

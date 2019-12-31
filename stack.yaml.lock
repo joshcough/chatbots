@@ -5,6 +5,13 @@
 
 packages:
 - completed:
+    hackage: aeson-typescript-0.2.0.0@sha256:d4bd016c04612bd6cbc02e3e38315de3bbf4f50c408f720b4472928b6ac4b59f,2642
+    pantry-tree:
+      size: 1719
+      sha256: 92ba5548e53be350edd6f5961a51375d77c0358a738a9a4f6bb496bf85f6935a
+  original:
+    hackage: aeson-typescript-0.2.0.0@sha256:d4bd016c04612bd6cbc02e3e38315de3bbf4f50c408f720b4472928b6ac4b59f,2642
+- completed:
     hackage: amazonka-1.6.1@sha256:d863557379350ed6bbb91187abeb8c349a654f60b140d138710486f58ae7c476,3536
     pantry-tree:
       size: 992

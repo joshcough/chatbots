@@ -7,9 +7,8 @@ module ChatBot.WebSocket.ChatBotWS
 import           Protolude
 
 import           ChatBot.Config                     (mkChannelName)
-import           ChatBot.WebSocket.MessageProcessor (MessageProcessor (..),
-                                                     Sender (..), authorize, connectTo,
-                                                     frontendListener)
+import           ChatBot.WebSocket.MessageProcessor (MessageProcessor (..), Sender (..), authorize,
+                                                     connectTo, frontendListener)
 import           Config                             (Config, ConfigAndConnection (..))
 import           Control.Concurrent                 (threadDelay)
 import           Control.Monad                      (forever)
@@ -33,15 +32,14 @@ instance Sender App where
     liftIO $ WS.sendTextData conn (renderRawIrcMsg msg)
 
 runBot :: Config -> IO ()
-runBot conf = withSocketsDo $ WS.runClient (cs twitchIrcUrl) 80 "/" $ \conn ->
-  do
-      let c = ConfigAndConnection conf conn
-      _ <- forkIO $ f $ runAppTAndThrow c frontendListener
-      f $ runAppTAndThrow c $ authorize >> connectDaut >> twitchListener
+runBot conf = withSocketsDo $ WS.runClient (cs twitchIrcUrl) 80 "/" $ \conn -> do
+  let c = ConfigAndConnection conf conn
+  _ <- forkIO $ f $ runAppTAndThrow c frontendListener
+  f $ runAppTAndThrow c $ authorize >> connectDaut >> twitchListener
  where
   -- if there is some blip, wait a second and try again.
-  f m = m `catch` (\(e :: SomeException) -> loop e m)
-          `catch` (\(e :: SomeAsyncException) -> loop e m)
+  f m =
+    m `catch` (\(e :: SomeException) -> loop e m) `catch` (\(e :: SomeAsyncException) -> loop e m)
   loop e m = print e >> threadDelay 1000000 >> m
 
   -- TODO: we should have some notion of what streams we are connected to
