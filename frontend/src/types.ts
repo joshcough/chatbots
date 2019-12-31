@@ -77,3 +77,13 @@ interface IStream {
   _streamId: number;
   _streamChannelName: ChannelName;
 }
+
+/* Example code
+function printIStream(iStream: IStream) {
+    console.log(iStream._streamId);
+    console.log(iStream._streamChannelName);
+}
+
+let myObj = {_streamId: 10, _streamChannelName: {_unChannelName : "daut"}};
+printIStream(myObj);
+*/
