@@ -29,6 +29,7 @@ data ChatBotUnprotected r = ChatBotUnprotected {
     chatBotGetStreams :: r :- "streams" :> Post '[JSON] [ChannelName]
   , chatBotGetCommands :: r :- "commands" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Command]
   , chatBotGetQuotes :: r :- "quotes" :> ReqBody '[JSON] ChannelName :> Post '[JSON] [Quote]
+  , chatBotGetRandomQuote :: r :- "quotes" :> ReqBody '[JSON] ChannelName :> Post '[JSON] (Maybe Quote)
   --
   , chatBotConnectConnect :: r :- "connect" :> Capture "channel" ChannelName :> Get '[JSON] ()
   , chatBotConnectDisconnect :: r :- "disconnect" :> Capture "channel" ChannelName :> Get '[JSON] ()
@@ -46,6 +47,7 @@ chatBotServerUnprotected = genericServerT $ ChatBotUnprotected
   { chatBotGetStreams = getStreams
   , chatBotGetCommands = getCommands
   , chatBotGetQuotes = getQuotes
+  , chatBotGetRandomQuote = getRandomQuote
   --
   , chatBotConnectConnect = channelConnect
   , chatBotConnectDisconnect = channelDisconnect
