@@ -34,6 +34,7 @@ before_install:
   - export PATH=/usr/lib/postgresql/11/bin:$PATH
 
 before_script:
+  - pg_ctlcluster 11 main start
   - psql --version
   - psql -c 'create database travis_ci_test;' -U postgres
 
