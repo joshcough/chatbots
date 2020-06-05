@@ -131,6 +131,7 @@ instance (HasConfig c, MonadIO m) => QuotesDb (AppT' ChatBotError m c) where
     $(logDebug) "getQuotes" ["channel" .= channel]
     withStream c $ \s -> fmap (fmap (dbQuoteToQuote s)) . runDb $ select $ from $ \quote -> do
       where_ $ (quote ^. DbQuoteChannel) ==. val (toSqlKey $ _streamId s)
+      orderBy [asc $ quote ^. DbQuoteId]
       pure quote
   getRandomQuote c = do
     let channel = getChannelName c

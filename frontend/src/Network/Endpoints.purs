@@ -1,6 +1,7 @@
 module Network.Endpoints
     ( getCommands
     , getQuotes
+    , getRandomQuote
     , getStreams
     , loginToken
     , createUser
@@ -8,7 +9,7 @@ module Network.Endpoints
 
 import Prelude
 import Auth.Models (CreateUser, Login)
-import ChatBot.Models (ChannelName, Command, Quote)
+import ChatBot.Models (ChannelName(..), Command, Quote)
 import Network.HTTP (Method(..), buildReq, httpJSON, jsonData, noData)
 import Types (OpM)
 import Control.Monad.Reader.Trans (ask)
@@ -20,10 +21,13 @@ getStreams :: OpM (Array ChannelName)
 getStreams = doPost "/chatbot/streams" noData
 
 getQuotes :: ChannelName -> OpM (Array Quote)
-getQuotes c = doPost "/chatbot/quotes" (jsonData c)
+getQuotes (ChannelName c) = doPost ("/chatbot/quotes/" <> c._unChannelName) noData
+
+getRandomQuote :: ChannelName -> OpM (Maybe Quote)
+getRandomQuote (ChannelName c) = doPost ("/chatbot/quotes/" <> c._unChannelName <> "random") noData
 
 getCommands :: ChannelName -> OpM (Array Command)
-getCommands c = doPost "/chatbot/commands" (jsonData c)
+getCommands (ChannelName c) = doPost ("/chatbot/commands/" <> c._unChannelName) noData
 
 doPost :: forall a. DecodeJson a => String -> Maybe Request.RequestBody -> OpM a
 doPost restOfUrl dat = do

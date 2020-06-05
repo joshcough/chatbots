@@ -19,12 +19,13 @@ import Elmish.React.DOM (empty)
 import Network.Endpoints (getStreams) --, loginToken)
 import Chat as Chat
 import Quotes as Quotes
+import RandomQuote as RandomQuote
 import Types (Config, OpM, runOpM)
 import URI.Extra.QueryPairs as QP
-import WsMain as WsMain
-import Effect.Console (log)
+--import WsMain as WsMain
+--import Effect.Console (log)
 
-data View = Quotes | Chat
+data View = Quotes | RandomQuote | Chat
 
 main :: Effect Unit
 main = launchAff_ $ do
@@ -42,9 +43,10 @@ main = launchAff_ $ do
     let chan = ChannelName { _unChannelName : fromMaybe "daut" mStream }
         emptyDef = { init: Transition {} [], update: \_ _ -> pureUpdate {}, view: \_ _ -> empty }
     case mView of
-      Just Chat      -> runComponent config $ Chat.def q chan
-      Just Quotes    -> runComponent config $ Quotes.def streams chan
-      _              -> runDef emptyDef
+      Just Chat        -> runComponent config $ Chat.def q chan
+      Just Quotes      -> runComponent config $ Quotes.def streams chan
+      Just RandomQuote -> runComponent config $ RandomQuote.def chan
+      _                -> runDef emptyDef
 
 runComponent :: forall m s . Config -> ComponentDef OpM m s -> Effect Unit
 runComponent config d = runDef $ Elmish.nat (runOpM config) d
@@ -57,8 +59,9 @@ getStreamFromUrlParams = getArgFromParams "stream"
 
 getViewFromUrlParams :: Effect (Maybe View)
 getViewFromUrlParams = f <$> getArgFromParams "view"
-  where f (Just "quotes") = Just Quotes
-        f (Just "chat") = Just Chat
+  where f (Just "quotes")       = Just Quotes
+        f (Just "random-quote") = Just RandomQuote
+        f (Just "chat")         = Just Chat
         f _ = Nothing
 
 -- TODO: this _could_ be an (Array String) if i feel like it. not sure yet.
