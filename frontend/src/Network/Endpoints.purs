@@ -24,7 +24,7 @@ getQuotes :: ChannelName -> OpM (Array Quote)
 getQuotes (ChannelName c) = doPost ("/chatbot/quotes/" <> c._unChannelName) noData
 
 getRandomQuote :: ChannelName -> OpM (Maybe Quote)
-getRandomQuote (ChannelName c) = doPost ("/chatbot/quotes/" <> c._unChannelName <> "random") noData
+getRandomQuote (ChannelName c) = doPost ("/chatbot/quotes/" <> c._unChannelName <> "/random") noData
 
 getCommands :: ChannelName -> OpM (Array Command)
 getCommands (ChannelName c) = doPost ("/chatbot/commands/" <> c._unChannelName) noData
