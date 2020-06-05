@@ -33,9 +33,9 @@ main = launchAff_ $ do
   q2 <- BQ.new 100
   q <- BQ.new 100
   liftEffect $ do
-    p <- Window.path_
-    log p
-    WsMain.main2 q2
+    -- p <- Window.path_
+    -- log p
+    -- WsMain.main2 q2
     -- WsMain.main q
     mStream <- getStreamFromUrlParams
     mView <- getViewFromUrlParams

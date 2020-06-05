@@ -294,120 +294,120 @@ buildParams [x]
 buildParams (x:xs)
   = Builder.char8 ' ' <> Text.encodeUtf8Builder x <> buildParams xs
 buildParams [] = mempty
--}
-
--- | Parse a whole IRC message assuming that the trailing
--- newlines have already been removed. This parser will
--- parse valid messages correctly but will also accept some
--- invalid messages. Presumably the server isn't sending
--- invalid messages!
-rawIrcMsgParser :: P.Parser String RawIrcMsg
-rawIrcMsgParser =
-  do tags   <- fromMaybe [] <$> guarded '@' tagsParser
-     prefix <- guarded ':' prefixParser
-     cmd    <- simpleTokenParser
-     params <- paramsParser maxMiddleParams
-     pure $ RawIrcMsg
-       { _msgTags    : tags
-       , _msgPrefix  : prefix
-       , _msgCommand : cmd
-       , _msgParams  : params
-       }
-
--- | RFC 2812 specifies that there can only be up to
--- 14 "middle" parameters, after that the fifteenth is
--- the final parameter and the trailing : is optional!
-maxMiddleParams :: Int
-maxMiddleParams = 14
-
-tagsParser :: P.Parser String (List TagEntry)
-tagsParser = tagParser `P.sepBy1` P.char ';' <* P.whiteSpace
-
-tagParser :: P.Parser String TagEntry
-tagParser = pure $ Tuple "x" $ unescapeTagVal "x"
---  do key <- takeWhile (not <<< flip contains "=; " <<< Pattern <<< singleton)
---     _   <- optional (P.char '=')
---     val <- takeWhile (not <<< flip contains "; " <<< Pattern <<< singleton)
---     pure $ Tuple key (unescapeTagVal val)
-
--- | Parse a rendered 'UserInfo' token.
-prefixParser :: P.Parser String UserInfo
-prefixParser =
-  do tok <- simpleTokenParser
-     pure $ parseUserInfo tok
-
--- | Take the next space-delimited lexeme
-simpleTokenParser :: P.Parser String String
-simpleTokenParser =
-  do xs <- takeWhile1 (\c -> c /= ' ')
-     _ <- P.whiteSpace
-     pure xs
-
--- | When the current input matches the given character parse
--- using the given parser.
-guarded :: forall b. Char -> P.Parser String b -> P.Parser String (Maybe b)
-guarded c p =
-  do success <- optionalChar c
-     if success then Just <$> p else pure Nothing
-
--- | Returns 'True' iff next character in stream matches argument.
-optionalChar :: Char -> P.Parser String Boolean
-optionalChar c = true <$ P.char c <|> pure false
-
-takeWhile :: (Char -> Boolean) -> P.Parser String String
-takeWhile f = do
-  cs <- many $ P.satisfy f
-  pure $ SCU.fromCharArray cs
-
-takeWhile1 :: (Char -> Boolean) -> P.Parser String String
-takeWhile1 f = do
-  cs <- some $ P.satisfy f
-  pure $ SCU.fromCharArray cs
-
-
-unescapeTagVal :: String -> String
-unescapeTagVal = String.fromCodePointArray <<< aux <<< String.toCodePointArray
-
-aux :: Array CodePoint -> Array CodePoint
-aux arr = case take 2 arr of
-  [x, y] | f x y '\\' ':' -> []
-  _ -> []
-
---  ['\\',':']  -> codePointFromChar ';'  : aux (drop 2 arr)
---  ['\\','s']  -> codePointFromChar ' '  : aux (drop 2 arr)
---  ['\\','\\'] -> codePointFromChar '\\' : aux (drop 2 arr)
---  ['\\','r']  -> codePointFromChar '\r' : aux (drop 2 arr)
---  ['\\','n']  -> codePointFromChar '\n' : aux (drop 2 arr)
---  [x,y]       -> x : aux (y : drop 2 arr)
---  [x]         -> [x]
---  []          -> []
-  where
-  f x y c1 c2 = x == codePointFromChar c1 && y == codePointFromChar c2
-
-
--- | Split up a hostmask into a nickname, username, and hostname.
--- The username and hostname might not be defined but are delimited by
--- a @!@ and @\@@ respectively.
-parseUserInfo :: String -> UserInfo
-parseUserInfo x = UserInfo
-  { userNick : nick
-  , userName : String.drop 1 user
-  , userHost : String.drop 1 host
-  }
-  where
-    breakOn c s = case String.indexOf (Pattern c) s of
-      Nothing -> { after: "", before: s}
-      Just n -> String.splitAt n s
-
-    r1 = breakOn ("@") x
-    nickuser = r1.before
-    host = r1.after
-    r2 = breakOn ("!") nickuser
-    nick = r2.before
-    user = r2.after
-
-paramsParser :: Int -> P.Parser String (Array String)
-paramsParser _ = pure []
+---}
+--
+---- | Parse a whole IRC message assuming that the trailing
+---- newlines have already been removed. This parser will
+---- parse valid messages correctly but will also accept some
+---- invalid messages. Presumably the server isn't sending
+---- invalid messages!
+--rawIrcMsgParser :: P.Parser String RawIrcMsg
+--rawIrcMsgParser =
+--  do tags   <- fromMaybe [] <$> guarded '@' tagsParser
+--     prefix <- guarded ':' prefixParser
+--     cmd    <- simpleTokenParser
+--     params <- paramsParser maxMiddleParams
+--     pure $ RawIrcMsg
+--       { _msgTags    : tags
+--       , _msgPrefix  : prefix
+--       , _msgCommand : cmd
+--       , _msgParams  : params
+--       }
+--
+---- | RFC 2812 specifies that there can only be up to
+---- 14 "middle" parameters, after that the fifteenth is
+---- the final parameter and the trailing : is optional!
+--maxMiddleParams :: Int
+--maxMiddleParams = 14
+--
+--tagsParser :: P.Parser String (List TagEntry)
+--tagsParser = tagParser `P.sepBy1` P.char ';' <* P.whiteSpace
+--
+--tagParser :: P.Parser String TagEntry
+--tagParser = pure $ Tuple "x" $ unescapeTagVal "x"
+----  do key <- takeWhile (not <<< flip contains "=; " <<< Pattern <<< singleton)
+----     _   <- optional (P.char '=')
+----     val <- takeWhile (not <<< flip contains "; " <<< Pattern <<< singleton)
+----     pure $ Tuple key (unescapeTagVal val)
+--
+---- | Parse a rendered 'UserInfo' token.
+--prefixParser :: P.Parser String UserInfo
+--prefixParser =
+--  do tok <- simpleTokenParser
+--     pure $ parseUserInfo tok
+--
+---- | Take the next space-delimited lexeme
+--simpleTokenParser :: P.Parser String String
+--simpleTokenParser =
+--  do xs <- takeWhile1 (\c -> c /= ' ')
+--     _ <- P.whiteSpace
+--     pure xs
+--
+---- | When the current input matches the given character parse
+---- using the given parser.
+--guarded :: forall b. Char -> P.Parser String b -> P.Parser String (Maybe b)
+--guarded c p =
+--  do success <- optionalChar c
+--     if success then Just <$> p else pure Nothing
+--
+---- | Returns 'True' iff next character in stream matches argument.
+--optionalChar :: Char -> P.Parser String Boolean
+--optionalChar c = true <$ P.char c <|> pure false
+--
+--takeWhile :: (Char -> Boolean) -> P.Parser String String
+--takeWhile f = do
+--  cs <- many $ P.satisfy f
+--  pure $ SCU.fromCharArray cs
+--
+--takeWhile1 :: (Char -> Boolean) -> P.Parser String String
+--takeWhile1 f = do
+--  cs <- some $ P.satisfy f
+--  pure $ SCU.fromCharArray cs
+--
+--
+--unescapeTagVal :: String -> String
+--unescapeTagVal = String.fromCodePointArray <<< aux <<< String.toCodePointArray
+--
+--aux :: Array CodePoint -> Array CodePoint
+--aux arr = case take 2 arr of
+--  [x, y] | f x y '\\' ':' -> []
+--  _ -> []
+--
+----  ['\\',':']  -> codePointFromChar ';'  : aux (drop 2 arr)
+----  ['\\','s']  -> codePointFromChar ' '  : aux (drop 2 arr)
+----  ['\\','\\'] -> codePointFromChar '\\' : aux (drop 2 arr)
+----  ['\\','r']  -> codePointFromChar '\r' : aux (drop 2 arr)
+----  ['\\','n']  -> codePointFromChar '\n' : aux (drop 2 arr)
+----  [x,y]       -> x : aux (y : drop 2 arr)
+----  [x]         -> [x]
+----  []          -> []
+--  where
+--  f x y c1 c2 = x == codePointFromChar c1 && y == codePointFromChar c2
+--
+--
+---- | Split up a hostmask into a nickname, username, and hostname.
+---- The username and hostname might not be defined but are delimited by
+---- a @!@ and @\@@ respectively.
+--parseUserInfo :: String -> UserInfo
+--parseUserInfo x = UserInfo
+--  { userNick : nick
+--  , userName : String.drop 1 user
+--  , userHost : String.drop 1 host
+--  }
+--  where
+--    breakOn c s = case String.indexOf (Pattern c) s of
+--      Nothing -> { after: "", before: s}
+--      Just n -> String.splitAt n s
+--
+--    r1 = breakOn ("@") x
+--    nickuser = r1.before
+--    host = r1.after
+--    r2 = breakOn ("!") nickuser
+--    nick = r2.before
+--    user = r2.after
+--
+--paramsParser :: Int -> P.Parser String (Array String)
+--paramsParser _ = pure []
 
 
 -- TODO:
