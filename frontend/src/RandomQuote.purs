@@ -11,36 +11,24 @@ import Elmish (ComponentDef, DispatchMsgFn, ReactComponent, ReactElement, Transi
 import Network.Endpoints (getRandomQuote)
 import Types (OpM)
 
-data Message = GetQuote String | GotQuote ChannelName (Maybe Quote)
+data Message = GotQuote (Maybe Quote)
 
 type UXQuote = { channel :: String, qid :: Int, body :: String, addedBy :: String }
 
-type State = { stream :: ChannelName, quote :: Maybe Quote }
+type State = { quote :: Maybe Quote }
 
 def :: ChannelName -> ComponentDef OpM Message State
-def initialStream =
-  { init: Transition
-            { stream: initialStream, quote: Nothing }
-            [ GotQuote initialStream <$> getRandomQuote initialStream ]
+def stream =
+  { init: Transition { quote: Nothing } [ GotQuote <$> getRandomQuote stream ]
   , update
   , view: view
   }
-  where
-    update s (GetQuote stream) =
-      let c = ChannelName { _unChannelName : stream }
-      in s `Transition` [ GotQuote c <$> getRandomQuote c ]
-    update s (GotQuote c q) = pureUpdate s { stream = c, quote = q }
+  where update s (GotQuote q) = pureUpdate s { quote = q }
 
-foreign import view_ :: ReactComponent {
-    stream :: String
-  , quote :: Nullable UXQuote
-  }
+foreign import view_ :: ReactComponent { quote :: Nullable UXQuote }
 
 view :: State -> DispatchMsgFn Message -> ReactElement
-view s dispatch = createElement' view_
-  { stream: g s.stream
-  , quote: toNullable $ f <$> s.quote
-  }
+view s dispatch = createElement' view_ { quote: toNullable $ f <$> s.quote }
   where
   f (Quote r) =
     { channel: channelName r.quoteChannel
