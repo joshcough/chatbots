@@ -26,9 +26,9 @@ type UnprotectedChatBotAPI = "chatbot" :> Compose ChatBotUnprotected
 type ProtectedChatBotAPI = "chatbot2" :> Compose ChatBotProtected
 
 data ChatBotUnprotected r = ChatBotUnprotected {
-    chatBotGetStreams :: r :- "streams" :> Post '[JSON] [ChannelName]
-  , chatBotGetCommands :: r :- "commands" :> Capture "channel" ChannelName:> Post '[JSON] [Command]
-  , chatBotGetQuotes :: r :- "quotes" :> Capture "channel" ChannelName :> Post '[JSON] [Quote]
+    chatBotGetStreams :: r :- "streams" :> Get '[JSON] [ChannelName]
+  , chatBotGetCommands :: r :- "commands" :> Capture "channel" ChannelName:> Get '[JSON] [Command]
+  , chatBotGetQuotes :: r :- "quotes" :> Capture "channel" ChannelName :> Get '[JSON] [Quote]
   , chatBotGetRandomQuote :: r :- "quotes" :> Capture "channel" ChannelName :> "random" :> Get '[JSON] (Maybe Quote)
   --
   , chatBotConnectConnect :: r :- "connect" :> Capture "channel" ChannelName :> Get '[JSON] ()

@@ -18,23 +18,29 @@ import Affjax.RequestBody as Request
 import Data.Argonaut.Decode (class DecodeJson)
 
 getStreams :: OpM (Array ChannelName)
-getStreams = doPost "/chatbot/streams" noData
+getStreams = doGet "/chatbot/streams" noData
 
 getQuotes :: ChannelName -> OpM (Array Quote)
-getQuotes (ChannelName c) = doPost ("/chatbot/quotes/" <> c._unChannelName) noData
+getQuotes (ChannelName c) = doGet ("/chatbot/quotes/" <> c._unChannelName) noData
 
 getRandomQuote :: ChannelName -> OpM (Maybe Quote)
-getRandomQuote (ChannelName c) = doPost ("/chatbot/quotes/" <> c._unChannelName <> "/random") noData
+getRandomQuote (ChannelName c) = doGet ("/chatbot/quotes/" <> c._unChannelName <> "/random") noData
 
 getCommands :: ChannelName -> OpM (Array Command)
-getCommands (ChannelName c) = doPost ("/chatbot/commands/" <> c._unChannelName) noData
+getCommands (ChannelName c) = doGet ("/chatbot/commands/" <> c._unChannelName) noData
 
 doPost :: forall a. DecodeJson a => String -> Maybe Request.RequestBody -> OpM a
-doPost restOfUrl dat = do
+doPost = callURL POST
+
+doGet :: forall a. DecodeJson a => String -> Maybe Request.RequestBody -> OpM a
+doGet = callURL GET
+
+callURL :: forall a. DecodeJson a => Method -> String -> Maybe Request.RequestBody -> OpM a
+callURL method restOfUrl dat = do
   {hostname} <- ask
   -- HACK, but it works! was this:
   -- let baseUrl = (fromMaybe "http://localhost:8081" hostname)
-  httpJSON $ buildReq POST (fromMaybe "" hostname <> restOfUrl) dat
+  httpJSON $ buildReq method (fromMaybe "" hostname <> restOfUrl) dat
 
 loginToken :: Login -> OpM String
 loginToken l = doPost "/login/token" (jsonData l)
