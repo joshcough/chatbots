@@ -36,7 +36,7 @@ before_install:
 before_script:
   - sudo pg_ctlcluster 11 main start
   - psql --version
-  - psql -c 'create database travis_ci_test;' -U postgres
+#  - psql -c 'create database travis_ci_test;' -U postgres
 
 services:
   - postgresql
@@ -44,7 +44,7 @@ services:
 # This line does all of the work: installs GHC if necessary, build the library,
 # executables, and test suites, and runs the test suites. --no-terminal works
 # around some quirks in Travis's terminal implementation.
-script: TEST_TYPE=Travis stack --no-terminal --install-ghc test
+script: TEST_TYPE=Travis stack --no-terminal --install-ghc build
 
 # Caching so the next build will be fast too.
 cache:
