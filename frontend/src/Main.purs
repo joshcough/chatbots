@@ -31,7 +31,7 @@ main :: Effect Unit
 main = launchAff_ $ do
   let config = {hostname:Nothing}
   streams <- runOpM config getStreams
-  q2 <- BQ.new 100
+  -- q2 <- BQ.new 100
   q <- BQ.new 100
   liftEffect $ do
     -- p <- Window.path_

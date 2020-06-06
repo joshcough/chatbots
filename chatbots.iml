@@ -13,6 +13,10 @@
       <excludeFolder url="file://$MODULE_DIR$/admin/dist" />
       <excludeFolder url="file://$MODULE_DIR$/admin/node_modules" />
       <excludeFolder url="file://$MODULE_DIR$/admin/output" />
+      <excludeFolder url="file://$MODULE_DIR$/frontend/.cache" />
+      <excludeFolder url="file://$MODULE_DIR$/frontend/.spago" />
+      <excludeFolder url="file://$MODULE_DIR$/frontend/node_modules" />
+      <excludeFolder url="file://$MODULE_DIR$/frontend/output" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
