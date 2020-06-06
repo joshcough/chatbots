@@ -27,7 +27,7 @@ def stream =
   }
   where
     getNextRandomQuote = GotQuote <$> getRandomQuote stream
-    update s (GotQuote q) = s { quote = q } `Transition` [ afterSeconds 5.0 getNextRandomQuote ]
+    update s (GotQuote q) = s { quote = q } `Transition` [ afterSeconds 15.0 getNextRandomQuote ]
 
 afterSeconds :: forall a . Number -> OpM a -> OpM a
 afterSeconds n op = (liftAff <<< delay $ Milliseconds (n*1000.0)) *> op

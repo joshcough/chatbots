@@ -58,7 +58,6 @@ withStreams (_, config) action = do
   _ <- runAppTInTestAndThrow config $ insertStream' art >> insertStream' daut
   action
 
-
 insertQuote' :: QuotesDb f => ChannelName -> Text -> f Int
 insertQuote' c = fmap quoteQid . insertQuote c trollabotUser
 
