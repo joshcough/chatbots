@@ -7,10 +7,8 @@ module ChatBot.Storage (
 
 import           Protolude                   hiding (from)
 
-import           Control.Monad.Except        (MonadIO, throwError)
-import           Data.List                   (sort, (!!))
+import           Data.List                   ((!!))
 import           Database.Esqueleto
-import           Database.Persist.Postgresql (insert)
 import qualified Database.Persist.Postgresql as P
 import           Logging                     (logDebug, (.=))
 import           System.Random               (randomRIO)

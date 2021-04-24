@@ -7,7 +7,6 @@ import           ChatBot.Models       (ChannelName, Command (..), Quote (..), St
 import qualified ChatBot.Storage      as Storage
 import           Config               (HasConfig, configChatBotExecution)
 import           Control.Lens         (view)
-import           Control.Monad.Except (MonadIO)
 import           Error                (ChatBotError)
 import           Protolude
 import           Types                (AppT')
