@@ -16,13 +16,10 @@ module ChatBot.Config
 import           Prelude                      (userError)
 import           Protolude
 
-import           Control.Concurrent.Chan      (Chan)
 import           Control.Concurrent.STM.TChan (TChan, newBroadcastTChanIO)
 import           Control.Lens.TH              (makeClassy)
 import           Data.Aeson                   (FromJSON, ToJSON, Value, eitherDecode)
 import qualified Data.ByteString.Lazy         as B
-import           Data.Text                    (Text)
-import           GHC.Generics                 (Generic)
 import qualified Settings                     as S
 
 import           ChatBot.Models               (ChannelName, ChatMessage', getChannelName,

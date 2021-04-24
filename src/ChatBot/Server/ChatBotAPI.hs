@@ -12,15 +12,14 @@ import           ChatBot.Models                    (ChannelName, ChatMessage' (.
 import           ChatBot.Server.ChatBotServerMonad (ChatBotServerMonad (..))
 import           Config                            (Config (..))
 import           Control.Concurrent.STM.TChan      (TChan, dupTChan, readTChan)
-import           Control.Monad.Except              (MonadIO)
 import           Data.Aeson                        (Value)
 import           Data.Aeson.Encode.Pretty          (encodePretty)
 import           Logging                           (logDebug, (.=))
-import           Network.WebSockets                (Connection, forkPingThread, sendTextData)
+import           Network.WebSockets                (Connection, sendTextData, withPingThread)
 import           Protolude
 import           Servant.API.WebSocket             (WebSocket)
 import           ServantHelpers                    hiding (Stream)
-import           Types                             (AppT)
+import           Types                             (AppT, runAppTAndThrow)
 
 type UnprotectedChatBotAPI = "chatbot" :> Compose ChatBotUnprotected
 type ProtectedChatBotAPI = "chatbot2" :> Compose ChatBotProtected
@@ -66,11 +65,15 @@ chatBotServerProtected user = genericServerT $ ChatBotProtected
   }
 
 webSocket :: (MonadIO m) => ChannelName -> TChan (ChatMessage' Value) -> Connection -> AppT m ()
-webSocket stream chan conn = liftIO (forkPingThread conn 10) >> loop
- where
+webSocket stream chan conn = do
+  c <- ask
+  liftIO $ withPingThread conn 10 (pure ()) (runAppTAndThrow c loop)
+  where
   loop = do
     $(logDebug) "reading from tchan" ["stream" .= stream]
     chatMessage <- liftIO . atomically $ readTChan chan
     $(logDebug) "writing to websocket" ["chatMessage" .= chatMessage]
     when (cmChannel chatMessage == stream) $ liftIO $ sendTextData conn (encodePretty chatMessage)
     loop
+
+--  _ <- forkIO $ f $ runAppTAndThrow c frontendListener

@@ -16,14 +16,11 @@ module ChatBot.Models
 import           Protolude
 
 import           Control.Lens.TH        (makeClassy)
-import           Control.Monad          (mzero)
 import           Data.Aeson             (FromJSON (..), ToJSON (..), Value (..))
-import           Data.Text              (Text)
 import qualified Data.Text              as T
 import           Database.Persist.Class (PersistField (..))
 import           Database.Persist.Sql   (PersistFieldSql (..), SqlType (..))
 import           Database.Persist.Types (PersistValue (..))
-import           GHC.Generics           (Generic)
 import           Irc.Identifier         (Identifier, idText, mkId)
 import           Irc.RawIrcMsg          (RawIrcMsg (..), TagEntry (..))
 import           Irc.UserInfo           (UserInfo (..))

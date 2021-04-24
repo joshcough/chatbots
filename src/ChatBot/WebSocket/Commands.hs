@@ -16,9 +16,8 @@ import           Control.Lens              (view)
 import           Data.Aeson                (FromJSON, ToJSON)
 import qualified Data.Map                  as Map
 import           Data.String.Conversions   (cs)
-import           Data.Text                 (Text)
 import qualified Data.Text                 as T
-import           Text.Trifecta             (Parser, optional)
+import           Text.Trifecta             (Parser)
 
 data Permission = ModOnly | Anyone
   deriving stock (Eq, Show)

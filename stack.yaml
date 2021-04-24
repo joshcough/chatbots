@@ -2,41 +2,51 @@ packages:
 - '.'
 extra-deps:
 - aeson-typescript-0.2.0.0@sha256:d4bd016c04612bd6cbc02e3e38315de3bbf4f50c408f720b4472928b6ac4b59f,2642
-- amazonka-1.6.1
-- amazonka-core-1.6.1
-- http-client-0.5.14@sha256:4880b27d6741e331454a1d4c887d96ce3d7d625322c8433983a4b1cd08538577,5348
-- irc-core-2.7.1@sha256:b03343345dc7d12758c9bcbb41ba4fa574a6e1c5d0d2058243ee1585d11cd8bb,1923
-- servant-0.14.1@sha256:e465f22a47b8d9f9452f9ac8673920e187e3a632d6c38cbf34b1037e4ee534d9,5711
-- servant-server-0.14.1@sha256:033cb7d969be44f77abcbb7d237641c0ba0ea2d6e45832a6962fb189ebc21b09,5922
-- http-api-data-0.3.10@sha256:13e1ed2514ec7a857454f472604fc6bf9616d908d2de7202c2507e413029c907,3695
-- http-media-0.7.1.3@sha256:481a40a26f71caaa1a9d9bf4c0fabdd4b51847c6bfa59b8e790fa07ef52dfea6,3839
-- persistent-2.10.1@sha256:5f28d01d7617e0c6ae4a83858a2c98b6a3fd44fa3589b1723860614ee2844a2c,4728
-- persistent-postgresql-2.10.0
-- persistent-template-2.7.2
-- port-utils-0.2.1.0@sha256:0e7cdb91e40cadedc528260bd5919414876c6f9eb250f9f54ace9fe7a12384ab
-- postgres-options-0.1.0.1@sha256:42331140b3c2e608c87005bc7636271b53db20fce7fd091cd4341128db3b47ad
-- tmp-postgres-0.3.0.0
-- HDBC-postgresql-2.3.2.7
+- irc-core-2.9@sha256:d054c6e1e7a63f6d5c75db8d59b4e33f287dfe44feb77c4ab432f1689243e28b,1993
+- postgresql-simple-url-0.2.1.0@sha256:25aa9dca3c05b2c66b9336907d9300f1312fbdfa54e0d395b52d1a1e6579810a,1837
+
+- HDBC-postgresql-2.3.2.7@sha256:93d8e3c3d2dc9291a10f28ae3f8d0604a55ef47298ed43003a4d16f3d9905bae,3228
 - dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075,5270
-- time-1.6.0.1@sha256:492067e1b6973db9df64bf0bc851985dabea138d8a35414fe9ee6870b4702c66,4232
 - yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d,1887
+#- HsSyck-0.53 # @sha256:a987ae2163811bdebfd4f2e2dcb7c75e9d2d68afd97d196f969d6a74786e43da,1818
+
+#- rollbar-1.1.2@sha256:d97e37822f42ea9e1fd2274fef1f170044d44b84102bea1138e4f085a0f4c223,1000
+#- aeson-typescript-0.2.0.0@sha256:d4bd016c04612bd6cbc02e3e38315de3bbf4f50c408f720b4472928b6ac4b59f,2642
+#- amazonka-1.6.1
+#- amazonka-core-1.6.1
+#- http-client-0.5.14@sha256:4880b27d6741e331454a1d4c887d96ce3d7d625322c8433983a4b1cd08538577,5348
+#- irc-core-2.7.1@sha256:b03343345dc7d12758c9bcbb41ba4fa574a6e1c5d0d2058243ee1585d11cd8bb,1923
+#- servant-0.14.1@sha256:e465f22a47b8d9f9452f9ac8673920e187e3a632d6c38cbf34b1037e4ee534d9,5711
+#- servant-server-0.14.1@sha256:033cb7d969be44f77abcbb7d237641c0ba0ea2d6e45832a6962fb189ebc21b09,5922
+#- http-api-data-0.3.10@sha256:13e1ed2514ec7a857454f472604fc6bf9616d908d2de7202c2507e413029c907,3695
+#- http-media-0.7.1.3@sha256:481a40a26f71caaa1a9d9bf4c0fabdd4b51847c6bfa59b8e790fa07ef52dfea6,3839
+#- persistent-2.10.1@sha256:5f28d01d7617e0c6ae4a83858a2c98b6a3fd44fa3589b1723860614ee2844a2c,4728
+#- persistent-postgresql-2.10.0
+#- persistent-template-2.7.2
+#- port-utils-0.2.1.0@sha256:0e7cdb91e40cadedc528260bd5919414876c6f9eb250f9f54ace9fe7a12384ab
+#- postgres-options-0.1.0.1@sha256:42331140b3c2e608c87005bc7636271b53db20fce7fd091cd4341128db3b47ad
+#- tmp-postgres-0.3.0.0
+#- HDBC-postgresql-2.3.2.7
+#- dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075,5270
+#- time-1.6.0.1@sha256:492067e1b6973db9df64bf0bc851985dabea138d8a35414fe9ee6870b4702c66,4232
+#- yaml-light-0.1.4@sha256:838b509c3a895339eea42b6524f46ba4e59c33e9f43537123cdaedfea09ca58d,1887
 - HsSyck-0.53@sha256:a987ae2163811bdebfd4f2e2dcb7c75e9d2d68afd97d196f969d6a74786e43da,1818
-- directory-1.3.4.0@sha256:500019f04494324d1df16cf83eefeb3f809b2b20b32a32ccd755ee0439c18bfd,2829
-- process-1.6.5.1@sha256:77a9afeb676357f67fe5cf1ad79aca0745fb6f7fb96b786d510af08f622643f6,2468
-- unix-2.7.2.2@sha256:e69269a17b9fa26cb77f3f55e86c39d0a4940ccfa0c4bc20826919d2572076ad,3496
-- servant-websockets-1.1.0@sha256:3e384b0565a081f83da8935cccc0817fda120af9119befe55a0515efc4a44bfc,2188
-- servant-errors-0.1.3.1@sha256:775cf28693fa957b87ca68bf0445659941cde3158ec56cef4458008a559e00e9
-- git: https://github.com/bitemyapp/esqueleto.git
-  commit: 3db6361d2c42b37e782ff05830c07d88a1afdf91
+#- directory-1.3.4.0@sha256:500019f04494324d1df16cf83eefeb3f809b2b20b32a32ccd755ee0439c18bfd,2829
+#- process-1.6.5.1@sha256:77a9afeb676357f67fe5cf1ad79aca0745fb6f7fb96b786d510af08f622643f6,2468
+#- unix-2.7.2.2@sha256:e69269a17b9fa26cb77f3f55e86c39d0a4940ccfa0c4bc20826919d2572076ad,3496
+#- servant-websockets-1.1.0@sha256:3e384b0565a081f83da8935cccc0817fda120af9119befe55a0515efc4a44bfc,2188
+#- servant-errors-0.1.3.1@sha256:775cf28693fa957b87ca68bf0445659941cde3158ec56cef4458008a559e00e9
+#- git: https://github.com/bitemyapp/esqueleto.git
+#  commit: 3db6361d2c42b37e782ff05830c07d88a1afdf91
 - git: https://github.com/ralphmorton/nano-http.git
   commit: bfccf7011964fcd8a12f7bcbf20ac5ef06eb4ede
-- git: https://github.com/collegevine/rollbar.git
-  commit: 08d7405292d71b94ea3c0562716330e77cfb93d8
-# from https://github.com/shmish111/purescript-bridge/tree/aeson-fix
-# also, see: https://github.com/eskimor/purescript-bridge/issues/44
-- git: https://github.com/shmish111/purescript-bridge.git
-  commit: dc500a47c8330526a78c5cfac84ddb923cd5c8a5
-resolver: lts-14.6
+#- git: https://github.com/collegevine/rollbar.git
+#  commit: 08d7405292d71b94ea3c0562716330e77cfb93d8
+## from https://github.com/shmish111/purescript-bridge/tree/aeson-fix
+## also, see: https://github.com/eskimor/purescript-bridge/issues/44
+#- git: https://github.com/shmish111/purescript-bridge.git
+#  commit: dc500a47c8330526a78c5cfac84ddb923cd5c8a5
+resolver: lts-16.26
 
 #extra-include-dirs:
 #- /usr/local/opt/openssl/include
