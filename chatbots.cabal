@@ -1,16 +1,16 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.34.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c0b3542307715e88ec623812dfd317160d9c0862e4101cb39823f233a5950d9a
+-- hash: 7de59ddfa93dd7a62c7570d90a0ba06174bb032814048bf59b859e66ea82b162
 
 name:           chatbots
 version:        0.1.0.0
 category:       Web
 homepage:       https://github.com/joshcough/chatbots
-bug-reports:    https://github.com/https://github.com/joshcough/chatbots/issues
+bug-reports:    https://github.com/joshcough/chatbots/issues
 author:         Josh Cough
 maintainer:     joshcough@gmail.com
 copyright:      © 2019 Josh Cough
@@ -22,7 +22,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/https://github.com/joshcough/chatbots
+  location: https://github.com/joshcough/chatbots
 
 library
   exposed-modules:
@@ -54,6 +54,9 @@ library
       Settings
       Types
       Util.Utils
+      Web.Rollbar
+      Web.Rollbar.Internal
+      Web.Rollbar.Types
   other-modules:
       Paths_chatbots
   hs-source-dirs:
@@ -86,6 +89,7 @@ library
     , mtl
     , nano-http >=0.1.1
     , network
+    , network-bsd
     , persistent
     , persistent-postgresql
     , persistent-template
@@ -95,13 +99,12 @@ library
     , purescript-bridge >=0.13
     , random
     , resource-pool
-    , rollbar
     , safe
-    , servant >=0.13 && <=0.14.1
+    , servant >=0.16.2
     , servant-auth >=0.3.1.0
     , servant-auth-server
     , servant-errors >=0.1.3.1
-    , servant-server >=0.13 && <=0.14.1
+    , servant-server >=0.16.2
     , servant-websockets
     , stm
     , string-conversions

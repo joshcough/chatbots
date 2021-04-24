@@ -7,7 +7,6 @@ import           Auth.Models                    (User)
 import           Auth.UserAPI                   (UserAPI, userServer)
 import           ChatBot.Server.ChatBotAPI      (ProtectedChatBotAPI, UnprotectedChatBotAPI,
                                                  chatBotServerProtected, chatBotServerUnprotected)
-import           Control.Monad.Except           (MonadIO, liftIO, throwError)
 import           Error                          (AppError (..), AuthError (..), throwAll,
                                                  toServantErr)
 import           Network.HTTP.Types
