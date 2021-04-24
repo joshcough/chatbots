@@ -10,7 +10,10 @@ import           ChatBot.Config                     (mkChannelName)
 import           ChatBot.WebSocket.MessageProcessor (MessageProcessor (..), Sender (..), authorize,
                                                      connectTo, frontendListener)
 import           Config                             (Config, ConfigAndConnection (..))
+import           Control.Concurrent                 (threadDelay)
+import           Control.Monad                      (forever)
 import           Data.String.Conversions            (cs)
+import           Data.Text                          (Text)
 import qualified Data.Text                          as T
 import           Error                              (ChatBotError, miscError)
 import           Irc.RawIrcMsg                      (parseRawIrcMsg, renderRawIrcMsg)

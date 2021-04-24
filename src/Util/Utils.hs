@@ -27,13 +27,19 @@ module Util.Utils (
 import           Protolude
 
 import           Control.Lens               (Traversal', alaf, set, (^?))
+import           Control.Monad              (forM)
+import           Control.Monad.Except       (MonadIO, liftIO)
 import           Data.Aeson                 (ToJSON, Value (..), object)
 import           Data.Aeson.Encode.Pretty   (encodePretty)
 import           Data.Aeson.Lens            (key)
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.HashMap.Strict        as HM
+import           Data.List                  (foldl', genericLength)
+import           Data.Map                   (Map)
 import qualified Data.Map                   as Map
-import           Data.Text                  (pack, split)
+import           Data.Maybe                 (fromMaybe)
+import           Data.Text                  (Text, pack, split)
+import           Data.Text.Encoding         (decodeUtf8)
 import qualified Data.Vector                as V
 import           System.Directory           (doesDirectoryExist, getDirectoryContents)
 import           System.FilePath            ((</>))

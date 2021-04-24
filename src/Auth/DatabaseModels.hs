@@ -4,8 +4,11 @@
 
 module Auth.DatabaseModels where
 
+import           Prelude                          (error)
 import           Protolude
 
+import           Data.Text                        (Text)
+import           Database.Persist
 import           Database.Persist.Postgresql.JSON ()
 import           Database.Persist.TH
 

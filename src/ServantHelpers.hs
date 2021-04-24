@@ -17,6 +17,8 @@ module ServantHelpers (
 
 import           Auth.DatabaseModels    (DbUserId)
 import           Auth.Models            (User (..))
+import           Control.Monad.Except   (MonadError)
+import           Data.Text              (Text)
 import           Database.Esqueleto     (fromSqlKey)
 import           Error                  (AppError (..), AuthError (..), ChatBotError,
                                          ChatBotError' (..))

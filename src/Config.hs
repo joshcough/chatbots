@@ -16,7 +16,7 @@ import           Protolude
 
 import           Control.Lens.TH                     (makeClassy)
 import           Control.Monad.Logger                (runNoLoggingT)
-import           Data.Text                           (unpack)
+import           Data.Text                           (Text, unpack)
 import           Database.Persist.Postgresql         (ConnectionPool, createPostgresqlPool)
 import           Database.PostgreSQL.Simple.Internal (postgreSQLConnectionString)
 import           Database.PostgreSQL.Simple.URL      (parseDatabaseUrl)

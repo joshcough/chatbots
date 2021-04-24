@@ -7,8 +7,11 @@ import           Auth.Models             (Login (..), User (..))
 import qualified Auth.UserStorage        as Db
 import           Config                  (HasConfig, configCookies, configJWT)
 import           Control.Lens            (view)
+import           Control.Monad.Except    (MonadError, MonadIO, liftIO)
+import           Control.Monad.Reader    (MonadReader)
 import           Crypto.BCrypt           (validatePassword)
 import           Data.String.Conversions (cs)
+import           Data.Text.Encoding      (encodeUtf8)
 import           Error                   (AppError)
 import           Servant.Auth.Server
 import           ServantHelpers

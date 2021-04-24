@@ -7,13 +7,15 @@ module AwsConfig (
   , acquireAwsConfig
   ) where
 
-import           Control.Lens            (set)
+import           Control.Lens            (set, (<&>))
 import           Control.Lens.TH         (makeClassy)
 import           Control.Monad.Trans.AWS (Credentials (Discover), LogLevel (Debug), envLogger,
                                           newEnv, newLogger)
 import qualified Control.Monad.Trans.AWS as AWS
+import           Data.Monoid             ((<>))
 import           Protolude
 import qualified Settings                as S
+import           System.IO               (stdout)
 
 -- | The AWS Config for our application
 data AwsConfig = AwsConfig

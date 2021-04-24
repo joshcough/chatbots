@@ -27,6 +27,7 @@ import           Control.Lens                 (view)
 import           Data.Aeson                   (ToJSON (..))
 import qualified Data.Map                     as Map
 import           Data.String.Conversions      (cs)
+import           Data.Text                    (Text)
 import qualified Data.Text                    as T
 import qualified Irc.Commands                 as Irc
 import           Irc.Identifier               (mkId)

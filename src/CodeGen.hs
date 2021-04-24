@@ -9,7 +9,7 @@ import           Data.Aeson.TypeScript.TH
 import qualified Data.Text                          as T
 import qualified Data.Text.IO                       as T
 import           Language.PureScript.Bridge
---import           Language.PureScript.Bridge.SumType (equal)
+import           Language.PureScript.Bridge.SumType (equal)
 import           Protolude
 
 srcDir :: FilePath

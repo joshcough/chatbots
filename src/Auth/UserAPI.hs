@@ -4,6 +4,7 @@ module Auth.UserAPI where
 import           Auth.DatabaseModels  (DbUserId)
 import           Auth.Models          (CreateUser (..), User (..))
 import qualified Auth.UserStorage     as Db
+import           Control.Monad.Except (MonadIO)
 import           Logging              (logDebug, (.=))
 import           Protolude
 import           ServantHelpers

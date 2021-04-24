@@ -21,11 +21,16 @@ module Error(
 
 import           Protolude
 
+import           Control.Exception          (Exception)
 import           Control.Lens               (makeClassyPrisms, prism)
+import           Control.Monad.Except       (MonadError, catchError, throwError)
+import           Control.Monad.Trans        (MonadIO, liftIO)
 import qualified Data.ByteString.Lazy.Char8 as BL
-import           Data.Text                  (unpack)
+import           Data.Maybe                 (Maybe (..))
+import           Data.Monoid                ((<>))
+import           Data.Text                  (Text, unpack)
 import           Network.HTTP.Nano          (AsHttpError (..), HttpError)
-import           Servant                    ((:<|>) (..), ServerError (..), err400, err401, err403,
+import           Servant                    ((:<|>) (..), ServantErr (..), err400, err401, err403,
                                              err404, err409, err500)
 import           Util.Utils                 (tShow)
 import           Web.Rollbar                (Event (..), EventLevel (..), ToRollbarEvent (..))
@@ -49,7 +54,7 @@ class TitledError e where
     getErrorTitle :: e -> Text
 
 class ToServant e where
-    toServantErr :: e -> ServerError
+    toServantErr :: e -> ServantErr
 
 instance ToServant () where
   toServantErr _ = err500

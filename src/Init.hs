@@ -3,6 +3,8 @@ module Init where
 
 import           Protolude
 
+import           Control.Concurrent                    (forkIO)
+import           Control.Exception                     (bracket)
 import qualified Data.Pool                             as Pool
 import           Network.Wai                           (Application)
 import           Network.Wai.Handler.Warp              (run)

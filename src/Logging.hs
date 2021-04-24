@@ -36,8 +36,10 @@ module Logging
 import           Protolude                         hiding (catch, lift)
 
 import           Control.Lens                      (makeClassy)
+import           Control.Monad                     (when)
 import           Control.Monad.Base                (MonadBase (liftBase))
 import           Control.Monad.Catch               (MonadCatch (..), MonadThrow (..))
+import           Control.Monad.IO.Class            (MonadIO, liftIO)
 import           Control.Monad.IO.Unlift           (MonadUnliftIO (..), UnliftIO (..), withUnliftIO)
 import           Control.Monad.Logger              (Loc (..), LogLevel (..), LogStr, liftLoc,
                                                     runNoLoggingT, toLogStr)
@@ -47,7 +49,11 @@ import           Data.Aeson                        (ToJSON, Value, object, toJSO
 import           Data.Aeson.Encode.Pretty          (Config (..), Indent (..), defConfig,
                                                     encodePretty', keyOrder)
 import           Data.Aeson.Types                  (Pair)
+import           Data.ByteString                   (ByteString)
 import qualified Data.ByteString.Lazy              as BL
+import           Data.Maybe                        (fromMaybe)
+import           Data.Monoid                       ((<>))
+import           Data.Text                         (Text)
 import qualified Data.Text                         as T
 import qualified Data.Text.Encoding                as T
 import qualified Data.Text.Encoding.Error          as T
@@ -56,15 +62,20 @@ import           Data.Time                         (UTCTime, getCurrentTime)
 import           Language.Haskell.TH               (Exp, Q)
 import           Language.Haskell.TH.Syntax        (lift, qLocation)
 import           System.Environment                (lookupEnv)
+import           System.IO                         (Handle, stdout)
 import           System.Log.FastLogger             (fromLogStr)
+import           Text.Read                         (readMaybe)
 
 -- Required for vendored instances from:
 -- https://www.stackage.org/haddock/lts-10.10/monad-logger-0.3.28.2/src/Control.Monad.Logger.html#line-518
 import           Control.Monad.Trans.Cont          (ContT)
+import           Control.Monad.Trans.Except        (ExceptT)
 import           Control.Monad.Trans.Identity      (IdentityT)
 import           Control.Monad.Trans.Maybe         (MaybeT)
+import           Control.Monad.Trans.Reader        (ReaderT)
 import           Control.Monad.Trans.RWS           (RWST)
 import qualified Control.Monad.Trans.RWS.Strict    as Strict (RWST)
+import           Control.Monad.Trans.State         (StateT)
 import qualified Control.Monad.Trans.State.Strict  as Strict (StateT)
 import           Control.Monad.Trans.Writer        (WriterT)
 import qualified Control.Monad.Trans.Writer.Strict as Strict (WriterT)

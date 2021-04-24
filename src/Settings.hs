@@ -4,6 +4,7 @@ module Settings where
 import           Prelude            (error)
 import           Protolude
 
+import           Data.Text          (Text)
 import qualified Data.Text          as T
 import           Safe               (readMay)
 import           System.Environment (getEnv, lookupEnv)

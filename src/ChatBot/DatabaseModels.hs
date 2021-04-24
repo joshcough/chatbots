@@ -4,9 +4,12 @@
 
 module ChatBot.DatabaseModels where
 
+import           Prelude                          (error)
 import           Protolude
 
 import           ChatBot.Models                   (ChatUserName)
+import           Data.Text                        (Text)
+import           Database.Persist
 import           Database.Persist.Postgresql.JSON ()
 import           Database.Persist.TH
 
