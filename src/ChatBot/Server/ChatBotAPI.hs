@@ -25,21 +25,25 @@ import           Types                             (AppT)
 type UnprotectedChatBotAPI = "chatbot" :> Compose ChatBotUnprotected
 type ProtectedChatBotAPI = "chatbot2" :> Compose ChatBotProtected
 
-data ChatBotUnprotected r = ChatBotUnprotected {
-    chatBotGetStreams :: r :- "streams" :> Get '[JSON] [ChannelName]
+data ChatBotUnprotected r = ChatBotUnprotected
+  { chatBotGetStreams :: r :- "streams" :> Get '[JSON] [ChannelName]
   , chatBotGetCommands :: r :- "commands" :> Capture "channel" ChannelName:> Get '[JSON] [Command]
   , chatBotGetQuotes :: r :- "quotes" :> Capture "channel" ChannelName :> Get '[JSON] [Quote]
-  , chatBotGetRandomQuote :: r :- "quotes" :> Capture "channel" ChannelName :> "random" :> Get '[JSON] (Maybe Quote)
+  , chatBotGetRandomQuote
+      :: r :- "quotes" :> Capture "channel" ChannelName :> "random" :> Get '[JSON] (Maybe Quote)
   --
   , chatBotConnectConnect :: r :- "connect" :> Capture "channel" ChannelName :> Get '[JSON] ()
   , chatBotConnectDisconnect :: r :- "disconnect" :> Capture "channel" ChannelName :> Get '[JSON] ()
   , chatBotChatWebSocket :: r :- "stream" :> Capture "channel" ChannelName :> WebSocket
-  } deriving Generic
+  }
+  deriving Generic
 
-data ChatBotProtected r = ChatBotProtected {
-    chatBotProtectedConnect :: r :- "connect" :> Capture "channel" ChannelName :> Get '[JSON] ()
-  , chatBotProtectedDisconnect :: r :- "disconnect" :> Capture "channel" ChannelName :> Get '[JSON] ()
-  } deriving Generic
+data ChatBotProtected r = ChatBotProtected
+  { chatBotProtectedConnect :: r :- "connect" :> Capture "channel" ChannelName :> Get '[JSON] ()
+  , chatBotProtectedDisconnect
+      :: r :- "disconnect" :> Capture "channel" ChannelName :> Get '[JSON] ()
+  }
+  deriving Generic
 
 -- | The server that runs the ChatBotAPI
 chatBotServerUnprotected :: (MonadIO m) => ServerT UnprotectedChatBotAPI (AppT m)

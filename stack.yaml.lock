@@ -96,19 +96,12 @@ packages:
   original:
     hackage: port-utils-0.2.1.0@sha256:0e7cdb91e40cadedc528260bd5919414876c6f9eb250f9f54ace9fe7a12384ab
 - completed:
-    hackage: postgres-options-0.1.0.1@sha256:42331140b3c2e608c87005bc7636271b53db20fce7fd091cd4341128db3b47ad,960
+    hackage: tmp-postgres-1.34.1.0@sha256:7d6fd2e6f737890857aa60be1ba2828093c057db272e16180e99cd51566fead7,4753
     pantry-tree:
-      size: 241
-      sha256: 8c958f907817255ee4d72a13b3f4296323a02e55d25bd585c7d68d3a54fc9578
+      size: 816
+      sha256: 328061c9ec70b240b5a247164ba049d56a7e217409cebb69ed528cc280ee3a74
   original:
-    hackage: postgres-options-0.1.0.1@sha256:42331140b3c2e608c87005bc7636271b53db20fce7fd091cd4341128db3b47ad
-- completed:
-    hackage: tmp-postgres-0.3.0.0@sha256:7329a0ced8596ca35b3b4f418d0ad8f2b5a20176f2472b385e419f36020d9725,2695
-    pantry-tree:
-      size: 489
-      sha256: 6258a5e844173dd1c9c02180dadeadab3bcf74e6a19c0a2c4b17b0f2ff967897
-  original:
-    hackage: tmp-postgres-0.3.0.0
+    hackage: tmp-postgres-1.34.1.0
 - completed:
     hackage: HDBC-postgresql-2.3.2.7@sha256:93d8e3c3d2dc9291a10f28ae3f8d0604a55ef47298ed43003a4d16f3d9905bae,3228
     pantry-tree:
@@ -180,9 +173,20 @@ packages:
   original:
     hackage: servant-errors-0.1.3.1@sha256:775cf28693fa957b87ca68bf0445659941cde3158ec56cef4458008a559e00e9
 - completed:
-    cabal-file:
-      size: 5291
-      sha256: fed89ff1425edffe0774f8c5bc8fa193e877a3e94083629f872aa0a0018da753
+    hackage: generic-monoid-0.1.0.1@sha256:d2ddcb359d05156e5654a309759dbf1de887e591d9afdabfb343b2e66403890c,713
+    pantry-tree:
+      size: 346
+      sha256: a67b01f1cd26438a61e4416f00eb78139c3f7a899a3c9b0dd03f722938c06665
+  original:
+    hackage: generic-monoid-0.1.0.1@sha256:d2ddcb359d05156e5654a309759dbf1de887e591d9afdabfb343b2e66403890c,713
+- completed:
+    hackage: postgres-options-0.2.0.0@sha256:5e2d6408ed3943f9a056b58106186397b9aa1424c56f1f26668305ce8ea2838f,1604
+    pantry-tree:
+      size: 295
+      sha256: a9fb2bafbaca65c548916e9276ad129302e0b82b7cc9a5c74d3b359a7a77d598
+  original:
+    hackage: postgres-options-0.2.0.0@sha256:5e2d6408ed3943f9a056b58106186397b9aa1424c56f1f26668305ce8ea2838f,1604
+- completed:
     name: esqueleto
     version: 3.1.0
     git: https://github.com/bitemyapp/esqueleto.git
@@ -194,9 +198,6 @@ packages:
     git: https://github.com/bitemyapp/esqueleto.git
     commit: 3db6361d2c42b37e782ff05830c07d88a1afdf91
 - completed:
-    cabal-file:
-      size: 1105
-      sha256: ad3e771df15129b3d77ffe4ed78448a050f0c9f35b109c63dd1e3c49bd0c520a
     name: nano-http
     version: 0.1.1
     git: https://github.com/ralphmorton/nano-http.git
@@ -208,9 +209,6 @@ packages:
     git: https://github.com/ralphmorton/nano-http.git
     commit: bfccf7011964fcd8a12f7bcbf20ac5ef06eb4ede
 - completed:
-    cabal-file:
-      size: 1958
-      sha256: 0716a5aa549137197e040e7712e268c32bd3ea470e7a6204cf83e3f91bd9f07b
     name: rollbar
     version: 0.2.0
     git: https://github.com/collegevine/rollbar.git
@@ -222,9 +220,6 @@ packages:
     git: https://github.com/collegevine/rollbar.git
     commit: 08d7405292d71b94ea3c0562716330e77cfb93d8
 - completed:
-    cabal-file:
-      size: 3289
-      sha256: b0e9427ec33e5e6beae856edf77ff2bf34bb5d3fcd2150bbfa3d63a9a7f05bcf
     name: purescript-bridge
     version: 0.13.0.0
     git: https://github.com/shmish111/purescript-bridge.git

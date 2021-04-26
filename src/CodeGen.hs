@@ -24,7 +24,8 @@ genPS = writePSTypes srcDir (buildBridge defaultBridge) psDecls
 
 -- TODO: there are more types in Models that maybe should be added here
 psDecls :: [SumType 'Haskell]
-psDecls = [
+psDecls =
+  [
   -- Auth.Models
     e (Proxy :: Proxy CreateUser)
   , e (Proxy :: Proxy Login)
@@ -75,21 +76,23 @@ ts :: Text
 ts = T.pack . formatTSDeclarations $ tsDecls
 
 tsDecls :: [TSDeclaration]
-tsDecls = join $ [
+tsDecls =
+  join
+    $ [
   -- Auth.Models
-    f (p @UserToken)
-  , f (p @Token)
-  , f (p @CreateUser)
-  , f (p @User)
-  , f (p @Login)
+        f (p @UserToken)
+      , f (p @Token)
+      , f (p @CreateUser)
+      , f (p @User)
+      , f (p @Login)
   -- ChatBot.Models
-  , f (p @ChannelName)
-  , f (p @ChatUser)
-  , f (p @ChatUserName)
-  , f (p @Command)
-  , f (p @Quote)
-  , f (p @Stream)
-  ]
+      , f (p @ChannelName)
+      , f (p @ChatUser)
+      , f (p @ChatUserName)
+      , f (p @Command)
+      , f (p @Quote)
+      , f (p @Stream)
+      ]
  where
   p :: Proxy a
   p = Proxy :: Proxy a

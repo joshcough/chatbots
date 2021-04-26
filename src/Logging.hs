@@ -72,9 +72,9 @@ import           Control.Monad.Trans.Cont          (ContT)
 import           Control.Monad.Trans.Except        (ExceptT)
 import           Control.Monad.Trans.Identity      (IdentityT)
 import           Control.Monad.Trans.Maybe         (MaybeT)
-import           Control.Monad.Trans.Reader        (ReaderT)
 import           Control.Monad.Trans.RWS           (RWST)
 import qualified Control.Monad.Trans.RWS.Strict    as Strict (RWST)
+import           Control.Monad.Trans.Reader        (ReaderT)
 import           Control.Monad.Trans.State         (StateT)
 import qualified Control.Monad.Trans.State.Strict  as Strict (StateT)
 import           Control.Monad.Trans.Writer        (WriterT)
@@ -87,9 +87,9 @@ instance ToJSON SourceVersion where
   toJSON (SourceVersion s) = toJSON s
 
 data LoggingCfg = LoggingCfg
-    { _logLevel         :: !LogLevel
-    , _logSourceVersion :: !(Maybe SourceVersion)
-    }
+  { _logLevel :: !LogLevel
+  , _logSourceVersion :: !(Maybe SourceVersion)
+  }
 
 fromEnv :: IO LoggingCfg
 fromEnv = do

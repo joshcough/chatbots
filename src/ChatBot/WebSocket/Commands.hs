@@ -26,11 +26,11 @@ data Permission = ModOnly | Anyone
 data View = Quotes
   deriving stock (Eq, Show)
 
-data BotCommand m = forall a. BotCommand {
-   bcPermission :: Permission
- , bcParser     :: Parser a
- , bcExecute    :: ChannelName -> ChatUser -> a -> m Response
- }
+data BotCommand m = forall a . BotCommand
+  { bcPermission :: Permission
+  , bcParser :: Parser a
+  , bcExecute :: ChannelName -> ChatUser -> a -> m Response
+  }
 
 data Response = RespondWith Text | Nada
   deriving stock (Eq, Show, Generic)

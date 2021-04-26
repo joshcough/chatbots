@@ -39,3 +39,4 @@ frontend/node_modules/
 ghci_local
 out/
 /ghci_prod
+/.hlint-2.1.10/

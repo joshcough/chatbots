@@ -46,19 +46,19 @@ data Environment
 
 -- | The Config for our application
 data Config = Config
-    { _configHost             :: Text
-    , _configPort             :: Port
-    , _configConnStr          :: Text
-    , _configPool             :: ConnectionPool
-    , _configEnv              :: Environment
-    , _configHttp             :: HttpCfg
-    , _configCookies          :: CookieSettings
-    , _configJWT              :: JWTSettings
-    , _configRollbar          :: RollbarCfg
-    , _configLogging          :: LoggingCfg
-    , _configChatBot          :: ChatBotConfig
-    , _configChatBotExecution :: ChatBotExecutionConfig
-    }
+  { _configHost :: Text
+  , _configPort :: Port
+  , _configConnStr :: Text
+  , _configPool :: ConnectionPool
+  , _configEnv :: Environment
+  , _configHttp :: HttpCfg
+  , _configCookies :: CookieSettings
+  , _configJWT :: JWTSettings
+  , _configRollbar :: RollbarCfg
+  , _configLogging :: LoggingCfg
+  , _configChatBot :: ChatBotConfig
+  , _configChatBotExecution :: ChatBotExecutionConfig
+  }
 
 makeClassy ''Config
 
@@ -71,11 +71,10 @@ instance HasRollbarCfg Config where
 instance HasLoggingCfg Config where
   loggingCfg = configLogging
 
-data ConfigAndConnection =
-  ConfigAndConnection
-    { _configAndConnectionConfig :: Config
-    , _configAndConnectionConn   :: WS.Connection
-    }
+data ConfigAndConnection = ConfigAndConnection
+  { _configAndConnectionConfig :: Config
+  , _configAndConnectionConn :: WS.Connection
+  }
 
 makeClassy ''ConfigAndConnection
 
