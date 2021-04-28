@@ -20,15 +20,16 @@ import           Types                          (App, AppT, Config (..), runAppT
 import           WaiAppStatic.Types             (StaticSettings (..))
 
 type TopLevelAPI' auths = (Auth auths User :> Protected) :<|> Unprotected
-type TopLevelAPI = TopLevelAPI' '[Cookie, JWT]
+type TopLevelAPI = TopLevelAPI' '[Cookie , JWT]
 
 type Protected = Compose ProtectedServer
 
 -- | Lives behind authorization. Only logged in users can visit these pages.
-data ProtectedServer route = ProtectedServer {
-    protectedChatBotApi :: route :- ProtectedChatBotAPI
-  , protectedUserApi    :: route :- UserAPI
-  } deriving Generic
+data ProtectedServer route = ProtectedServer
+  { protectedChatBotApi :: route :- ProtectedChatBotAPI
+  , protectedUserApi :: route :- UserAPI
+  }
+  deriving Generic
 
 protectedServer :: MonadIO m => User -> ServerT Protected (AppT m)
 protectedServer u = genericServerT $ ProtectedServer
@@ -39,10 +40,11 @@ protectedServer u = genericServerT $ ProtectedServer
 type Unprotected = Compose UnprotectedServer
 
 -- | Not protected by any authorization. Anyone can visit these pages.
-data UnprotectedServer route = UnprotectedServer {
-    unprotectedLoginApi   :: route :- LoginAPI
+data UnprotectedServer route = UnprotectedServer
+  { unprotectedLoginApi :: route :- LoginAPI
   , unprotectedChatBotApi :: route :- UnprotectedChatBotAPI
-  } deriving Generic
+  }
+  deriving Generic
 
 -- |
 unprotectedServer :: (MonadIO m) => ServerT Unprotected (AppT m)
@@ -68,7 +70,7 @@ app cfg = serveWithContext
   mainServer :: Server TopLevelAPI
   mainServer = hoistServerWithContext
     (Proxy :: Proxy TopLevelAPI)
-    (Proxy :: Proxy '[CookieSettings, JWTSettings])
+    (Proxy :: Proxy '[CookieSettings , JWTSettings])
     (convertApp cfg)
     (protectedServer' :<|> unprotectedServer)
 

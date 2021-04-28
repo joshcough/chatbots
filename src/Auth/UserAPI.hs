@@ -18,12 +18,13 @@ type UserM m = (ChatBotM m, Db.UserDb m)
 
 type UserAPI = "users" :> Compose UserServer
 
-data UserServer r = UserServer {
-    userServerGetUserById :: r :- Capture "id" DbUserId :> Get '[JSON] User
-  , userServerDeleteUser  :: r :- Capture "id" DbUserId :> Delete '[JSON] ()
-  , userServerCreateUser  :: r :- ReqBody '[JSON] CreateUser :> Post '[JSON] DbUserId
-  , userServerUpdateUser  :: r :- Capture "id" DbUserId :> ReqBody '[JSON] User :> Put '[JSON] ()
-  } deriving Generic
+data UserServer r = UserServer
+  { userServerGetUserById :: r :- Capture "id" DbUserId :> Get '[JSON] User
+  , userServerDeleteUser :: r :- Capture "id" DbUserId :> Delete '[JSON] ()
+  , userServerCreateUser :: r :- ReqBody '[JSON] CreateUser :> Post '[JSON] DbUserId
+  , userServerUpdateUser :: r :- Capture "id" DbUserId :> ReqBody '[JSON] User :> Put '[JSON] ()
+  }
+  deriving Generic
 
 -- | The server that runs the UserAPI
 userServer :: (MonadIO m) => User -> ServerT UserAPI (AppT m)

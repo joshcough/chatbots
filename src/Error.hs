@@ -30,8 +30,8 @@ import           Data.Maybe                 (Maybe (..))
 import           Data.Monoid                ((<>))
 import           Data.Text                  (Text, unpack)
 import           Network.HTTP.Nano          (AsHttpError (..), HttpError)
-import           Servant                    ((:<|>) (..), ServantErr (..), err400, err401, err403,
-                                             err404, err409, err500)
+import           Servant                    (ServantErr (..), err400, err401, err403, err404,
+                                             err409, err500, (:<|>) (..))
 import           Util.Utils                 (tShow)
 import           Web.Rollbar                (Event (..), EventLevel (..), ToRollbarEvent (..))
 

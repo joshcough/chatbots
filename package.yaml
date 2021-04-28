@@ -50,6 +50,7 @@ default-extensions:
   - OverloadedLabels
   - OverloadedStrings
   - PatternSynonyms
+  - QuasiQuotes
   - RankNTypes
   - RecordWildCards
   - ScopedTypeVariables
@@ -93,12 +94,15 @@ library:
     - monad-logger
     - mtl
     - nano-http >=0.1.1
+    - neat-interpolation
     - network
     - persistent
     - persistent-postgresql
     - persistent-template
+    - postgres-options
     - postgresql-simple-url
     - postgresql-simple
+    - postgresql-simple-migration
     - purescript-bridge >= 0.13
     - random
     - resource-pool
@@ -112,6 +116,7 @@ library:
     - servant-websockets
     - stm
     - template-haskell
+    - tmp-postgres
     - text
     - time
     - transformers
@@ -149,13 +154,6 @@ tests:
     dependencies:
       - chatbots
       - hspec
-      - persistent
-      - postgres-options
-      - text
-      - tmp-postgres
-      # moo postgres stuff
-      - dbmigrations >= 2
-      - HDBC-postgresql == 2.3.2.7
     ghc-options:
       - -Wall
       - -Werror

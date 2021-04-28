@@ -18,24 +18,27 @@ import           GHC.Generics        (Generic)
 import           Servant.Auth.Server
 import           Web.HttpApiData     (FromHttpApiData (..))
 
-data Login = Login {
-    loginEmail    :: Text
+data Login = Login
+  { loginEmail :: Text
   , loginPassword :: Text
-} deriving (Eq, Show, Generic, ToJSON, FromJSON)
+  }
+  deriving (Eq, Show, Generic, ToJSON, FromJSON)
 
-data User = User {
-    userId    :: Int64
-  , userName  :: Text
+data User = User
+  { userId :: Int64
+  , userName :: Text
   , userEmail :: Text
   , userAdmin :: Bool
-} deriving stock (Eq, Read, Show, Generic)
+  }
+  deriving stock (Eq, Read, Show, Generic)
   deriving anyclass (FromJSON, ToJSON, ToJWT, FromJWT)
 
-data CreateUser = CreateUser {
-    createUserName     :: Text
-  , createUserEmail    :: Text
+data CreateUser = CreateUser
+  { createUserName :: Text
+  , createUserEmail :: Text
   , createUserPassword :: Text
-} deriving (Eq, Generic, Show, ToJSON, FromJSON)
+  }
+  deriving (Eq, Generic, Show, ToJSON, FromJSON)
 
 newtype Token = Token { getToken :: Text }
   deriving stock (Eq, Ord, Read, Show, Generic)

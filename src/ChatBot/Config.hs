@@ -31,8 +31,9 @@ import           ChatBot.Models               (ChannelName, ChatMessage', getCha
 data ChatBotConfig = ChatBotConfig
   { _cbConfigNick :: Text
   , _cbConfigPass :: Text
-  } deriving stock (Eq, Ord, Show, Generic)
-    deriving anyclass (FromJSON, ToJSON)
+  }
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving anyclass (FromJSON, ToJSON)
 
 makeClassy ''ChatBotConfig
 
@@ -41,10 +42,10 @@ data ChatBotFrontendMessage
   | DisconnectFrom ChannelName
   deriving (Eq, Generic, Ord, Show, ToJSON, FromJSON)
 
-data ChatBotExecutionConfig = ChatBotExecutionConfig {
-    _cbecOutputChan :: TChan (ChatMessage' Value)
-  , _cbecInputChan  :: Chan ChatBotFrontendMessage
-}
+data ChatBotExecutionConfig = ChatBotExecutionConfig
+  { _cbecOutputChan :: TChan (ChatMessage' Value)
+  , _cbecInputChan :: Chan ChatBotFrontendMessage
+  }
 
 makeClassy ''ChatBotExecutionConfig
 

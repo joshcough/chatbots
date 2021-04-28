@@ -19,10 +19,10 @@ import           System.IO               (stdout)
 
 -- | The AWS Config for our application
 data AwsConfig = AwsConfig
-  { _awsConfigS3RootUrl  :: Text
+  { _awsConfigS3RootUrl :: Text
   , _awsConfigBucketName :: Text
-  , _awsConfigBucketUrl  :: Text
-  , _awsConfigEnv        :: AWS.Env
+  , _awsConfigBucketUrl :: Text
+  , _awsConfigEnv :: AWS.Env
   }
 makeClassy ''AwsConfig
 

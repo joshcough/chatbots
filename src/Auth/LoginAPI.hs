@@ -18,7 +18,7 @@ import           ServantHelpers
 import           Types                   (AppT)
 
 type SetCookieHeader = Header "Set-Cookie" SetCookie
-type SetCookieHeaders = '[SetCookieHeader, SetCookieHeader]
+type SetCookieHeaders = '[SetCookieHeader , SetCookieHeader]
 
 ---
 --- Login API/Server
@@ -26,10 +26,12 @@ type SetCookieHeaders = '[SetCookieHeader, SetCookieHeader]
 
 type LoginAPI = "login" :> Compose LoginServer
 
-data LoginServer r = LoginServer {
-    loginServerLogin :: r :- "header" :> ReqBody '[JSON] Login :> Post '[JSON] (Headers SetCookieHeaders User)
+data LoginServer r = LoginServer
+  { loginServerLogin
+      :: r :- "header" :> ReqBody '[JSON] Login :> Post '[JSON] (Headers SetCookieHeaders User)
   , loginServerToken :: r :- "token" :> ReqBody '[JSON] Login :> Post '[JSON] Text
-  } deriving Generic
+  }
+  deriving Generic
 
 loginServer :: MonadIO m => ServerT LoginAPI (AppT m)
 loginServer = genericServerT $ LoginServer login loginToken

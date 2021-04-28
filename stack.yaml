@@ -14,8 +14,7 @@ extra-deps:
 - persistent-postgresql-2.10.0
 - persistent-template-2.7.2
 - port-utils-0.2.1.0@sha256:0e7cdb91e40cadedc528260bd5919414876c6f9eb250f9f54ace9fe7a12384ab
-- postgres-options-0.1.0.1@sha256:42331140b3c2e608c87005bc7636271b53db20fce7fd091cd4341128db3b47ad
-- tmp-postgres-0.3.0.0
+- tmp-postgres-1.34.1.0
 - HDBC-postgresql-2.3.2.7
 - dbmigrations-2.0.0@sha256:1e3bd62ca980659d27b6bc7b00e58ae0e2bf7781e3859f440b7c005c46037075,5270
 - time-1.6.0.1@sha256:492067e1b6973db9df64bf0bc851985dabea138d8a35414fe9ee6870b4702c66,4232
@@ -26,6 +25,9 @@ extra-deps:
 - unix-2.7.2.2@sha256:e69269a17b9fa26cb77f3f55e86c39d0a4940ccfa0c4bc20826919d2572076ad,3496
 - servant-websockets-1.1.0@sha256:3e384b0565a081f83da8935cccc0817fda120af9119befe55a0515efc4a44bfc,2188
 - servant-errors-0.1.3.1@sha256:775cf28693fa957b87ca68bf0445659941cde3158ec56cef4458008a559e00e9
+- generic-monoid-0.1.0.1@sha256:d2ddcb359d05156e5654a309759dbf1de887e591d9afdabfb343b2e66403890c,713
+- postgres-options-0.2.0.0@sha256:5e2d6408ed3943f9a056b58106186397b9aa1424c56f1f26668305ce8ea2838f,1604
+
 - git: https://github.com/bitemyapp/esqueleto.git
   commit: 3db6361d2c42b37e782ff05830c07d88a1afdf91
 - git: https://github.com/ralphmorton/nano-http.git

@@ -44,22 +44,24 @@ getChannelName = _unChannelName
 getChannelNameHashed :: ChannelName -> Text
 getChannelNameHashed c = "#" <> getChannelName c
 
-data Stream = Stream {
-   _streamId          :: Int64
- , _streamChannelName :: ChannelName
- } deriving stock (Eq, Ord, Read, Show, Generic)
-   deriving anyclass (FromJSON, ToJSON)
+data Stream = Stream
+  { _streamId :: Int64
+  , _streamChannelName :: ChannelName
+  }
+  deriving stock (Eq, Ord, Read, Show, Generic)
+  deriving anyclass (FromJSON, ToJSON)
 
 makeClassy ''Stream
 
 instance FromHttpApiData ChannelName where
   parseUrlPiece = pure . ChannelName
 
-data ChatUser = ChatUser {
-   cuUserName   :: ChatUserName
- , cuMod        :: Bool
- , cuSubscriber :: Bool
-} deriving stock (Eq, Show, Generic)
+data ChatUser = ChatUser
+  { cuUserName :: ChatUserName
+  , cuMod :: Bool
+  , cuSubscriber :: Bool
+  }
+  deriving stock (Eq, Show, Generic)
   deriving anyclass (FromJSON, ToJSON)
 
 trollabotUser :: ChatUserName
@@ -78,12 +80,13 @@ instance PersistField ChatUserName where
   fromPersistValue (PersistText t) = pure $ ChatUserName t
   fromPersistValue v = Left $ "wrong type for ChatUserName: " <> show v
 
-data ChatMessage' a = ChatMessage {
-    cmUser       :: ChatUser
-  , cmChannel    :: ChannelName
-  , cmBody       :: Text
+data ChatMessage' a = ChatMessage
+  { cmUser :: ChatUser
+  , cmChannel :: ChannelName
+  , cmBody :: Text
   , cmRawMessage :: a
-} deriving stock (Eq, Show, Generic, Functor)
+  }
+  deriving stock (Eq, Show, Generic, Functor)
   deriving anyclass (FromJSON, ToJSON)
 
 type ChatMessage = ChatMessage' RawIrcMsg
@@ -106,17 +109,19 @@ deriving instance Generic RawIrcMsg
 deriving instance FromJSON RawIrcMsg
 deriving instance ToJSON RawIrcMsg
 
-data Command = Command {
-    commandChannel :: ChannelName
-  , commandName    :: Text
-  , commandBody    :: Text
-} deriving stock (Eq, Ord, Read, Show, Generic)
+data Command = Command
+  { commandChannel :: ChannelName
+  , commandName :: Text
+  , commandBody :: Text
+  }
+  deriving stock (Eq, Ord, Read, Show, Generic)
   deriving anyclass (FromJSON, ToJSON)
 
-data Quote = Quote {
-    quoteChannel :: ChannelName
-  , quoteBody    :: Text
-  , quoteUser    :: ChatUserName
-  , quoteQid     :: Int
-} deriving stock (Eq, Ord, Show, Generic)
+data Quote = Quote
+  { quoteChannel :: ChannelName
+  , quoteBody :: Text
+  , quoteUser :: ChatUserName
+  , quoteQid :: Int
+  }
+  deriving stock (Eq, Ord, Show, Generic)
   deriving anyclass (FromJSON, ToJSON)
